@@ -1,0 +1,18 @@
+{
+  "parser": "babel-eslint",
+
+  "plugins": [
+    "react",
+  ],
+
+  "extends": "airbnb",
+
+  "env": {
+    "mocha": true
+  },
+
+  "rules": {
+    // only warn about long line, but not error
+    "max-len": 1,
+  }
+}

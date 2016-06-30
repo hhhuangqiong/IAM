@@ -1,0 +1,59 @@
+{
+  "name": "maaii-identity-access-mgmt",
+  "version": "0.1.0",
+  "description": "Identity Access Management",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon --exec babel-node -- src",
+    "doc": "apidoc -i src/ -f \".*\\.js$\"",
+    "lint": "eslint src",
+    "test": "mocha",
+    "test:coverage": "nyc --reporter=html --reporter=lcov --reporter=text mocha",
+    "jenkins": "npm prune && npm i --verbose",
+    "jenkins:commit": "npm run jenkins && npm run lint && npm run test:coverage",
+    "jenkins:merge": "npm run jenkins && npm run doc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "gerrit.dev.maaii.com:29418/maaii-identity-access-mgmt"
+  },
+  "keywords": [
+    "m800",
+    "iam",
+    "access",
+    "identity",
+    "permission"
+  ],
+  "author": "M800 Web Team",
+  "license": "ISC",
+  "dependencies": {
+    "acl": "^0.4.9",
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
+    "http": "0.0.0",
+    "mongoose": "^4.5.2",
+    "oidc-provider": "^0.6.0",
+    "winston": "^2.2.0"
+  },
+  "devDependencies": {
+    "apidoc": "^0.16.1",
+    "babel-cli": "^6.10.1",
+    "babel-core": "^6.10.4",
+    "babel-eslint": "^6.1.0",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-react": "^6.11.1",
+    "babel-preset-stage-2": "^6.11.0",
+    "chai": "^3.5.0",
+    "eslint": "^2.13.1",
+    "eslint-config-airbnb": "^9.0.1",
+    "eslint-plugin-import": "^1.9.2",
+    "eslint-plugin-jsx-a11y": "^1.5.3",
+    "eslint-plugin-react": "^5.2.2",
+    "mocha": "^2.5.3",
+    "nodemon": "^1.9.2",
+    "nyc": "^6.6.1",
+    "rimraf": "^2.5.2",
+    "supertest": "^1.2.0"
+  }
+}
