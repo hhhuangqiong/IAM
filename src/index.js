@@ -1,18 +1,23 @@
 import http from 'http';
 import logger from 'winston';
+import healthcheck from 'm800-health-check';
+import mongoose from 'mongoose';
 
-import config from './config';
-import expressApp from './express';
-import koaApp from './koa';
+import { createServer } from './server';
 
-const OPENID_PREFIX = '/openid';
+const env = process.env.NODE_ENV || 'development';
+const port = process.env.PORT || '3000';
 
-// mount the koa on top of the express
-expressApp.use(OPENID_PREFIX, koaApp.callback());
+const app = createServer(env);
+
+// set up the health check
+healthcheck(app, {
+  mongodb: {
+    mongoose,
+  },
+});
 
 // start the server
-const server = http.createServer(expressApp);
-
-server.listen(config.APP_PORT, () => {
-  logger.info('Server listening on %d', config.APP_PORT);
+http.createServer(app).listen(port, () => {
+  logger.info('Server listening on %d', port);
 });

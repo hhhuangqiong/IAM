@@ -1,0 +1,18 @@
+{
+  "containerName": "maaii-iam",
+   "mongodb":{
+      "uri":"mongodb://localhost/maaii-identity-access-mgmt",
+      "options":{
+         "mongos":false,
+         "user":"",
+         "pass":"",
+         "server":{
+            "auto_reconnect":true,
+            "socketOptions":{
+               "keepAlive":1,
+               "connectTimeoutMS":3000
+            }
+         }
+      }
+   }
+}
