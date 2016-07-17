@@ -13,7 +13,7 @@ export default function initialize(mongodbURI, mongodbOpts) {
     throw new Error('Both uri & options are required');
   }
 
-  logger.info('Connecting to Mongo on %s with %j', mongodbURI, {});
+  logger.info('Connecting to Mongo on %s', mongodbURI);
   mongoose.connect(mongodbURI, mongodbOpts);
 
   const connection = mongoose.connection;

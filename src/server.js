@@ -1,6 +1,5 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import expressValidator from 'express-validator';
 import methodOverride from 'method-override';
 import path from 'path';
 import logger from 'winston';
@@ -25,7 +24,6 @@ export function createServer(env) {
   app.use(bodyParser.urlencoded({
     extended: true,
   }));
-  app.use(expressValidator());
 
   // To enable using PUT, DELETE METHODS
   app.use(methodOverride('_method'));
