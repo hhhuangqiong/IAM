@@ -181,7 +181,14 @@ describe('GET /identity/companies', () => {
 
     it('fails get the non-existing company data', (done) => {
       agent.get('/identity/companies/company123')
-           .expect(404)
+           .expect(404, {
+             result: {
+               status: 404,
+               code: 20001,
+               message: 'Invalid or missing argument supplied: company id ' +
+                 'company123 is not found',
+             },
+           })
            .end(done);
     });
   });
