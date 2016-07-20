@@ -10,11 +10,12 @@
     "lint": "eslint src",
     "test": "mocha",
     "test:coverage": "nyc --reporter=html --reporter=lcov --reporter=text mocha",
-    "jenkins": "npm prune && npm i --verbose",
+    "jenkins": "npm prune && npm i --verbose && npm run build",
     "jenkins:commit": "npm run jenkins && npm run lint && npm run test:coverage",
     "jenkins:merge": "npm run jenkins && npm run doc",
-    "build-src": "babel -d ./build ./src -s",
-    "build": "npm run clean && npm run build-src && node ./build/index.js"
+    "build-src": "babel -d ./build ./src -s --copy-files",
+    "build": "npm run clean && npm run build-src",
+    "server": "node ./build/index.js"
   },
   "repository": {
     "type": "git",

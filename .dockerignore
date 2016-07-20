@@ -1,0 +1,8 @@
+.npmrc
+.editorconfig
+.js*
+.git*
+.nyc_output
+coverage
+doc
+test
