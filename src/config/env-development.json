@@ -7,11 +7,7 @@
          "user":"",
          "pass":"",
          "server":{
-            "auto_reconnect":true,
-            "socketOptions":{
-               "keepAlive":1,
-               "connectTimeoutMS":3000
-            }
+            "auto_reconnect":true
          }
       }
    }

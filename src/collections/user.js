@@ -1,14 +1,20 @@
 import bcrypt from 'bcrypt';
-// import moment from 'moment';
 import mongoose from 'mongoose';
 // import randtoken from 'rand-token';
 import Q from 'q';
 import timestamp from 'mongoose-timestamp';
 
+function hashPassword(password) {
+  const salt = bcrypt.genSaltSync(10);
+  return Q.ninvoke(bcrypt, 'hash', password, salt)
+    .then(hashedPassword => ({
+      salt,
+      hashedPassword,
+    }));
+}
 
 const COLLECTION_NAME = 'User';
-
-const userSchema = new mongoose.Schema({
+const schema = new mongoose.Schema({
   isRoot: {
     type: Boolean,
     default: false,
@@ -36,9 +42,14 @@ const userSchema = new mongoose.Schema({
   locale: String,
   timezone: String,
   active: Boolean,
-  hashedPassword: String,
-  salt: String,
+  hashedPassword: {
+    type: String,
+  },
+  salt: {
+    type: String,
+  },
   emails: [{
+    _id: false,
     primary: Boolean,
     type: String,
     display: String,
@@ -46,6 +57,7 @@ const userSchema = new mongoose.Schema({
     verified: Boolean,
   }],
   phoneNumbers: [{
+    _id: false,
     primary: Boolean,
     value: String,
     display: String,
@@ -53,18 +65,21 @@ const userSchema = new mongoose.Schema({
     verified: Boolean,
   }],
   ims: [{
+    _id: false,
     primary: Boolean,
     value: String,
     display: String,
     type: String,
   }],
   photos: [{
+    _id: false,
     primary: Boolean,
     value: String,
     display: String,
     type: String,
   }],
   addresses: [{
+    _id: false,
     formatted: String,
     streetAddress: String,
     locality: String,
@@ -74,12 +89,14 @@ const userSchema = new mongoose.Schema({
     type: String,
   }],
   entitlements: [{
+    _id: false,
     primary: Boolean,
     value: String,
     display: String,
     type: String,
   }],
   x509Certificates: [{
+    _id: false,
     primary: Boolean,
     value: String,
     display: String,
@@ -91,12 +108,19 @@ const userSchema = new mongoose.Schema({
   website: String,
 
   affiliatedCompany: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Company',
+    company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Company',
+    },
+    department: String,
   },
   assignedCompanies: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Company',
+    _id: false,
+    company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Company',
+    },
+    department: String,
   }],
   tokens: [{
     _id: false,
@@ -109,51 +133,46 @@ const userSchema = new mongoose.Schema({
   }],
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: COLLECTION_NAME,
   },
   updatedBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: COLLECTION_NAME,
   },
 }, {
   collection: COLLECTION_NAME,
 });
 
-userSchema.plugin(timestamp);
+schema.plugin(timestamp);
 
-userSchema.pre('save', function preSave(next) {
-  if (this.hashedPassword && !this.password) {
+schema.virtual('password')
+  .get(function getPassword() {
+    return this.tempPassword;
+  })
+  .set(function setPassword(password) {
+    this.tempPassword = password;
+  });
+
+
+schema.pre('save', function preSave(next) {
+  // do nothing when password is not set
+  if (!this.password) {
     next();
     return;
   }
-
-  if (this.password) {
-    const hashPasswordCb = (err, hashResult) => {
-      this.salt = hashResult.salt;
-      this.hashedPassword = hashResult.hashedPassword;
-      next();
-    };
-
-    this.constructor.hashInfo(this.password, hashPasswordCb);
-    return;
-  }
-
-  next();
+  // encrpyted the password
+  hashPassword(this.password).then(hashResult => {
+    this.salt = hashResult.salt;
+    this.hashedPassword = hashResult.hashedPassword;
+    next();
+  }).done();
 });
 
-userSchema.method('isValidPassword', function isValidPassword(password) {
+schema.method('isValidPassword', function isValidPassword(password) {
   return bcrypt.compareSync(password, this.hashedPassword);
 });
 
-userSchema.static('hashInfo', (password) => {
-  // use default rounds for now
-  const salt = bcrypt.genSaltSync(10);
-  return Q.ninvoke(bcrypt, 'hash', password, salt)
-    .then(hash => ({
-      hashedPassword: hash,
-      salt,
-    }));
-});
+schema.static('hashPassword', hashPassword);
 
-const user = mongoose.model(COLLECTION_NAME, userSchema);
+const user = mongoose.model(COLLECTION_NAME, schema);
 export default user;

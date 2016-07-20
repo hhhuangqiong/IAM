@@ -1,10 +1,13 @@
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
-import _ from 'lodash';
+import sortBy from 'lodash/sortBy';
 
 import getAgent from '../../getAgent';
 import Company from '../../../src/collections/company';
-import { DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NO } from '../../../src/express/identity/routes/company';
+import {
+  DEFAULT_PAGE_SIZE,
+  DEFAULT_PAGE_NO,
+} from '../../../src/express/identity/constants/param';
 
 function removeDynamicAttribute(company) {
   const myCompany = company;
@@ -61,7 +64,7 @@ describe('GET /identity/companies', () => {
         count++;
       }
       // auto sort the data first
-      companyArray = _.sortBy(companyArray, ['id']);
+      companyArray = sortBy(companyArray, ['id']);
       Company.create(companyArray, done);
     });
 

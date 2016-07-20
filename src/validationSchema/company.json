@@ -3,6 +3,9 @@
   "title":"Company",
   "type":"object",
   "properties":{
+    "userId":{
+      "type":"string"
+    },
     "parent":{
       "type":"string"
     },

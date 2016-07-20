@@ -66,7 +66,7 @@ export default class CompanyController {
       return company.removeLogo().then(() => company.remove());
     });
   }
-  getAll(filter, pageNo, pageSize, sort) {
+  getAll(filter, { pageNo, pageSize }, sort) {
     const query = Company.find(filter, '-_id -__v')
       .skip(pageNo * pageSize)
       .limit(pageSize)
@@ -108,26 +108,27 @@ export default class CompanyController {
   update(id, param, userId) {
     return updateCompanyParam(param)
       .then((updatedParam) =>
-         Company.findOneAndUpdate({ id }, updatedParam, {
-           runValidators: true,
-           upsert: true,
-           new: true,
-         })
-         .then((company) => {
-            // determine whether createAt exist and indicate it is newly created
-           if (company.createdAt.toString() === company.updatedAt.toString()) {
-             return company;
-           }
-
-            // return null to indicate it is updated
-            // update the userId;
-           if (userId) {
-             /* eslint no-param-reassign: ["error", { "props": false }]*/
-             company.updatedBy = userId;
-             return company.save().then(() => null);
-           }
-           return null;
-         })
+        getCompany(id)
+          .then((company) => {
+            // update the record
+            /* eslint no-param-reassign: ["error", { "props": false }]*/
+            Object.keys(updatedParam).forEach((key) => {
+              company[key] = updatedParam[key];
+            });
+            // update the person who modify the data
+            if (userId) {
+              company.updatedBy = userId;
+            }
+            // to indicate it is updated instead of create
+            return company.save().then(() => null);
+          })
+          .catch((err) => {
+            // not found and create a new record
+            if (err && err.name === ArgumentError.name) {
+              return createCompany(updatedParam);
+            }
+            throw err;
+          })
     );
   }
   replace(id, param, userId) {
@@ -155,5 +156,8 @@ export default class CompanyController {
             throw err;
           })
       );
+  }
+  static getObjectId(id) {
+    return convertIdToObjectId(id);
   }
 }

@@ -81,3 +81,7 @@ export function schemaExpressError(result, req, res) {
 
   expressError(new ValidationError(message), req, res);
 }
+
+export function filterExpressError(key, req, res) {
+  expressError(new ValidationError(`${key} is unavailable filter param`), req, res);
+}

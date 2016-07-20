@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import timestamp from 'mongoose-timestamp';
-import User from './user';
 
 import * as gridFs from '../utils/gridfs';
 
@@ -8,7 +7,7 @@ const COLLECTION_NAME = 'Company';
 
 const schema = new mongoose.Schema({
   parent: {
-    ref: 'Company',
+    ref: COLLECTION_NAME,
     type: mongoose.Schema.Types.ObjectId,
   },
   id: {
@@ -60,11 +59,11 @@ const schema = new mongoose.Schema({
     _id: false,
   }],
   createdBy: {
-    ref: User.modelName,
+    ref: 'User',
     type: mongoose.Schema.Types.ObjectId,
   },
   updatedBy: {
-    ref: User.modelName,
+    ref: 'User',
     type: mongoose.Schema.Types.ObjectId,
   },
 }, {

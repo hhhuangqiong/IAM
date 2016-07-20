@@ -1,37 +1,24 @@
 import { Router } from 'express';
-import multer from 'multer';
-import path from 'path';
-import { ArgumentError, ArgumentNullError } from 'common-errors';
+import bind from 'lodash/bind';
+
+import companyFormat from '../../validationSchema/company.json';
+import userFormat from '../../validationSchema/user.json';
 
 import * as company from './routes/company';
-import { expressError } from '../../utils/errorHelper';
+import * as user from './routes/user';
 
-const uploadPath = path.resolve(__dirname, '../../uploads/');
-const upload = multer({ dest: uploadPath });
+import { validateData,
+   uploadFile,
+   updateGetAllParam,
+ } from './utils/helper';
+
+const companyValidateData = bind(validateData, company, companyFormat);
+const userValidateData = bind(validateData, user, userFormat);
+const uploadLogo = bind(uploadFile, null, 'logo');
+const companyUpdateParam = bind(updateGetAllParam, null, companyFormat);
+const userUpdateParam = bind(updateGetAllParam, null, userFormat);
 
 export const router = new Router();
-
-function uploadHandling(expectedField, req, res, next) {
-  const fileUpload = upload.single(expectedField);
-  fileUpload(req, res, (err) => {
-    if (err) {
-      expressError(new ArgumentError(`${err.code} on field ${err.field}`), req, res);
-      return;
-    }
-    // missing file
-    if (!req.file) {
-      expressError(new ArgumentNullError(expectedField), req, res);
-      return;
-    }
-    next();
-  });
-  return fileUpload;
-}
-
-function uploadLogo(req, res, next) {
-  return uploadHandling('logo', req, res, next);
-}
-
 // companies
 /**
  * @apiDefine errorObject
@@ -195,7 +182,7 @@ function uploadLogo(req, res, next) {
  *        }
  *     }
  */
-router.post('/companies', company.validateRequired, company.validateData, company.create);
+router.post('/companies', company.validateRequired, companyValidateData, company.create);
 
 /**
  * @api {get} /identity/companies Get companies
@@ -266,7 +253,7 @@ router.post('/companies', company.validateRequired, company.validateData, compan
  *          }]
  *     }
  */
-router.get('/companies', company.getAll);
+router.get('/companies', companyUpdateParam, company.getAll);
 
 /**
  * @api {get} /identity/companies/:id Get a company
@@ -434,7 +421,7 @@ router.delete('/companies/:id', company.remove);
  *        }
  *     }
  */
-router.patch('/companies/:id', company.validateData, company.update);
+router.patch('/companies/:id', companyValidateData, company.update);
 
 /**
  * @api {put} /identity/companies/:id/logo Put company
@@ -468,4 +455,12 @@ router.patch('/companies/:id', company.validateData, company.update);
  *        }
  *     }
  */
-router.put('/companies/:id', company.validateRequired, company.validateData, company.replace);
+router.put('/companies/:id', company.validateRequired, companyValidateData, company.replace);
+
+// user
+router.post('/users', user.validateRequired, userValidateData, user.create);
+router.get('/users', userUpdateParam, user.getAll);
+router.get('/users/:username', user.validateRequired, user.get);
+router.delete('/users/:username', user.remove);
+router.patch('/users/:username', companyValidateData, user.update);
+router.put('/users/:username', user.validateRequired, userValidateData, user.replace);
