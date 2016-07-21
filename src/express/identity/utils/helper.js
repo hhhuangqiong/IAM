@@ -1,6 +1,6 @@
 import * as tv4 from 'tv4';
 import multer from 'multer';
-import path from 'path';
+import { tmpdir } from 'os';
 
 import { ArgumentError, ArgumentNullError } from 'common-errors';
 import {
@@ -12,8 +12,7 @@ import {
 } from '../constants/param';
 import { expressError, schemaExpressError } from '../../../utils/errorHelper';
 
-const uploadPath = path.resolve(__dirname, '../../uploads/');
-const upload = multer({ dest: uploadPath });
+const upload = multer({ dest: tmpdir() });
 
 export function getSortOrder(sortOrder) {
   if (!!~['asc', 'desc', 'ascending', 'descending', 1, -1].indexOf(sortOrder)) {

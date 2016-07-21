@@ -1,4 +1,4 @@
-FROM mhart/alpine-node:6
+FROM mhart/alpine-node:6.2.2
 MAINTAINER "Andy Hui" <andyhui@maaii.com>
 
 # To configure the timezone to Asia/Hong_Kong
