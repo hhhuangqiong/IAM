@@ -2,6 +2,7 @@ import { ArgumentError, NotFoundError } from 'common-errors';
 import Q from 'q';
 import tv4 from 'tv4';
 import * as jsonpatch from 'fast-json-patch';
+import fs from 'fs';
 
 import Company from '../../../collections/company';
 import { filterProperties } from '../utils/helper';
@@ -136,6 +137,13 @@ export default class CompanyController {
         mimeType: file.mimetype,
         filename: file.originalname,
       });
+    })
+    .catch((err) => {
+       // remove the file if any failure like not existing company id.
+      if (file.path && fs.statSync(file.path)) {
+        fs.unlinkSync(file.path);
+      }
+      throw err;
     });
   }
 

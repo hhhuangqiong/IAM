@@ -11,14 +11,10 @@ import Company from '../../../src/collections/company';
 function removeGridFs(done) {
   // fail to use gridfs to remove all files once
   // directly clean the collection it
-  mongoose.connection.db.dropCollection('fs.files', (err, result) => {
-    if (result) {
-      mongoose.connection.db.dropCollection('fs.chunks', (error, resultData) => {
-        if (resultData) {
-          done();
-        }
-      });
-    }
+  mongoose.connection.db.dropCollection('fs.files', () => {
+    mongoose.connection.db.dropCollection('fs.chunks', () => {
+      done();
+    });
   });
 }
 
