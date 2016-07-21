@@ -6,7 +6,8 @@ import { ArgumentError, ArgumentNullError } from 'common-errors';
 import {
   DEFAULT_SORT_ORDER,
   DEFAULT_PAGE_NO,
-  DEFAULT_SORT_BY,
+  DEFAULT_COMPANY_SORT_BY,
+  DEFAULT_USER_SORT_BY,
   DEFAULT_PAGE_SIZE,
 } from '../constants/param';
 import { expressError, schemaExpressError } from '../../../utils/errorHelper';
@@ -89,13 +90,18 @@ export function updateGetAllParam(schema, req, res, next) {
     return;
   }
   // update the get all parameter
+
   req.locals.input = {
     pageNo: (req.query.page && parseInt(req.query.page, 10)) || DEFAULT_PAGE_NO,
     pageSize: (req.query.size && parseInt(req.query.size, 10)) || DEFAULT_PAGE_SIZE,
     query: updatedFilter,
     sort: {},
   };
-  req.locals.input.sort[req.query.sortBy || DEFAULT_SORT_BY] = getSortOrder(req.query.sortOrder);
+
+  const sortBy = req.query.sortBy ||
+    (schema.title === 'User' ? DEFAULT_USER_SORT_BY : DEFAULT_COMPANY_SORT_BY);
+
+  req.locals.input.sort[sortBy] = getSortOrder(req.query.sortOrder);
   next();
 }
 

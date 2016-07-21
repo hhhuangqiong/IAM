@@ -38,9 +38,6 @@
         }
       }
     },
-    "displayName":{
-      "type":"string"
-    },
     "nickName":{
       "type":"string"
     },
@@ -63,7 +60,7 @@
       "type":"string"
     },
     "active":{
-      "type":"string"
+      "type":"boolean"
     },
     "emails":{
       "type":"array",
@@ -151,7 +148,7 @@
         }
       }
     },
-    "address":{
+    "addresses":{
       "type":"array",
       "items":{
         "type":"object",
@@ -173,25 +170,8 @@
           },
           "country":{
             "type":"string"
-          }
-        }
-      }
-    },
-    "entitlements":{
-      "type":"array",
-      "items":{
-        "type":"object",
-        "properties":{
-          "primary":{
-            "type":"boolean"
           },
           "type":{
-            "type":"string"
-          },
-          "display":{
-            "type":"string"
-          },
-          "value":{
             "type":"string"
           }
         }
