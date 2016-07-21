@@ -3,9 +3,6 @@
   "title":"User",
   "type":"object",
   "properties":{
-    "userId":{
-      "type":"string"
-    },
     "isRoot":{
       "type":"boolean"
     },

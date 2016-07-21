@@ -76,11 +76,8 @@ export function validateRequired(req, res, next) {
   next();
 }
 
-export function update(req, res) {
-  // ensure the username should be the same as param username
-  const param = req.locals.input.data;
-  param.username = req.params.username;
-  userController.update(req.params.username, param, req.locals.input.user)
+export function patch(req, res) {
+  userController.patch(req.params.username, req.body, req.user)
     .then((user) => updateOrInsert(user, req, res))
     .catch(err => expressError(err, req, res))
     .done();

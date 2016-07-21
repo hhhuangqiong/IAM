@@ -16,6 +16,15 @@ function errorJSON(code, status, message) {
   };
 }
 
+function formatSchemaMessage(errors) {
+  let message = '';
+  Object.keys(errors).forEach((key) => {
+    const errorObject = errors[key];
+    message = `${errorObject.dataPath} with ${errorObject.message} `;
+  });
+  return message;
+}
+
 export function mongooseError(error) {
   // invalid schema for json when create
   if (error.name === 'ValidationError') {
@@ -29,6 +38,19 @@ export function mongooseError(error) {
     default:
       break;
   }
+}
+
+export function jsonPatchError(error) {
+  let message = 'invalid patch operation';
+  if (error) {
+    if (error.index > -1) {
+      message = `Invalid operation number ${error.index}: `;
+    }
+    if (error.message) {
+      message += error.message;
+    }
+  }
+  throw new ValidationError(message);
 }
 
 export function expressError(error, req, res) {
@@ -72,14 +94,13 @@ export function expressError(error, req, res) {
 }
 
 export function schemaExpressError(result, req, res) {
-  let message = '';
-
-  Object.keys(result.errors).forEach((key) => {
-    const errorObject = result.errors[key];
-    message = `${errorObject.dataPath} with ${errorObject.message} `;
-  });
-
+  const message = formatSchemaMessage(result.errors);
   expressError(new ValidationError(message), req, res);
+}
+
+export function getSchemaError(result) {
+  const message = formatSchemaMessage(result.errors);
+  return new ValidationError(message);
 }
 
 export function filterExpressError(key, req, res) {

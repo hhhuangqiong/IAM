@@ -1,8 +1,15 @@
 import { ArgumentError, NotFoundError } from 'common-errors';
 import Q from 'q';
+import tv4 from 'tv4';
+import * as jsonpatch from 'fast-json-patch';
 
 import Company from '../../../collections/company';
-import { mongooseError } from '../../../utils/errorHelper';
+import { filterProperties } from '../utils/helper';
+import companyValidationSchema from '../../../validationSchema/company.json';
+import { mongooseError,
+   getSchemaError,
+   jsonPatchError,
+} from '../../../utils/errorHelper';
 
 // populate the query with user details and parent id
 function doPopulateData(query) {
@@ -33,13 +40,15 @@ function convertIdToObjectId(id) {
 
 // create a new company
 function createCompany(param) {
+  if (param.updatedBy) {
+    param.createdBy = param.updatedBy;
+  }
   return Company.create(param).catch(mongooseError);
 }
 
-function updateCompanyParam(param, userId) {
+function updateParam(param, userId) {
   const mParam = param;
   if (userId) {
-    mParam.createdBy = userId;
     mParam.updatedBy = userId;
   }
   if (mParam.parent) {
@@ -53,10 +62,37 @@ function updateCompanyParam(param, userId) {
   return Q.resolve(mParam);
 }
 
-export default class CompanyController {
-  create(param, userId) {
-    return updateCompanyParam(param, userId).then(createCompany);
+function toSchemaFormat(companyJSON) {
+  const userFilteredProperties = filterProperties(companyJSON, companyValidationSchema.properties);
+  return userFilteredProperties;
+}
+
+function applyPatch(company, patches, userId) {
+  // apply the patches on the possible properies in schema
+  try {
+    jsonpatch.apply(company, patches, true);
+  } catch (ex) {
+    throw jsonPatchError(ex);
   }
+
+  // undergo validation to see if any unexpected format or changes
+  const result = tv4.validateMultiple(company, companyValidationSchema, undefined, true);
+
+  // check the result
+  if (!result.valid) {
+    // throw validation error
+    throw getSchemaError(result);
+  }
+  // update the param with Object id like assignedCompanies
+  return updateParam(company, userId);
+}
+
+export default class CompanyController {
+
+  create(param, userId) {
+    return updateParam(param, userId).then(createCompany);
+  }
+
   remove(id) {
     return getCompany(id).then(company => {
       // remove directly when no logo
@@ -66,6 +102,7 @@ export default class CompanyController {
       return company.removeLogo().then(() => company.remove());
     });
   }
+
   getAll(filter, { pageNo, pageSize }, sort) {
     const query = Company.find(filter, '-_id -__v')
       .skip(pageNo * pageSize)
@@ -73,15 +110,19 @@ export default class CompanyController {
       .sort(sort);
     return doPopulateData(query);
   }
+
   getTotal(filter) {
     return Company.find(filter).count();
   }
+
   get(id) {
     return getCompany(id, '-_id -__v', true);
   }
+
   getLogo(id) {
     return Company.getLogo(id);
   }
+
   createLogo(file, companyId) {
     return getCompany(companyId).then(company => {
       if (company.logo) {
@@ -97,6 +138,7 @@ export default class CompanyController {
       });
     });
   }
+
   removeLogo(companyId) {
     return getCompany(companyId).then(company => {
       if (company.logo) {
@@ -105,34 +147,45 @@ export default class CompanyController {
       throw new NotFoundError('logo is not found');
     });
   }
-  update(id, param, userId) {
-    return updateCompanyParam(param)
-      .then((updatedParam) =>
-        getCompany(id)
-          .then((company) => {
-            // update the record
+
+  patch(id, patches, userId) {
+    return getCompany(id)
+      .then(company => {
+        // filter the company, so it will remain the possible value to be set
+        const expectedCompany = toSchemaFormat(company.toJSON());
+
+        return applyPatch(expectedCompany, patches, userId)
+          .then(updatedParam => {
+            // apply the changes and update the values
             /* eslint no-param-reassign: ["error", { "props": false }]*/
-            Object.keys(updatedParam).forEach((key) => {
-              company[key] = updatedParam[key];
+            Object.keys(updatedParam).forEach(item => {
+              // can't change the id
+              if (item === 'id') {
+                return;
+              }
+              company[item] = updatedParam[item];
             });
-            // update the person who modify the data
-            if (userId) {
-              company.updatedBy = userId;
-            }
-            // to indicate it is updated instead of create
-            return company.save().then(() => null);
-          })
-          .catch((err) => {
-            // not found and create a new record
-            if (err && err.name === ArgumentError.name) {
-              return createCompany(updatedParam);
-            }
-            throw err;
-          })
-    );
+
+            // expect to return null to indicate it is updated instead of create
+            return company.save()
+              .then(() => null);
+          });
+      })
+      .catch((err) => {
+        // not found and create a new record
+        if (err && err.name === ArgumentError.name) {
+          // default will have a username
+          return applyPatch({
+            id,
+          }, patches, userId)
+            .then(createCompany);
+        }
+        throw err;
+      });
   }
+
   replace(id, param, userId) {
-    return updateCompanyParam(param, userId)
+    return updateParam(param, userId)
       .then((updatedParam) =>
         getCompany(id)
           .then((company) => {
@@ -157,6 +210,7 @@ export default class CompanyController {
           })
       );
   }
+
   static getObjectId(id) {
     return convertIdToObjectId(id);
   }

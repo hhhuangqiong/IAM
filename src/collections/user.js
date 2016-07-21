@@ -1,8 +1,8 @@
 import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
-// import randtoken from 'rand-token';
 import Q from 'q';
 import timestamp from 'mongoose-timestamp';
+import isUndefined from 'lodash/isUndefined';
 
 function hashPassword(password) {
   const salt = bcrypt.genSaltSync(10);
@@ -187,7 +187,7 @@ schema.virtual('displayName')
 
 schema.pre('save', function preSave(next) {
   // do nothing when password is not set
-  if (!this.password) {
+  if (isUndefined(this.password)) {
     next();
     return;
   }

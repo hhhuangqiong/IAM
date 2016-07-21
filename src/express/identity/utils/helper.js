@@ -1,8 +1,13 @@
 import * as tv4 from 'tv4';
 import multer from 'multer';
 import { tmpdir } from 'os';
+import pick from 'lodash/pick';
 
-import { ArgumentError, ArgumentNullError } from 'common-errors';
+import {
+  ArgumentError,
+  ArgumentNullError,
+  ValidationError,
+} from 'common-errors';
 import {
   DEFAULT_SORT_ORDER,
   DEFAULT_PAGE_NO,
@@ -111,4 +116,18 @@ export function formatGetAllResult(allParam, count, resources) {
     page_no: allParam.pageNo,
     resources,
   };
+}
+
+export function filterProperties(param, schema) {
+  const expectedProps = Object.keys(schema);
+  // obtain the expected param and filter out useless field
+  return pick(param, expectedProps);
+}
+
+export function validatePatchFormat(req, res, next) {
+  if (!Array.isArray(req.body)) {
+    expressError(new ValidationError('Patch requests a set of changes in an array'), req, res);
+    return;
+  }
+  next();
 }

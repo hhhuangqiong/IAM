@@ -1,9 +1,16 @@
 import { ArgumentError } from 'common-errors';
 import Q from 'q';
+import tv4 from 'tv4';
+import * as jsonpatch from 'fast-json-patch';
 
+import userValidationSchema from '../../../validationSchema/user.json';
 import User from '../../../collections/user';
 import CompanyController from './company';
-import { mongooseError } from '../../../utils/errorHelper';
+import { filterProperties } from '../utils/helper';
+import { mongooseError,
+   getSchemaError,
+   jsonPatchError,
+} from '../../../utils/errorHelper';
 
 // hashed information and token should not be displayed
 const removeDisplayAttribte = '-__v -hashedPassword -salt -tokens';
@@ -55,10 +62,9 @@ function updateParam(param, userId) {
 
   // userId
   if (userId) {
-    mParam.createdBy = userId;
     mParam.updatedBy = userId;
   }
-  // company
+  // find company id
   if (param.affiliatedCompany && param.affiliatedCompany.company) {
     promiseArray.push(
       CompanyController.getObjectId(param.affiliatedCompany.company)
@@ -86,7 +92,37 @@ function updateParam(param, userId) {
   });
 }
 
+function toSchemaFormat(userJSON) {
+  const userFilteredProperties = filterProperties(userJSON, userValidationSchema.properties);
+  // because fail to get password directly, setting a dumy so user can update/add
+  userFilteredProperties.password = '';
+  return userFilteredProperties;
+}
+
+function applyPatch(user, patches, userId) {
+  // apply the patches on the possible properies in schema
+  try {
+    jsonpatch.apply(user, patches, true);
+  } catch (ex) {
+    throw jsonPatchError(ex);
+  }
+
+  // undergo validation to see if any unexpected format or changes
+  const result = tv4.validateMultiple(user, userValidationSchema, undefined, true);
+
+  // check the result
+  if (!result.valid) {
+    // throw validation error
+    throw getSchemaError(result);
+  }
+  // update the param with Object id like assignedCompanies
+  return updateParam(user, userId);
+}
+
 function createUser(param) {
+  if (param.updatedBy) {
+    param.createdBy = param.updatedBy;
+  }
   return User.create(param).catch(mongooseError);
 }
 
@@ -120,31 +156,40 @@ export default class UserController {
     return getUser(username, removeDisplayAttribte, true);
   }
 
-  update(username, param, userId) {
-    return updateParam(param)
-      .then((updatedParam) =>
-        getUser(username)
-          .then((user) => {
-            // update the record
+  patch(username, patches, userId) {
+    return getUser(username, removeDisplayAttribte)
+      .then(user => {
+        // filter the user, so it will remain the possible value to be set
+        const expectedUser = toSchemaFormat(user.toJSON());
+
+        return applyPatch(expectedUser, patches, userId)
+          .then(updatedParam => {
+            // apply the changes and update the values
             /* eslint no-param-reassign: ["error", { "props": false }]*/
-            Object.keys(updatedParam).forEach((key) => {
-              user[key] = updatedParam[key];
+            Object.keys(updatedParam).forEach(item => {
+              // can't change the username and ignore update password if it is empty
+              if (item === 'username' || item === 'password' && !updatedParam[item]) {
+                return;
+              }
+              user[item] = updatedParam[item];
             });
-            // update the person who modify the data
-            if (userId) {
-              user.updatedBy = userId;
-            }
-            // to indicate it is updated instead of create
-            return user.save().then(() => null);
-          })
-          .catch((err) => {
-            // not found and create a new record
-            if (err && err.name === ArgumentError.name) {
-              return createUser(updatedParam);
-            }
-            throw err;
-          })
-    );
+
+            // expect to return null to indicate it is updated instead of create
+            return user.save()
+              .then(() => null);
+          });
+      })
+      .catch((err) => {
+        // not found and create a new record
+        if (err && err.name === ArgumentError.name) {
+          // default will have a username
+          return applyPatch({
+            username,
+          }, patches, userId)
+            .then(createUser);
+        }
+        throw err;
+      });
   }
 
   replace(username, param, userId) {

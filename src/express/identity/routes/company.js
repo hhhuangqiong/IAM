@@ -94,12 +94,9 @@ export function create(req, res) {
     .done();
 }
 
-export function update(req, res) {
-  // ensure the id should be the same
-  const param = req.locals.input.data;
-  param.id = req.params.id;
-  companyController.update(req.params.id, param, req.locals.input.user)
-    .then((company) => updateOrInsert(company, req, res))
+export function patch(req, res) {
+  companyController.patch(req.params.id, req.body, req.user)
+    .then((user) => updateOrInsert(user, req, res))
     .catch(err => expressError(err, req, res))
     .done();
 }
