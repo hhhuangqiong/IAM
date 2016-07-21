@@ -33,7 +33,6 @@ const schema = new mongoose.Schema({
     honorificPrefix: String,
     honorificSuffix: String,
   },
-  displayName: String,
   nickName: String,
   profileUrl: String,
   title: String,
@@ -41,7 +40,10 @@ const schema = new mongoose.Schema({
   preferredLanguage: String,
   locale: String,
   timezone: String,
-  active: Boolean,
+  active: {
+    type: Boolean,
+    default: true,
+  },
   hashedPassword: {
     type: String,
   },
@@ -51,17 +53,21 @@ const schema = new mongoose.Schema({
   emails: [{
     _id: false,
     primary: Boolean,
-    type: String,
     display: String,
     value: String,
     verified: Boolean,
+    type: {
+      type: String,
+    },
   }],
   phoneNumbers: [{
     _id: false,
     primary: Boolean,
     value: String,
     display: String,
-    type: String,
+    type: {
+      type: String,
+    },
     verified: Boolean,
   }],
   ims: [{
@@ -69,14 +75,18 @@ const schema = new mongoose.Schema({
     primary: Boolean,
     value: String,
     display: String,
-    type: String,
+    type: {
+      type: String,
+    },
   }],
   photos: [{
     _id: false,
     primary: Boolean,
     value: String,
     display: String,
-    type: String,
+    type: {
+      type: String,
+    },
   }],
   addresses: [{
     _id: false,
@@ -86,21 +96,18 @@ const schema = new mongoose.Schema({
     region: String,
     postalCode: String,
     country: String,
-    type: String,
-  }],
-  entitlements: [{
-    _id: false,
-    primary: Boolean,
-    value: String,
-    display: String,
-    type: String,
+    type: {
+      type: String,
+    },
   }],
   x509Certificates: [{
     _id: false,
     primary: Boolean,
     value: String,
     display: String,
-    type: String,
+    type: {
+      type: String,
+    },
   }],
 
   gender: String,
@@ -141,6 +148,23 @@ const schema = new mongoose.Schema({
   },
 }, {
   collection: COLLECTION_NAME,
+  toObject: {
+    virtuals: true,
+  },
+  toJSON: {
+    virtuals: true,
+    transform: (doc, ret) => {
+      /* eslint no-param-reassign: ["error", { "props": false }]*/
+      Object.keys(ret).forEach(key => {
+        if (Array.isArray(ret[key]) && !ret[key].length) {
+          delete ret[key];
+        }
+      });
+      // delete id since username is the key, and_id is kept
+      // which will send along with the request as an user indcation instead of public username
+      delete ret.id;
+    },
+  },
 });
 
 schema.plugin(timestamp);
@@ -153,6 +177,13 @@ schema.virtual('password')
     this.tempPassword = password;
   });
 
+schema.virtual('displayName')
+  .get(function getDisplayName() {
+    if (!this.name.givenName && !this.name.familyName) {
+      return '';
+    }
+    return `${this.name.givenName} ${this.name.familyName}`;
+  });
 
 schema.pre('save', function preSave(next) {
   // do nothing when password is not set

@@ -68,6 +68,16 @@ const schema = new mongoose.Schema({
   },
 }, {
   collection: COLLECTION_NAME,
+  toJSON: {
+    transform: (doc, ret) => {
+      /* eslint no-param-reassign: ["error", { "props": false }]*/
+      Object.keys(ret).forEach(key => {
+        if (Array.isArray(ret[key]) && !ret[key].length) {
+          delete ret[key];
+        }
+      });
+    },
+  },
 });
 
 schema.plugin(timestamp);
