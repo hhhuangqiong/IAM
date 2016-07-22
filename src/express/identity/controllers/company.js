@@ -1,4 +1,4 @@
-import { ArgumentError, NotFoundError } from 'common-errors';
+import { NotFoundError } from 'common-errors';
 import Q from 'q';
 import tv4 from 'tv4';
 import * as jsonpatch from 'fast-json-patch';
@@ -27,7 +27,7 @@ function getCompany(id, option, populateData) {
   }
   return query.then(company => {
     if (!company) {
-      throw new ArgumentError(`company id ${id} is not found`);
+      throw new NotFoundError(`company id ${id}`);
     }
     return company;
   });
@@ -181,7 +181,7 @@ export default class CompanyController {
       })
       .catch((err) => {
         // not found and create a new record
-        if (err && err.name === ArgumentError.name) {
+        if (err && err.name === NotFoundError.name) {
           // default will have a username
           return applyPatch({
             id,
@@ -211,7 +211,7 @@ export default class CompanyController {
               });
           })
           .catch((err) => {
-            if (err && err.name === ArgumentError.name) {
+            if (err && err.name === NotFoundError.name) {
               return createCompany(updatedParam);
             }
             throw err;

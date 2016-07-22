@@ -185,8 +185,7 @@ describe('GET /identity/companies', () => {
              result: {
                status: 404,
                code: 20001,
-               message: 'Invalid or missing argument supplied: company id ' +
-                 'company123 is not found',
+               message: 'Not Found: "company id company123"',
              },
            })
            .end(done);

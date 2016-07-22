@@ -71,11 +71,11 @@ describe('perform logo action', () => {
       agent.post('/identity/companies/fakeCompany/logo')
         .set('Content-Type', 'multipart/form-data')
         .attach('logo', companyLogo)
-        .expect(422, {
+        .expect(404, {
           result: {
-            status: 422,
+            status: 404,
             code: 20001,
-            message: 'Invalid or missing argument supplied: company id fakeCompany is not found',
+            message: 'Not Found: "company id fakeCompany"',
           },
         })
         .end(done);
@@ -191,8 +191,14 @@ describe('perform logo action', () => {
     });
 
     it('delete unsuccessfully the logo with wrong companyid', (done) => {
-      agent.get('/identity/companies/dummyCompany/logo')
-        .expect(404)
+      agent.delete('/identity/companies/dummyCompany/logo')
+        .expect(404, {
+          result: {
+            status: 404,
+            code: 20001,
+            message: 'Not Found: "company id dummyCompany"',
+          },
+        })
         .end(done);
     });
   });

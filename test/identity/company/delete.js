@@ -70,7 +70,7 @@ describe('DELETE /identity/companies/:id', () => {
              result: {
                code: 20001,
                status: 404,
-               message: 'Invalid or missing argument supplied: company id companyNotExist is not found',
+               message: 'Not Found: "company id companyNotExist"',
              },
            })
            .end(done);
