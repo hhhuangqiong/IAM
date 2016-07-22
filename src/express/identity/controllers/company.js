@@ -12,14 +12,26 @@ import { mongooseError,
    jsonPatchError,
 } from '../../../utils/errorHelper';
 
-// populate the query with user details and parent id
+/**
+ * inject the query with populate
+ * @method doPopulateDate
+ * @param {Object} query the query
+ * @returns {Object} the injected query
+ */
 function doPopulateData(query) {
   return query.populate('parent', 'id -_id')
          .populate('createdBy', 'username -_id')
          .populate('updatedBy', 'username -_id');
 }
 
-// get the company from the mongoose
+/**
+ * Get the company from mongo
+ * @method getCompany
+ * @param {String} id the company id
+ * @param {Object} option the query option
+ * @param {Boolean} populateData whether populate the ref linked
+ * @returns {Promise<Object>} the company object
+ */
 function getCompany(id, option, populateData) {
   const query = Company.findOne({ id }, option);
   if (populateData) {
@@ -33,13 +45,23 @@ function getCompany(id, option, populateData) {
   });
 }
 
-// convert the company id to object id
+/**
+ * Convert company id to mongo object id
+ * @method convertIdToObjectId
+ * @param {Object} param the current parameter
+ * @returns {Promise<Object>} the updated user object
+ */
 function convertIdToObjectId(id) {
     /* eslint no-underscore-dangle: ["error", { "allow": ["company", "_id"] }]*/
   return getCompany(id).then(company => company._id);
 }
 
-// create a new company
+/**
+ * To perform create company action
+ * @method createCompany
+ * @param {Object} param the current parameter
+ * @returns {Promise<Object>} the updated user object
+ */
 function createCompany(param) {
   if (param.updatedBy) {
     param.createdBy = param.updatedBy;
@@ -47,6 +69,13 @@ function createCompany(param) {
   return Company.create(param).catch(mongooseError);
 }
 
+/**
+ * To update the parameter, linking the ref object id
+ * @method updateParam
+ * @param {Object} param the current parameter
+ * @param {String} userId the user who perform the action
+ * @returns {Promise<Object>} the updated company object
+ */
 function updateParam(param, userId) {
   const mParam = param;
   if (userId) {
@@ -63,11 +92,26 @@ function updateParam(param, userId) {
   return Q.resolve(mParam);
 }
 
+/**
+ * To filter extra properties based on the schema format
+ * @method toSchemaFormat
+ * @param {Object} user the current company object
+ * @returns {Object} the filter company object
+ */
 function toSchemaFormat(companyJSON) {
   const userFilteredProperties = filterProperties(companyJSON, companyValidationSchema.properties);
   return userFilteredProperties;
 }
 
+/**
+ * To perform patch action
+ * @method applyPatch
+ * @param {Object} user the current company object
+ * @param {Object[]} patches the json patches array
+ * @param {String} userId the person who perform patch
+ * @throws {ValidationError} the json patch is not valid
+ * @returns {Object} the updated object
+ */
 function applyPatch(company, patches, userId) {
   // apply the patches on the possible properies in schema
   try {
@@ -89,11 +133,22 @@ function applyPatch(company, patches, userId) {
 }
 
 export default class CompanyController {
-
+  /**
+   * Create the company
+   * @method create
+   * @param {Object} param the company propeties
+   * @returns {Promise<Object>} when successfully add the company and return company object
+   */
   create(param, userId) {
     return updateParam(param, userId).then(createCompany);
   }
 
+  /**
+   * Remove the company by company id, it will remove both linked company logo and company profile
+   * @method remove
+   * @param {String} id the company id
+   * @returns {Promise<[]>} when successfully remove the company
+   */
   remove(id) {
     return getCompany(id).then(company => {
       // remove directly when no logo
@@ -104,6 +159,15 @@ export default class CompanyController {
     });
   }
 
+  /**
+   * Get all the companies based on the query with pagination and sorting
+   * @method getAll
+   * @param {Object} filter the filter object query
+   * @param {Object} pagination the pagination object
+   * @param {Number} pagination.pageNo the page number
+   * @param {Number} pagination.pageSize the number of result per page
+   * @returns {Promise<Object[]>} the array of user object
+   */
   getAll(filter, { pageNo, pageSize }, sort) {
     const query = Company.find(filter, '-_id -__v')
       .skip(pageNo * pageSize)
@@ -112,18 +176,44 @@ export default class CompanyController {
     return doPopulateData(query);
   }
 
+  /**
+   * Get the total count
+   * @method getTotal
+   * @param {Object} filter the filter object query
+   * @returns {Promise<Number>} the number of result
+   */
   getTotal(filter) {
     return Company.find(filter).count();
   }
 
+  /**
+   * Obtain the company object
+   * @method get
+   * @param {String} id the company id
+   * @returns {Promise<Object>} the company object
+   */
   get(id) {
     return getCompany(id, '-_id -__v', true);
   }
 
+  /**
+   * Obtain the logo by logo object id
+   * @method getLogo
+   * @param {String} id the logo object id
+   * @returns {Promise<Buffer>} when successfully found and return the logo data
+   */
   getLogo(id) {
     return Company.getLogo(id);
   }
 
+  /**
+   * create and link up company logo, it will append the logo data into mongodb gridfs
+   * and delete the files
+   * @method createLogo
+   * @param {File} file
+   * @param {String} companyId the company to add the logo
+   * @returns {Promise<>} when successfully add the logo to company
+   */
   createLogo(file, companyId) {
     return getCompany(companyId).then(company => {
       if (company.logo) {
@@ -147,6 +237,13 @@ export default class CompanyController {
     });
   }
 
+  /**
+   * remove the company's logo by company id
+   * @method removeLogo
+   * @param {String} companyId
+   * @returns {Promise<>} when successfully remove the logo
+   * @throws {NotFoundError} logo file doesn't exist
+   */
   removeLogo(companyId) {
     return getCompany(companyId).then(company => {
       if (company.logo) {
@@ -156,6 +253,15 @@ export default class CompanyController {
     });
   }
 
+  /**
+   * patch the company data
+   * @method patch
+   * @param {String} id
+   * @param {Object[]} patches the json patch operations
+   * @param {String} userId the user id who patches the user
+   * @returns {Promise<Object>} the company object when created new company
+   * @returns {Promise<>} when successfully update the data
+   */
   patch(id, patches, userId) {
     return getCompany(id)
       .then(company => {
@@ -192,6 +298,15 @@ export default class CompanyController {
       });
   }
 
+  /**
+   * Replace the company data
+   * @method replace
+   * @param {String} id
+   * @param {Object} param the company parameter
+   * @param {String} userId the user id who replaces the user's data
+   * @returns {Promise<Object>} the company object when created new company
+   * @returns {Promise<>} when successfully replace the data
+   */
   replace(id, param, userId) {
     return updateParam(param, userId)
       .then((updatedParam) =>
@@ -219,6 +334,12 @@ export default class CompanyController {
       );
   }
 
+  /**
+   * get the obeject id by company id
+   * @method getObjectId
+   * @param {String} id
+   * @returns {Promise<String>} the mongo object id
+   */
   static getObjectId(id) {
     return convertIdToObjectId(id);
   }

@@ -15,7 +15,12 @@ import { mongooseError,
 // hashed information and token should not be displayed
 const removeDisplayAttribte = '-__v -hashedPassword -salt -tokens';
 
-// populate the query with user details and parent id
+/**
+ * To inject the populate option into the query
+ * @method doPopulateData
+ * @param {Object} query the query
+ * @returns {Object} the updated query
+ */
 function doPopulateData(query) {
   return query.populate('affiliatedCompany.company', 'id -_id')
          .populate('assignedCompanies.company', 'id -_id')
@@ -23,6 +28,14 @@ function doPopulateData(query) {
          .populate('updatedBy', 'username -_id');
 }
 
+/**
+ * To get the user
+ * @method getUser
+ * @param {String} username the username
+ * @param {Object} option the query option
+ * @param {Boolean} populate the ref data
+ * @returns {Promise<Object>} the user object
+ */
 function getUser(username, option, populateData) {
   const query = User.findOne({ username }, option);
   if (populateData) {
@@ -36,6 +49,12 @@ function getUser(username, option, populateData) {
   });
 }
 
+/**
+ * To update the filter
+ * @method updateFilter
+ * @param {Object} param the current parameter
+ * @returns {Promise<Object>} the updated filter
+ */
 function updateFilter(filter) {
   const myFilter = filter;
   const promiseArray = [];
@@ -55,6 +74,13 @@ function updateFilter(filter) {
     .then(() => myFilter);
 }
 
+/**
+ * To update the parameter, linking the ref object id
+ * @method updateParam
+ * @param {Object} param the current parameter
+ * @param {String} userId the user who perform the action
+ * @returns {Promise<Object>} the updated user object
+ */
 function updateParam(param, userId) {
   const mParam = param;
   const promiseArray = [];
@@ -92,6 +118,12 @@ function updateParam(param, userId) {
   });
 }
 
+/**
+ * To filter extra properties based on the schema format
+ * @method toSchemaFormat
+ * @param {Object} user the current user object
+ * @returns {Object} the filter user object
+ */
 function toSchemaFormat(userJSON) {
   const userFilteredProperties = filterProperties(userJSON, userValidationSchema.properties);
   // because fail to get password directly, setting a dumy so user can update/add
@@ -99,6 +131,15 @@ function toSchemaFormat(userJSON) {
   return userFilteredProperties;
 }
 
+/**
+ * To perform patch action
+ * @method applyPatch
+ * @param {Object} user the current user object
+ * @param {Object[]} patches the json patches array
+ * @param {String} userId the person who perform patch
+ * @throws {ValidationError} the json patch is not valid
+ * @returns {Object} the updated object
+ */
 function applyPatch(user, patches, userId) {
   // apply the patches on the possible properies in schema
   try {
@@ -119,6 +160,12 @@ function applyPatch(user, patches, userId) {
   return updateParam(user, userId);
 }
 
+/**
+ * To perform create action
+ * @method create
+ * @param {Object} param the user parameter
+ * @returns {Promise<User>} when successfully create a user
+ */
 function createUser(param) {
   if (param.updatedBy) {
     param.createdBy = param.updatedBy;
@@ -128,14 +175,37 @@ function createUser(param) {
 
 export default class UserController {
 
+  /**
+   * create a user
+   * @method create
+   * @param {Object} param the user parameter
+   * @param {String} userId the person who create user
+   * @returns {Promise<User>} when successfully create a user
+   */
   create(param, userId) {
     return updateParam(param, userId).then(createUser);
   }
 
+  /**
+   * remove a user
+   * @method remove
+   * @param {String} username
+   * @returns {Promise<>} when succeed to remove a user
+   */
   remove(username) {
     return getUser(username).then(user => user.remove());
   }
 
+  /**
+   * get all the users based on the filter
+   * @method getAll
+   * @param {Object} filter
+   * @param {Object} pagination the pagination object
+   * @param {Number} pagination.pageNo the page number
+   * @param {Number} pagination.pageSize the page size
+   * @param {Object} sort the sort object
+   * @returns {Promise<User>} the users
+   */
   getAll(filter, { pageNo, pageSize }, sort) {
     return updateFilter(filter)
       .then(myFilter => {
@@ -147,15 +217,36 @@ export default class UserController {
       }).catch(mongooseError);
   }
 
+  /**
+   * get the total count of users based on the filter
+   * @method getTotal
+   * @param {Object} filter
+   * @returns {Promise<Number>} the number of users
+   */
   getTotal(filter) {
     return updateFilter(filter)
       .then(myFilter => User.find(myFilter).count());
   }
 
+  /**
+   * get the user data
+   * @method get
+   * @param {String} username
+   * @returns {Promise<Object>} the user object
+   */
   get(username) {
     return getUser(username, removeDisplayAttribte, true);
   }
 
+  /**
+   * patch the user data
+   * @method patch
+   * @param {String} username
+   * @param {Object[]} patches the json patch array
+   * @param {String} userId the user id who perform patch
+   * @returns {Promise<Object>} the user object when create a new user
+   * @returns {Promise<>} replace the existing user
+   */
   patch(username, patches, userId) {
     return getUser(username, removeDisplayAttribte)
       .then(user => {
@@ -192,6 +283,15 @@ export default class UserController {
       });
   }
 
+  /**
+   * replace the user data
+   * @method replace
+   * @param {String} username
+   * @param {Object} param the data parameter
+   * @param {String} userId the user id who perform replace
+   * @returns {Promise<Object>} the user object when create a new user
+   * @returns {Promise<>} replace the existing user
+   */
   replace(username, param, userId) {
     return updateParam(param, userId)
       .then((updatedParam) =>

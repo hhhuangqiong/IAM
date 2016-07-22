@@ -1,40 +1,26 @@
 import fs from 'fs';
-import mongoose from 'mongoose';
-import Grid from 'gridfs-stream';
+import * as bottle from '../utils/bottle';
 import mime from 'mime';
 import Q from 'q';
+import nconf from 'nconf';
 import { NotFoundError, ArgumentNullError } from 'common-errors';
 
-let gridFs;
-export function initGridFs() {
-  if (gridFs) {
-    return;
-  }
-  const db = mongoose.connection.db;
-  const mongoDriver = mongoose.mongo;
-  gridFs = new Grid(db, mongoDriver);
-}
-
 /**
- * addFile
  * add file into gridFS from path of source
- *
- * @param {String} filePath - Path of file to be uploaded
+ * @method addFile
+ * @param {String} filePath Path of file to be uploaded
  * @param {Object} options
- * @param {String} [options.filename] - Custom file name
- * @param {String} [options.mimeType] - mimeType
- * @param {Boolean} [options.unlinkFile] -
- *   Set true if you want to remove the file source, happens mostly in uploading
- * file
- * @param {Function} cb
- * @returns {*} - Returns GridFs document
+ * @param {String} [options.filename] Custom file name
+ * @param {String} [options.mimeType] mimeType
+ * @param {Boolean} [options.unlinkFile] True if remove the file source
+ * @returns {Promise<Object>} Returns GridFs document
  */
 export function addFile(filePath, options) {
-  this.initGridFs();
   if (!filePath) {
     return Q.reject(new ArgumentNullError(filePath));
   }
   const deferred = Q.defer();
+  const gridFs = bottle.fetchDep(nconf.get('containerName'), 'gridfs');
   const writeStream = gridFs.createWriteStream({
     filename: options.filename || filePath.split('/').pop(),
     // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
@@ -54,8 +40,14 @@ export function addFile(filePath, options) {
   return deferred.promise;
 }
 
+/**
+ * get the buffer by the file id
+ * @method getById
+ * @param {String} id the file id
+ * @returns {Promise<Buffer>} return the file
+ */
 export function getById(id) {
-  this.initGridFs();
+  const gridFs = bottle.fetchDep(nconf.get('containerName'), 'gridfs');
   if (!id) {
     return Q.reject(new ArgumentNullError(id));
   }
@@ -84,8 +76,16 @@ export function getById(id) {
   });
 }
 
+/**
+ * remove the file from grid fs
+ * @method removeFile
+ * @param {String} id the file id
+ * @returns {Promise<>} when succeed to remove file
+ * @throws {NotFoundError} File can't be found
+ * @throws {ArgumentNullError} missing the file id
+ */
 export function removeFile(id) {
-  this.initGridFs();
+  const gridFs = bottle.fetchDep(nconf.get('containerName'), 'gridfs');
   if (!id) {
     return Q.reject(new ArgumentNullError(id));
   }

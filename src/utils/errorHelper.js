@@ -6,6 +6,14 @@ import {
   NotFoundError,
 } from 'common-errors';
 
+/**
+ * To output the errorJSON object in the response
+ * @method errorJSON
+ * @param {Number} code the error code
+ * @param {Number} status the error status
+ * @param {String} message the error message
+ * @returns {Object} the error object
+ */
 function errorJSON(code, status, message) {
   return {
     result: {
@@ -16,6 +24,12 @@ function errorJSON(code, status, message) {
   };
 }
 
+/**
+ * To output the validation schema error message
+ * @method formatSchemaMessage
+ * @param {Object} error the schema error
+ * @returns {String} the error message
+ */
 function formatSchemaMessage(errors) {
   let message = '';
   Object.keys(errors).forEach((key) => {
@@ -25,6 +39,13 @@ function formatSchemaMessage(errors) {
   return message;
 }
 
+/**
+ * To handle the mongoose error
+ * @method mongooseError
+ * @param {Object} error the schema error
+ * @throws {ValidationError} when the data is not in valid format
+ * @throws {AlreadyInUseError} when the data is already inserted
+ */
 export function mongooseError(error) {
   // invalid schema for json when create
   if (error.name === 'ValidationError') {
@@ -40,6 +61,12 @@ export function mongooseError(error) {
   }
 }
 
+/**
+ * To handle the json patch error
+ * @method jsonPatchError
+ * @param {Object} error the patch error from fast-json-patch
+ * @throws {ValidationError} when the patch operation is not correct
+ */
 export function jsonPatchError(error) {
   let message = 'invalid patch operation';
   if (error) {
@@ -53,6 +80,14 @@ export function jsonPatchError(error) {
   throw new ValidationError(message);
 }
 
+/**
+ * To handle all the express error and response with different error obeject
+ * with status, error code and message
+ * @method expressError
+ * @param {Object} error the errorObject
+ * @param {Object} req the express req object
+ * @param {Object} res the express res object
+ */
 export function expressError(error, req, res) {
   switch (error.name) {
     case ArgumentNullError.name:
@@ -93,16 +128,25 @@ export function expressError(error, req, res) {
   }
 }
 
+/**
+ * To handle tv4 schema valiation express error
+ * @method schemaExpressError
+ * @param {Object} result the result from the tv4 validation
+ * @param {Object} req the express req object
+ * @param {Object} res the express res object
+ */
 export function schemaExpressError(result, req, res) {
   const message = formatSchemaMessage(result.errors);
   expressError(new ValidationError(message), req, res);
 }
 
+/**
+ * To get the error based on the tv4 schema
+ * @method getSchemaError
+ * @param {Object} result the result from the tv4 validation
+ * @returns {Error} the validation error object
+ */
 export function getSchemaError(result) {
   const message = formatSchemaMessage(result.errors);
   return new ValidationError(message);
-}
-
-export function filterExpressError(key, req, res) {
-  expressError(new ValidationError(`${key} is unavailable filter param`), req, res);
 }

@@ -19,6 +19,12 @@ import { expressError, schemaExpressError } from '../../../utils/errorHelper';
 
 const upload = multer({ dest: tmpdir() });
 
+/**
+ * Get the sorting order, if it is incorrect, it will return the default sort order
+ * @method getSortOrder
+ * @param {String} sortOrder the sortOrder method either asc, desc, ascending, descending, 1, -1
+ * @returns {String} the sortOrder type
+ */
 export function getSortOrder(sortOrder) {
   if (!!~['asc', 'desc', 'ascending', 'descending', 1, -1].indexOf(sortOrder)) {
     return sortOrder;
@@ -26,6 +32,13 @@ export function getSortOrder(sortOrder) {
   return DEFAULT_SORT_ORDER;
 }
 
+/**
+ * When getting all the parameter, it will remove those unnecesssary filtering such as
+ * pagination and sorting order.
+ * @method updateFilter
+ * @param {Object} param
+ * @returns {Object} filtered parameter
+ */
 function updateFilter(param) {
   const myParam = {};
   Object.keys(param).forEach((key) => {
@@ -47,6 +60,15 @@ function updateFilter(param) {
   return myParam;
 }
 
+/**
+ * Validate the input data whether fulfil the schema and format the data for the next handler
+ * @method validateData
+ * @param {Object} schema the tv4 schema to valiate the properties type
+ * @param {Object} req the express request object
+ * @param {Object} res the express response object
+ * @param {Object} next the express next object
+ * @throws {ValidationError} arguement doesn't fulfil the schema
+ */
 export function validateData(schema, req, res, next) {
   const data = req.body;
   // validate the data format and ban unknown properties
@@ -65,6 +87,17 @@ export function validateData(schema, req, res, next) {
   next();
 }
 
+/**
+ * middleware to handle file uploading
+ * @method uploadFile
+ * @param {String} expectedField the field to send along with the file
+ * @param {Object} req the express request object
+ * @param {Object} res the express response object
+ * @param {Object} next the express next object
+ * @throws {ArgumentError} invalid field for file uploading
+ * @throws {ArgumentNullError} missing file
+ * @returns {Object} multer upload handler
+ */
 export function uploadFile(expectedField, req, res, next) {
   const fileUpload = upload.single(expectedField);
   fileUpload(req, res, (err) => {
@@ -82,6 +115,14 @@ export function uploadFile(expectedField, req, res, next) {
   return fileUpload;
 }
 
+/**
+ * get all param update
+ * @method updateGetAllParam
+ * @param {Object} schema the tv4 schema to valiate the properties type
+ * @param {Object} req the express request object
+ * @param {Object} res the express response object
+ * @param {Object} next the express next object
+ */
 export function updateGetAllParam(schema, req, res, next) {
   req.locals = req.locals || {};
   // convert the query to object
@@ -109,6 +150,15 @@ export function updateGetAllParam(schema, req, res, next) {
   next();
 }
 
+/**
+ * format the style for get all result
+ * @method formatGetAllResult
+ * @returns {Object} result the result object
+ * @returns {Number} result.total the total number of the result
+ * @returns {Number} result.page_size the number of item in a page
+ * @returns {Number} result.page_no the page number
+ * @returns {Resource[]} the resource array
+ */
 export function formatGetAllResult(allParam, count, resources) {
   return {
     total: count,
@@ -118,12 +168,26 @@ export function formatGetAllResult(allParam, count, resources) {
   };
 }
 
+/**
+ * Filter the parameter mentioned in the schema
+ * @method filterProperties
+ * @param {Object} param the parameter
+ * @param {Object} schema the tv4 schema to valiate the properties type
+ * @returns {Object} the filter properties
+ */
 export function filterProperties(param, schema) {
   const expectedProps = Object.keys(schema);
   // obtain the expected param and filter out useless field
   return pick(param, expectedProps);
 }
 
+/**
+ * validate the patch format whether contain array
+ * @method validatePatchFormat
+ * @param {Object} req the express request object
+ * @param {Object} res the express response object
+ * @param {Object} next the express next object
+ */
 export function validatePatchFormat(req, res, next) {
   if (!Array.isArray(req.body)) {
     expressError(new ValidationError('Patch requests a set of changes in an array'), req, res);
