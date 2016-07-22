@@ -14,5 +14,8 @@
   "rules": {
     // only warn about long line, but not error
     "max-len": 1,
+    "no-underscore-dangle": ["error", {
+      "allow": ["_id"]
+    }]
   }
 }
