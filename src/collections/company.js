@@ -2,15 +2,16 @@ import mongoose from 'mongoose';
 import timestamp from 'mongoose-timestamp';
 
 import * as gridFs from '../utils/gridfs';
+import mongooseToJSON from '../utils/mongooseToJSON';
 
 const COLLECTION_NAME = 'Company';
 
 const schema = new mongoose.Schema({
   parent: {
     ref: COLLECTION_NAME,
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
   },
-  id: {
+  _id: {
     type: String,
     unique: true,
     required: true,
@@ -60,29 +61,28 @@ const schema = new mongoose.Schema({
   }],
   createdBy: {
     ref: 'User',
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
   },
   updatedBy: {
     ref: 'User',
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
   },
 }, {
   collection: COLLECTION_NAME,
-  toJSON: {
-    transform: (doc, ret) => {
-      /* eslint no-param-reassign: ["error", { "props": false }]*/
-      Object.keys(ret).forEach(key => {
-        if (Array.isArray(ret[key]) && !ret[key].length) {
-          delete ret[key];
-        }
-      });
-    },
-  },
+  toJSON: mongooseToJSON,
 });
 
 schema.plugin(timestamp);
 
-/* eslint no-underscore-dangle: ["error", { "allow": ["fileDoc", "_id"] }] */
+/* eslint no-underscore-dangle: ["error", { "allow": ["_id"] }] */
+schema.virtual('id')
+  .get(function getId() {
+    return this._id;
+  })
+  .set(function setId(id) {
+    this._id = id;
+  });
+
 schema.method('addLogo', function addLogo(filePath, options = {}) {
   // set unlinkFile to true which removes file after storing into mongodb
   return gridFs.addFile(filePath, Object.assign(options, { unlinkFile: true }))

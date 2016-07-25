@@ -23,14 +23,14 @@ describe('POST /identity/users', () => {
            .expect(422, {
              result: {
                code: 20001,
-               message: 'Missing argument: username',
+               message: 'Missing argument: id',
                status: 422,
              },
            })
            .end(done);
     });
 
-    it('fails to create user without username', (done) => {
+    it('fails to create user without id', (done) => {
       const userInfo = {
         name: 'Marco F',
       };
@@ -40,7 +40,7 @@ describe('POST /identity/users', () => {
            .expect(422, {
              result: {
                code: 20001,
-               message: 'Missing argument: username',
+               message: 'Missing argument: id',
                status: 422,
              },
            })
@@ -49,7 +49,7 @@ describe('POST /identity/users', () => {
 
     it('successfully creates users and check display name', (done) => {
       const userInfo = {
-        username: 'marcof@abc.com',
+        id: 'marcof@abc.com',
         name: {
           familyName: 'F',
           givenName: 'Marco',
@@ -60,13 +60,13 @@ describe('POST /identity/users', () => {
            .send(userInfo)
            .expect(201)
            .end((err, res) => {
-             const expectedHeader = `/identity/users/${userInfo.username}`;
+             const expectedHeader = `/identity/users/${userInfo.id}`;
              expect(res.header).to.have.property('location');
              expect(res.header.location).to.include(expectedHeader);
 
              // also ensure the model has such record
-             User.findOne({ username: userInfo.username }).then((user) => {
-               expect(user.userName).to.equal(userInfo.userName);
+             User.findOne({ _id: userInfo.id }).then((user) => {
+               expect(user.id).to.equal(userInfo.id);
                expect(user.displayName).to
                  .equal(`${userInfo.name.givenName} ${userInfo.name.familyName}`);
              })
@@ -77,7 +77,7 @@ describe('POST /identity/users', () => {
     it('successfully creates user with all attribute', (done) => {
       const userInfo = {
         isRoot: true,
-        username: 'user@test.abc',
+        id: 'user@test.abc',
         name: {
           formatted: 'Johnny M. Richmond',
           familyName: 'Richmond',
@@ -133,11 +133,11 @@ describe('POST /identity/users', () => {
            .send(userInfo)
            .expect(201)
            .end((err, res) => {
-             const expectedHeader = `/identity/users/${userInfo.username}`;
+             const expectedHeader = `/identity/users/${userInfo.id}`;
              expect(res.header).to.have.property('location');
              expect(res.header.location).to.include(expectedHeader);
-             User.findOne({ username: userInfo.username }).then((user) => {
-               const localUser = user.toObject();
+             User.findOne({ _id: userInfo.id }).then((user) => {
+               const localUser = user.toJSON();
                // ensure the value are stored in the mongo
                Object.keys(userInfo).forEach(key =>
                   expect(localUser[key]).to.deep.equal(userInfo[key])
@@ -149,7 +149,7 @@ describe('POST /identity/users', () => {
 
     it('successfully creates user with encrpted password stored', (done) => {
       const userInfo = {
-        username: 'companyB',
+        id: 'companyB',
         password: '123456',
       };
       agent.post('/identity/users')
@@ -157,7 +157,7 @@ describe('POST /identity/users', () => {
            .send(userInfo)
            .expect(201)
            .end(() => {
-             User.findOne({ username: userInfo.username }).then((user) => {
+             User.findOne({ _id: userInfo.id }).then((user) => {
                expect(user.salt).not.to.equal(undefined);
                expect(user.hashedPassword).not.to.equal(undefined);
                expect(bcrypt.compareSync(userInfo.password, user.hashedPassword)).to.equal(true);
@@ -169,7 +169,7 @@ describe('POST /identity/users', () => {
 
     it('unsuccessfully creates user with invalid data format', (done) => {
       const userInfo = {
-        username: 'testUser@abc.com',
+        id: 'testUser@abc.com',
         address: 'Hong Kong',
       };
       agent.post('/identity/users')

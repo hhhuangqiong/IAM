@@ -42,9 +42,9 @@ export const router = new Router();
   * @apiSuccess (Company) {Date} updatedAt the time being updated
   * @apiSuccess (Company) {Date} createdAt the time being created
   * @apiSuccess (Company) {Object} updatedBy the user who last update
-  * @apiSuccess (Company) {String} updatedBy.username the username of person who last update
+  * @apiSuccess (Company) {String} updatedBy.id the id of person who last update
   * @apiSuccess (Company) {Object} createdBy the user who create
-  * @apiSuccess (Company) {String} createdBy.username the username of person who create
+  * @apiSuccess (Company) {String} createdBy.id the id of person who create
   * @apiSuccess (Company) {String} id Company unique id
   * @apiSuccess (Company) {String} country country
   * @apiSuccess (Company) {String} logo the logo url
@@ -190,16 +190,9 @@ router.post('/companies', company.validateRequired, companyValidateData, company
  * @apiName GetCompanies
  * @apiGroup company
  * @apiDescription get the companies
- * @apiParam {String} [id] filter by id
- * @apiParam {String} [country] filter by country
- * @apiParam {Boolean} [reseller] filter by reseller
- * @apiParam {String} [themeType] filter by themeType
- * @apiParam {String} [name] filter by name
- * @apiParam {String} [timezone] filter by timezone
  * @apiParam {Number} [size=20] the page size
  * @apiParam {Number} [page=0] the page number
- * @apiParam {String="id","country","reseller","updatedBy","updatedAt",
- * "createdAt","createdBy","timezone","themeType","name"} [sortBy=id] sort by field
+ * @apiParam {String="id", "createdAt","updatedAt"} [sortBy=id] sort by field
  * @apiParam {String="asc","desc","ascending","descending","1","-1"} [sortOrder=asc] sort by order
  * @apiSuccess {Number} total the total number
  * @apiSuccess {Number} page_size the number of result per page
@@ -218,10 +211,10 @@ router.post('/companies', company.validateRequired, companyValidateData, company
  *              "updatedAt": "2016-07-17T12:44:46.194Z",
  *              "createdAt": "2016-07-16T17:28:27.222Z",
  *              "createdBy": {
- *                "username": "thomas1lee@maaii.com"
+ *                "id": "thomas1lee@maaii.com"
  *              },
  *              "updatedBy": {
- *                "username": "thomas1lee@maaii.com"
+ *                "id": "thomas1lee@maaii.com"
  *              },
  *              "logo": "http://localhost:3000/identity/companies/logo/578b235999de20be8cf68b26",
  *              "id": "companyTest",
@@ -270,10 +263,10 @@ router.get('/companies', companyUpdateParam, company.getAll);
  *       "updatedAt": "2016-07-17T12:44:46.194Z",
  *       "createdAt": "2016-07-16T17:28:27.222Z",
  *       "createdBy": {
- *         "username": "thomas1lee@maaii.com"
+ *         "id": "thomas1lee@maaii.com"
  *       },
  *       "updatedBy": {
- *         "username": "thomas1lee@maaii.com"
+ *         "id": "thomas1lee@maaii.com"
  *       },
  *       "logo": "http://localhost:3000/identity/companies/logo/578b235999de20be8cf68b26",
  *       "id": "companyTest",
@@ -490,7 +483,7 @@ router.put('/companies/:id', company.validateRequired, companyValidateData, comp
 
 /**
  * @apiDefine userInputParam
- * @apiParam {String} username User unique username
+ * @apiParam {String} id User unique id
  * @apiParam {Boolean} [isRoot=false] Root user or not
  * @apiParam {Object} [name] name  object
  * @apiParam {String} [name.formatted] formatted name
@@ -558,10 +551,10 @@ router.put('/companies/:id', company.validateRequired, companyValidateData, comp
   * @apiSuccess (User) {Date} updatedAt the time being updated
   * @apiSuccess (User) {Date} createdAt the time being created
   * @apiSuccess (User) {Object} updatedBy the user who last update
-  * @apiSuccess (User) {String} updatedBy.username the username of person who last update
+  * @apiSuccess (User) {String} updatedBy.id the id of person who last update
   * @apiSuccess (User) {Object} createdBy the user who create
-  * @apiSuccess (User) {String} createdBy.username the username of person who create
-  * @apiSuccess (User)  username User unique username
+  * @apiSuccess (User) {String} createdBy.id the id of person who create
+  * @apiSuccess (User)  id User unique id
   * @apiSuccess (User) {Boolean} [isRoot=false] Root user or not
   * @apiSuccess (User) {Object} [name] name  object
   * @apiSuccess (User) {String} [name.formatted] formatted name
@@ -631,14 +624,14 @@ router.put('/companies/:id', company.validateRequired, companyValidateData, comp
   * @apiDescription create a new user
   * @apiHeader {String} Content-Type application/json
   * @apiUse userInputParam
-  * @apiSuccess (Success 201) {String} username the username
+  * @apiSuccess (Success 201) {String} id the id
   * @apiUse errorObject
   * @apiHeaderExample {json} Header-Example:
   * { "Content-Type": "application/json" }
   * @apiParamExample {json} Request-Example:
   *   {
   *      "isRoot":true,
-  *      "username":"user@test.abc",
+  *      "id":"user@test.abc",
   *       "name":{
   *         "formatted":"Johnny M. Richmond",
   *         "familyName":"Richmond",
@@ -693,7 +686,7 @@ router.put('/companies/:id', company.validateRequired, companyValidateData, comp
   *     Location: /identity/users/user@test.abc
   *     HTTP/1.1 201 Created
   *     {
-  *       "username": "user@test.abc"
+  *       "id": "user@test.abc"
   *     }
   * @apiErrorExample Conflict Keys Error-Response:
   *     HTTP/1.1 409 Conflict
@@ -710,7 +703,7 @@ router.put('/companies/:id', company.validateRequired, companyValidateData, comp
   *       "result": {
   *          "code": 20001,
   *          "status": 422,
-  *          "message": "Missing argument: username "
+  *          "message": "Missing argument: id "
   *        }
   *     }
   * @apiErrorExample Invalid data  Error-Response:
@@ -730,11 +723,10 @@ router.post('/users', user.validateRequired, userValidateData, user.create);
  * @apiName GetUsers
  * @apiGroup user
  * @apiDescription get the users
- * @apiParam {String} [username] filter by id
+ * @apiParam {String} [id] filter by id
  * @apiParam {Number} [size=20] the page size
  * @apiParam {Number} [page=0] the page number
- * @apiParam {String="username","updatedBy","updatedAt",
- * "createdAt","createdBy"} [sortBy=username] sort by field
+ * @apiParam {String="id", "updatedAt", "createdAt"} [sortBy=id] sort by field
  * @apiParam {String="asc","desc","ascending","descending","1","-1"} [sortOrder=asc] sort by order
  * @apiSuccess {Number} total the total number
  * @apiSuccess {Number} page_size the number of result per page
@@ -752,7 +744,7 @@ router.post('/users', user.validateRequired, userValidateData, user.create);
  *            "_id": "578fd41e59aa0a4fad48913c",
  *            "createdAt": "2016-07-20T19:42:22.398Z",
  *            "updatedAt": "2016-07-20T19:42:22.398Z",
- *            "username": "user@test.abc1",
+ *            "id": "user@test.abc1",
  *            "nickName": "Johnny R",
  *            "profileUrl": "http://abd.com",
  *            "title": "FBI",
@@ -809,11 +801,11 @@ router.post('/users', user.validateRequired, userValidateData, user.create);
 router.get('/users', userUpdateParam, user.getAll);
 
 /**
- * @api {get} /identity/users/:username Get user
+ * @api {get} /identity/users/:id Get user
  * @apiName GetUser
  * @apiGroup user
  * @apiDescription get the user
- * @apiParam {String} username filter by username
+ * @apiParam {String} id filter by id
  * @apiUse userData
  * @apiUse errorObject
  * @apiSuccessExample {json} Success-Response:
@@ -822,7 +814,7 @@ router.get('/users', userUpdateParam, user.getAll);
  *        "_id": "578fd41e59aa0a4fad48913c",
  *        "createdAt": "2016-07-20T19:42:22.398Z",
  *        "updatedAt": "2016-07-20T19:42:22.398Z",
- *        "username": "user@test.abc1",
+ *        "id": "user@test.abc1",
  *        "nickName": "Johnny R",
  *        "profileUrl": "http://abd.com",
  *        "title": "FBI",
@@ -875,14 +867,14 @@ router.get('/users', userUpdateParam, user.getAll);
  *        "displayName": "Johnny Richmond"
  *      }
  */
-router.get('/users/:username', user.validateRequired, user.get);
+router.get('/users/:id', user.validateRequired, user.get);
 
 /**
- * @api {delete} /identity/users/:username Delete user
+ * @api {delete} /identity/users/:id Delete user
  * @apiName DeleteUser
  * @apiGroup user
  * @apiDescription delete the user
- * @apiParam {String} username the target username
+ * @apiParam {String} id the target id
  * @apiUse errorObject
  * @apiSuccessExample {json} Success-Response:
  *     HTTP/1.1 204 No Content
@@ -892,19 +884,19 @@ router.get('/users/:username', user.validateRequired, user.get);
  *       "result": {
  *          "code": 20001,
  *          "status": 404,
- *          "message": "Invalid or missing argument supplied: user username notExist@sample.org is not found'"
+ *          "message": "Invalid or missing argument supplied: user id notExist@sample.org is not found'"
  *        }
  *     }
  */
-router.delete('/users/:username', user.remove);
+router.delete('/users/:id', user.remove);
 
 /**
- * @api {patch} /identity/users/:username
+ * @api {patch} /identity/users/:id
  * @apiName PatchCompany
  * @apiGroup company
  * @apiDescription update the user, it will only update the data.
  * If the company doesn't exist, it will create a new company.
- * @apiParam {String} username the target user
+ * @apiParam {String} id the target user
  * @apiHeader {String} Content-Type application/json
  * @apiHeaderExample {json} Header-Example:
  * { "Content-Type": "application/json" }
@@ -916,7 +908,7 @@ router.delete('/users/:username', user.remove);
  *     Location: /identity/users/newUser
  *     HTTP/1.1 201 Created
  *     {
- *       "username": "newUser"
+ *       "id": "newUser"
  *     }
  * @apiUse errorObject
  * @apiErrorExample Error-Response:
@@ -957,16 +949,16 @@ router.delete('/users/:username', user.remove);
  *        }
  *     }
  */
-router.patch('/users/:username', validatePatchFormat, user.patch);
+router.patch('/users/:id', validatePatchFormat, user.patch);
 
 /**
- * @api {put} /identity/users/:username Put user
+ * @api {put} /identity/users/:id Put user
  * @apiName PutUser
  * @apiGroup user
  * @apiDescription replace the user, it will replace all the data.
  * If the param doesn't exist, it will remove the existing data.
  * If the company doesn't exist, it will create a new company.
- * @apiParam {String} username the target user
+ * @apiParam {String} id the target user
  * @apiHeader {String} Content-Type application/json
  * @apiHeaderExample {json} Header-Example:
  * { "Content-Type": "application/json" }
@@ -975,10 +967,10 @@ router.patch('/users/:username', validatePatchFormat, user.patch);
  *     HTTP/1.1 204 No Content
  * @apiSuccessExample {json} New created Success-Response:
  *     // Header: access link to the company entity
- *     Location: /identity/users/newUsername
+ *     Location: /identity/users/newId
  *     HTTP/1.1 201 Created
  *     {
- *       "username": "newUsername"
+ *       "id": "newId"
  *     }
  * @apiUse errorObject
  * @apiErrorExample Error-Response:
@@ -991,4 +983,4 @@ router.patch('/users/:username', validatePatchFormat, user.patch);
  *        }
  *     }
  */
-router.put('/users/:username', user.validateRequired, userValidateData, user.replace);
+router.put('/users/:id', user.validateRequired, userValidateData, user.replace);

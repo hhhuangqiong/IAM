@@ -57,7 +57,7 @@ describe('DELETE /identity/companies/:id', () => {
            .expect(204)
            .end(() => {
              // check the mongo and expect no more record
-             Company.findOne({ id }).then((company) => {
+             Company.findOne({ _id: id }).then((company) => {
                expect(company).to.equal(null);
                done();
              });

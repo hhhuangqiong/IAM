@@ -11,12 +11,12 @@ const userController = new UserController();
 /**
  * get the user url to access the user data
  * @method getUserUrl
- * @param {String} username the username
+ * @param {String} id the id
  * @param {Object} req the express request object
  * @returns {String} the url
  */
-function getUserUrl(username, req) {
-  return `${req.protocol}://${req.get('host')}/identity/users/${username}`;
+function getUserUrl(id, req) {
+  return `${req.protocol}://${req.get('host')}/identity/users/${id}`;
 }
 
 /**
@@ -34,8 +34,8 @@ function updateOrInsert(user, req, res) {
   }
   // create new company
   res.status(201)
-     .set('Location', getUserUrl(user.username, req))
-     .json({ username: user.username });
+     .set('Location', getUserUrl(user.id, req))
+     .json({ id: user.id });
 }
 
 /**
@@ -76,7 +76,7 @@ export function getAll(req, res) {
  * @param {Object} res the express response object
  */
 export function get(req, res) {
-  userController.get(req.params.username)
+  userController.get(req.params.id)
     .then((user) => res.status(200).json(user))
     .catch(err => expressError(err, req, res))
     .done();
@@ -92,8 +92,8 @@ export function create(req, res) {
   userController.create(req.locals.input.data, req.locals.input.user)
     .then((user) => {
       res.status(201)
-         .set('Location', getUserUrl(user.username, req))
-         .json({ username: user.username });
+         .set('Location', getUserUrl(user.id, req))
+         .json({ id: user.id });
     })
     .catch(err => expressError(err, req, res))
     .done();
@@ -105,12 +105,12 @@ export function create(req, res) {
  * @param {Object} req the express request object
  * @param {Object} res the express response object
  * @param {Object} next the express next object
- * @throws {ArgumentNullError} Missing username
+ * @throws {ArgumentNullError} Missing id
  */
 export function validateRequired(req, res, next) {
-  // missing username which is username
-  if (isUndefined(req.body.username) && isUndefined(req.params.username)) {
-    expressError(new ArgumentNullError('username'), req, res);
+  // missing id which is id
+  if (isUndefined(req.body.id) && isUndefined(req.params.id)) {
+    expressError(new ArgumentNullError('id'), req, res);
     return;
   }
   next();
@@ -123,7 +123,7 @@ export function validateRequired(req, res, next) {
  * @param {Object} res the express response object
  */
 export function patch(req, res) {
-  userController.patch(req.params.username, req.body, req.user)
+  userController.patch(req.params.id, req.body, req.user)
     .then((user) => updateOrInsert(user, req, res))
     .catch(err => expressError(err, req, res))
     .done();
@@ -137,8 +137,8 @@ export function patch(req, res) {
  */
 export function replace(req, res) {
   const param = req.locals.input.data;
-  param.username = req.params.username;
-  userController.replace(req.params.username, param, req.locals.input.user)
+  param.id = req.params.id;
+  userController.replace(req.params.id, param, req.locals.input.user)
     .then((user) => updateOrInsert(user, req, res))
     .catch(err => expressError(err, req, res))
     .done();
@@ -151,7 +151,7 @@ export function replace(req, res) {
  * @param {Object} res the express response object
  */
 export function remove(req, res) {
-  userController.remove(req.params.username)
+  userController.remove(req.params.id)
     .then(() => res.status(204).end())
     .catch(err => expressError(err, req, res))
     .done();

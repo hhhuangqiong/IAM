@@ -22,28 +22,28 @@ const removeDisplayAttribte = '-__v -hashedPassword -salt -tokens';
  * @returns {Object} the updated query
  */
 function doPopulateData(query) {
-  return query.populate('affiliatedCompany.company', 'id -_id')
-         .populate('assignedCompanies.company', 'id -_id')
-         .populate('createdBy', 'username -_id')
-         .populate('updatedBy', 'username -_id');
+  return query.populate('affiliatedCompany', 'id')
+         .populate('assignedCompanies', 'id')
+         .populate('createdBy', 'id')
+         .populate('updatedBy', 'id');
 }
 
 /**
  * To get the user
  * @method getUser
- * @param {String} username the username
+ * @param {String} id the id
  * @param {Object} option the query option
  * @param {Boolean} populate the ref data
  * @returns {Promise<Object>} the user object
  */
-function getUser(username, option, populateData) {
-  const query = User.findOne({ username }, option);
+function getUser(id, option, populateData) {
+  const query = User.findOne({ _id: id }, option);
   if (populateData) {
     doPopulateData(query);
   }
   return query.then(user => {
     if (!user) {
-      throw new ArgumentError(`user username ${username} is not found`);
+      throw new ArgumentError(`user id ${id} is not found`);
     }
     return user;
   });
@@ -79,43 +79,17 @@ function updateFilter(filter) {
  * @method updateParam
  * @param {Object} param the current parameter
  * @param {String} userId the user who perform the action
- * @returns {Promise<Object>} the updated user object
+ * @returns {Object} the updated user object
  */
 function updateParam(param, userId) {
   const mParam = param;
-  const promiseArray = [];
-  const updatedAssignmentCompanies = [];
 
   // userId
   if (userId) {
     mParam.updatedBy = userId;
   }
-  // find company id
-  if (param.affiliatedCompany && param.affiliatedCompany.company) {
-    promiseArray.push(
-      CompanyController.getObjectId(param.affiliatedCompany.company)
-        .then(companyObjectId => {
-          mParam.affiliatedCompany.company = companyObjectId;
-        })
-    );
-  }
 
-  if (param.assignedCompanies && param.assignedCompanies.length > 0) {
-    param.assignedCompanies.forEach((item) => {
-      promiseArray.push(CompanyController.getObjectId(item.company)
-        .then(companyObjectId => {
-          updatedAssignmentCompanies.push({
-            company: companyObjectId,
-            department: item.department,
-          });
-        }));
-    });
-  }
-
-  return Q.all(promiseArray).then(() => {
-    mParam.assignedCompanies = updatedAssignmentCompanies;
-    return mParam;
-  });
+  return mParam;
 }
 
 /**
@@ -183,17 +157,17 @@ export default class UserController {
    * @returns {Promise<User>} when successfully create a user
    */
   create(param, userId) {
-    return updateParam(param, userId).then(createUser);
+    return createUser(updateParam(param, userId));
   }
 
   /**
    * remove a user
    * @method remove
-   * @param {String} username
+   * @param {String} id
    * @returns {Promise<>} when succeed to remove a user
    */
-  remove(username) {
-    return getUser(username).then(user => user.remove());
+  remove(id) {
+    return getUser(id).then(user => user.remove());
   }
 
   /**
@@ -207,12 +181,20 @@ export default class UserController {
    * @returns {Promise<User>} the users
    */
   getAll(filter, { pageNo, pageSize }, sort) {
+    let updatedSort = {};
+    // convert back the id to _id
+    if (hasOwnProperty.call(sort, 'id')) {
+      /* eslint no-underscore-dangle: ["error", { "allow": [ "_id"] }]*/
+      updatedSort._id = sort.id;
+    } else {
+      updatedSort = sort;
+    }
     return updateFilter(filter)
       .then(myFilter => {
         const query = User.find(myFilter, removeDisplayAttribte)
           .skip(pageNo * pageSize)
           .limit(pageSize)
-          .sort(sort);
+          .sort(updatedSort);
         return doPopulateData(query);
       }).catch(mongooseError);
   }
@@ -231,53 +213,50 @@ export default class UserController {
   /**
    * get the user data
    * @method get
-   * @param {String} username
+   * @param {String} id
    * @returns {Promise<Object>} the user object
    */
-  get(username) {
-    return getUser(username, removeDisplayAttribte, true);
+  get(id) {
+    return getUser(id, removeDisplayAttribte, true);
   }
 
   /**
    * patch the user data
    * @method patch
-   * @param {String} username
+   * @param {String} id
    * @param {Object[]} patches the json patch array
    * @param {String} userId the user id who perform patch
    * @returns {Promise<Object>} the user object when create a new user
    * @returns {Promise<>} replace the existing user
    */
-  patch(username, patches, userId) {
-    return getUser(username, removeDisplayAttribte)
+  patch(id, patches, userId) {
+    return getUser(id, removeDisplayAttribte)
       .then(user => {
         // filter the user, so it will remain the possible value to be set
         const expectedUser = toSchemaFormat(user.toJSON());
+        const updatedParam = applyPatch(expectedUser, patches, userId);
+        // apply the changes and update the values
+        /* eslint no-param-reassign: ["error", { "props": false }]*/
+        Object.keys(updatedParam).forEach(item => {
+          // can't change the id and ignore update password if it is empty
+          if (item === 'id' || item === 'password' && !updatedParam[item]) {
+            return;
+          }
+          user[item] = updatedParam[item];
+        });
 
-        return applyPatch(expectedUser, patches, userId)
-          .then(updatedParam => {
-            // apply the changes and update the values
-            /* eslint no-param-reassign: ["error", { "props": false }]*/
-            Object.keys(updatedParam).forEach(item => {
-              // can't change the username and ignore update password if it is empty
-              if (item === 'username' || item === 'password' && !updatedParam[item]) {
-                return;
-              }
-              user[item] = updatedParam[item];
-            });
-
-            // expect to return null to indicate it is updated instead of create
-            return user.save()
-              .then(() => null);
-          });
+        // expect to return null to indicate it is updated instead of create
+        return user.save()
+          .then(() => null);
       })
       .catch((err) => {
         // not found and create a new record
         if (err && err.name === ArgumentError.name) {
-          // default will have a username
-          return applyPatch({
-            username,
-          }, patches, userId)
-            .then(createUser);
+          // default will have a id
+          const updatedParam = applyPatch({
+            id,
+          }, patches, userId);
+          return createUser(updatedParam);
         }
         throw err;
       });
@@ -286,36 +265,34 @@ export default class UserController {
   /**
    * replace the user data
    * @method replace
-   * @param {String} username
+   * @param {String} id
    * @param {Object} param the data parameter
    * @param {String} userId the user id who perform replace
    * @returns {Promise<Object>} the user object when create a new user
    * @returns {Promise<>} replace the existing user
    */
-  replace(username, param, userId) {
-    return updateParam(param, userId)
-      .then((updatedParam) =>
-        getUser(username)
-          .then((user) => {
-            // replace the previous the record and create again
-            const { createdBy, createdAt } = user;
-            return this.remove(username)
-              .then(() => {
-                // need to update back the original data
-                const newUser = new User(updatedParam);
-                newUser.createdBy = createdBy;
-                newUser.createdAt = createdAt;
-                return newUser.save()
-                // return null to indicate it is updated
-                .then(() => null);
-              });
-          })
-          .catch((err) => {
-            if (err && err.name === ArgumentError.name) {
-              return createUser(updatedParam);
-            }
-            throw err;
-          })
-      );
+  replace(id, param, userId) {
+    const updatedParam = updateParam(param, userId);
+    return getUser(id)
+      .then((user) => {
+        // replace the previous the record and create again
+        const { createdBy, createdAt } = user;
+        return this.remove(id)
+          .then(() => {
+            // need to update back the original data
+            const newUser = new User(updatedParam);
+            newUser.createdBy = createdBy;
+            newUser.createdAt = createdAt;
+            return newUser.save()
+            // return null to indicate it is updated
+            .then(() => null);
+          });
+      })
+      .catch((err) => {
+        if (err && err.name === ArgumentError.name) {
+          return createUser(updatedParam);
+        }
+        throw err;
+      });
   }
 }

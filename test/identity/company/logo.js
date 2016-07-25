@@ -53,7 +53,7 @@ describe('perform logo action', () => {
           expect(res.header).to.have.property('location');
           expect(res.body).to.have.property('id');
           expect(res.header.location).to.include(res.body.id);
-          Company.findOne({ id: companyInfo.id }).then((company) => {
+          Company.findOne({ _id: companyInfo.id }).then((company) => {
             expect(company).to.have.property('logo');
             expect(company.logo.toString()).to.equal(res.body.id);
           }).then(() => {
@@ -182,7 +182,7 @@ describe('perform logo action', () => {
         .expect(204)
         .end(() => {
           // expect the Company info logo link is removed
-          Company.findOne({ id: companyInfo.id })
+          Company.findOne({ _id: companyInfo.id })
             .then((myCompany) => {
               expect(myCompany.logo).to.equal(undefined);
               done();

@@ -1,7 +1,6 @@
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
 import jsonpatch from 'fast-json-patch';
-import bcrypt from 'bcrypt';
 
 import getAgent from '../../getAgent';
 import Company from '../../../src/collections/company';
@@ -110,8 +109,8 @@ describe('PATCH /identity/companies', () => {
              const expectedHeader = `/identity/companies/${newId}`;
              expect(res.header).to.have.property('location');
              expect(res.header.location).to.include(expectedHeader);
-             Company.findOne({ id: newId }).then((company) => {
-               const localCompany = company.toObject();
+             Company.findOne({ _id: newId }).then((company) => {
+               const localCompany = company.toJSON();
                expect(localCompany.country).to.equal(patches[0].value);
                expect(localCompany.address).to.deep.equal(patches[1].value);
              })
@@ -133,8 +132,8 @@ describe('PATCH /identity/companies', () => {
            .send(patches)
            .expect(204)
            .end(() => {
-             Company.findOne({ id: companyInfo.id }).then((company) => {
-               const localCompany = company.toObject();
+             Company.findOne({ _id: companyInfo.id }).then((company) => {
+               const localCompany = company.toJSON();
                expect(localCompany.timezone).to.equal(companyInfo.timezone);
                expect(localCompany.technicalContact).to.deep.equal(companyInfo.technicalContact);
              })

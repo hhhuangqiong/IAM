@@ -35,7 +35,7 @@ describe('GET /identity/users', () => {
       let count = 0;
       while (count < 45) {
         userArray.push({
-          username: `user${count}`,
+          id: `user${count}`,
           isRoot: count === 0,
           name: {
             familyName: 'bigFamily',
@@ -75,7 +75,7 @@ describe('GET /identity/users', () => {
         count++;
       }
       // auto sort the data first
-      userArray = sortBy(userArray, ['username']);
+      userArray = sortBy(userArray, ['id']);
       User.create(userArray, () => {
         // manually update the displayName, so that it is easier for checking
         userArray.forEach((item, index) => {
@@ -187,9 +187,9 @@ describe('GET /identity/users', () => {
     });
 
     it('successfully gets all the users using sort', (done) => {
-      const sortByUserName = 'username';
+      const sortById = 'id';
       const sortOrder = 'desc';
-      agent.get(`/identity/users?sortBy=${sortByUserName}&sortOrder=${sortOrder}`)
+      agent.get(`/identity/users?sortBy=${sortById}&sortOrder=${sortOrder}`)
            .expect('Content-Type', /json/)
            .expect(200)
            .end((err, res) => {
@@ -207,7 +207,7 @@ describe('GET /identity/users', () => {
 
     it('successfully get the exact user data', (done) => {
       const targetUser = userArray[0];
-      agent.get(`/identity/users/${targetUser.username}`)
+      agent.get(`/identity/users/${targetUser.id}`)
            .expect('Content-Type', /json/)
            .expect(200)
            .end((err, res) => {
@@ -224,7 +224,7 @@ describe('GET /identity/users', () => {
                status: 404,
                code: 20001,
                message: 'Invalid or missing argument supplied: user ' +
-                 'username nonExistingUser is not found',
+                 'id nonExistingUser is not found',
              },
            })
            .end(done);

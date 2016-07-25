@@ -3,10 +3,13 @@
   "title":"User",
   "type":"object",
   "properties":{
+    "userId":{
+      "type":"string"
+    },
     "isRoot":{
       "type":"boolean"
     },
-    "username":{
+    "id":{
       "type":"string"
     },
     "password":{
@@ -204,28 +207,12 @@
       "type":"string"
     },
     "affiliatedCompany":{
-      "type":"object",
-      "properties":{
-        "company":{
-          "type":"string"
-        },
-        "department":{
-          "type":"string"
-        }
-      }
+      "type":"string"
     },
     "assignedCompanies":{
       "type":"array",
       "items":{
-        "type":"object",
-        "properties":{
-          "company":{
-            "type":"string"
-          },
-          "department":{
-            "type":"string"
-          }
-        }
+        "type":"string"
       }
     }
   }

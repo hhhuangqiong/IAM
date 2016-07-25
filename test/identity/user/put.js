@@ -4,7 +4,7 @@ import { expect } from 'chai';
 import getAgent from '../../getAgent';
 import User from '../../../src/collections/user';
 
-describe('PUT /identity/users/:username', () => {
+describe('PUT /identity/users/:id', () => {
   let agent;
   before((done) => {
     getAgent().then(mAgent => {
@@ -15,7 +15,7 @@ describe('PUT /identity/users/:username', () => {
 
   describe('replace the data', () => {
     const userInfo = {
-      username: 'abc@gmail.com',
+      id: 'abc@gmail.com',
       timezone: 'UTC+8',
       name: {
         familyName: 'family',
@@ -36,12 +36,12 @@ describe('PUT /identity/users/:username', () => {
           type: 'home',
         }],
       };
-      agent.put(`/identity/users/${userInfo.username}`)
+      agent.put(`/identity/users/${userInfo.id}`)
         .set('Content-Type', 'application/json')
         .send(newUserInfo)
         .expect(204)
         .end(() => {
-          User.findOne({ username: userInfo.username }).then((user) => {
+          User.findOne({ _id: userInfo.id }).then((user) => {
             const localUser = user.toJSON();
             expect(localUser.timezone).to.equal(newUserInfo.timezone);
             expect(localUser.emails[0]).to.deep.equal(newUserInfo.emails[0]);
@@ -51,7 +51,7 @@ describe('PUT /identity/users/:username', () => {
     });
 
     it('put successfully and create the data with new id', (done) => {
-      const username = 'newNonExistingId';
+      const id = 'newNonExistingId';
       const newUserInfo = {
         title: 'USA',
         gender: 'female',
@@ -60,17 +60,17 @@ describe('PUT /identity/users/:username', () => {
           type: 'urgent',
         }],
       };
-      agent.put(`/identity/users/${username}`)
+      agent.put(`/identity/users/${id}`)
         .set('Content-Type', 'application/json')
         .send(newUserInfo)
         .expect(201, {
-          username,
+          id,
         })
         .end((err, res) => {
-          const expectedHeader = `/identity/users/${username}`;
+          const expectedHeader = `/identity/users/${id}`;
           expect(res.header).to.have.property('location');
           expect(res.header.location).to.include(expectedHeader);
-          User.findOne({ username }).then((user) => {
+          User.findOne({ _id: id }).then((user) => {
             const localUser = user.toJSON();
             expect(localUser.title).to.equal(newUserInfo.title);
             expect(localUser.gender).to.equal(newUserInfo.gender);

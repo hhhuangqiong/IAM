@@ -18,7 +18,7 @@ describe('PATCH /identity/users', () => {
   describe('patch existing user', () => {
     const userInfo = {
       isRoot: true,
-      username: 'user@test.abc',
+      id: 'user@test.abc',
       name: {
         formatted: 'Johnny M. Richmond',
         familyName: 'Richmond',
@@ -80,7 +80,7 @@ describe('PATCH /identity/users', () => {
       const wrongFormat = {
         wrong: 'format',
       };
-      agent.patch(`/identity/users/${userInfo.username}`)
+      agent.patch(`/identity/users/${userInfo.id}`)
            .set('Content-Type', 'application/json')
            .send(wrongFormat)
            .expect(422, {
@@ -93,7 +93,7 @@ describe('PATCH /identity/users', () => {
            .end(done);
     });
 
-    it('patches with a new username and create user with wrong operation', (done) => {
+    it('patches with a new id and create user with wrong operation', (done) => {
       const patches = [{
         op: 'replace',
         path: '/password',
@@ -113,7 +113,7 @@ describe('PATCH /identity/users', () => {
            .end(done);
     });
 
-    it('patches with a new username and create user with right operation', (done) => {
+    it('patches with a new id and create user with right operation', (done) => {
       const newName = 'notExistedUsername123';
       const patches = [{
         op: 'add',
@@ -134,7 +134,7 @@ describe('PATCH /identity/users', () => {
              const expectedHeader = `/identity/users/${newName}`;
              expect(res.header).to.have.property('location');
              expect(res.header.location).to.include(expectedHeader);
-             User.findOne({ username: newName }).then((user) => {
+             User.findOne({ _id: newName }).then((user) => {
                const localUser = user.toObject();
                expect(localUser.name.familyName).to.equal(patches[1].value.familyName);
                expect(bcrypt.compareSync(patches[0].value, user.hashedPassword)).to.equal(true);
@@ -143,16 +143,16 @@ describe('PATCH /identity/users', () => {
            });
     });
 
-    it('patches with existing username and perform operation without changing password', (done) => {
+    it('patches with existing id and perform operation without changing password', (done) => {
       const observer = jsonpatch.observe(userInfo);
       userInfo.active = false;
       const patches = jsonpatch.generate(observer);
-      agent.patch(`/identity/users/${userInfo.username}`)
+      agent.patch(`/identity/users/${userInfo.id}`)
            .set('Content-Type', 'application/json')
            .send(patches)
            .expect(204)
            .end(() => {
-             User.findOne({ username: userInfo.username }).then((user) => {
+             User.findOne({ _id: userInfo.id }).then((user) => {
                const localUser = user.toObject();
                expect(localUser.active).to.equal(userInfo.active);
                expect(bcrypt.compareSync(userInfo.password, user.hashedPassword)).to.equal(true);
@@ -161,7 +161,7 @@ describe('PATCH /identity/users', () => {
            });
     });
 
-    it('patches with a existing username and perform right operation', (done) => {
+    it('patches with a existing id and perform right operation', (done) => {
       const observer = jsonpatch.observe(userInfo);
       userInfo.password = 'thomas';
       userInfo.name.familyName = 'May';
@@ -171,12 +171,12 @@ describe('PATCH /identity/users', () => {
         value: 'home@abc.com',
       });
       const patches = jsonpatch.generate(observer);
-      agent.patch(`/identity/users/${userInfo.username}`)
+      agent.patch(`/identity/users/${userInfo.id}`)
            .set('Content-Type', 'application/json')
            .send(patches)
            .expect(204)
            .end(() => {
-             User.findOne({ username: userInfo.username }).then((user) => {
+             User.findOne({ _id: userInfo.id }).then((user) => {
                const localUser = user.toObject();
                expect(localUser.name.familyName).to.equal(userInfo.name.familyName);
                expect(bcrypt.compareSync(userInfo.password, user.hashedPassword)).to.equal(true);
@@ -187,13 +187,13 @@ describe('PATCH /identity/users', () => {
            });
     });
 
-    it('patches with a existing username and perform wrong operation', (done) => {
+    it('patches with a existing id and perform wrong operation', (done) => {
       const patches = [{
         op: '9add',
         path: '/pasjsword',
         value: 'th1omas',
       }];
-      agent.patch(`/identity/users/${userInfo.username}`)
+      agent.patch(`/identity/users/${userInfo.id}`)
            .set('Content-Type', 'application/json')
            .send(patches)
            .expect(422, {
@@ -207,13 +207,13 @@ describe('PATCH /identity/users', () => {
            .end(done);
     });
 
-    it('patches with a existing username and perform wrong format', (done) => {
+    it('patches with a existing id and perform wrong format', (done) => {
       const patches = [{
         op: 'replace',
         path: '/active',
         value: 'string',
       }];
-      agent.patch(`/identity/users/${userInfo.username}`)
+      agent.patch(`/identity/users/${userInfo.id}`)
            .set('Content-Type', 'application/json')
            .send(patches)
            .expect(422, {
@@ -226,13 +226,13 @@ describe('PATCH /identity/users', () => {
            .end(done);
     });
 
-    it('patches with a existing username and perform wrong schema', (done) => {
+    it('patches with a existing id and perform wrong schema', (done) => {
       const patches = [{
         op: 'add',
         path: '/nonExisting',
         value: 'dummy',
       }];
-      agent.patch(`/identity/users/${userInfo.username}`)
+      agent.patch(`/identity/users/${userInfo.id}`)
            .set('Content-Type', 'application/json')
            .send(patches)
            .expect(422, {

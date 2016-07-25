@@ -18,7 +18,7 @@ describe('DELETE /identity/users/:id', () => {
     before((done) => {
       const userInfo = {
         isRoot: true,
-        username: 'user@test.abc',
+        id: 'user@test.abc',
         name: {
           formatted: 'Johnny M. Richmond',
           familyName: 'Richmond',
@@ -34,12 +34,12 @@ describe('DELETE /identity/users/:id', () => {
     after((done) => User.remove({}, done));
 
     it('successfully deletes the user record', (done) => {
-      const username = 'user@test.abc';
-      agent.delete(`/identity/users/${username}`)
+      const id = 'user@test.abc';
+      agent.delete(`/identity/users/${id}`)
            .expect(204)
            .end(() => {
              // check the mongo and expect no more record
-             User.findOne({ username }).then((user) => {
+             User.findOne({ _id: id }).then((user) => {
                expect(user).to.equal(null);
                done();
              });
@@ -52,7 +52,7 @@ describe('DELETE /identity/users/:id', () => {
              result: {
                code: 20001,
                status: 404,
-               message: 'Invalid or missing argument supplied: user username notExist@sample.org is not found',
+               message: 'Invalid or missing argument supplied: user id notExist@sample.org is not found',
              },
            })
            .end(done);

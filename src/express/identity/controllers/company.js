@@ -1,5 +1,4 @@
 import { NotFoundError } from 'common-errors';
-import Q from 'q';
 import tv4 from 'tv4';
 import * as jsonpatch from 'fast-json-patch';
 import fs from 'fs';
@@ -19,7 +18,7 @@ import { mongooseError,
  * @returns {Object} the injected query
  */
 function doPopulateData(query) {
-  return query.populate('parent', 'id -_id')
+  return query.populate('parent')
          .populate('createdBy', 'username -_id')
          .populate('updatedBy', 'username -_id');
 }
@@ -33,7 +32,7 @@ function doPopulateData(query) {
  * @returns {Promise<Object>} the company object
  */
 function getCompany(id, option, populateData) {
-  const query = Company.findOne({ id }, option);
+  const query = Company.findOne({ _id: id }, option);
   if (populateData) {
     doPopulateData(query);
   }
@@ -43,17 +42,6 @@ function getCompany(id, option, populateData) {
     }
     return company;
   });
-}
-
-/**
- * Convert company id to mongo object id
- * @method convertIdToObjectId
- * @param {Object} param the current parameter
- * @returns {Promise<Object>} the updated user object
- */
-function convertIdToObjectId(id) {
-    /* eslint no-underscore-dangle: ["error", { "allow": ["company", "_id"] }]*/
-  return getCompany(id).then(company => company._id);
 }
 
 /**
@@ -74,22 +62,14 @@ function createCompany(param) {
  * @method updateParam
  * @param {Object} param the current parameter
  * @param {String} userId the user who perform the action
- * @returns {Promise<Object>} the updated company object
+ * @returns {Object} the updated company object
  */
 function updateParam(param, userId) {
   const mParam = param;
   if (userId) {
     mParam.updatedBy = userId;
   }
-  if (mParam.parent) {
-    // convert the parent id into mongo _id
-    return convertIdToObjectId(mParam.parent).then((id) => {
-      mParam.parent = id;
-      return mParam;
-    });
-  }
-
-  return Q.resolve(mParam);
+  return mParam;
 }
 
 /**
@@ -140,7 +120,7 @@ export default class CompanyController {
    * @returns {Promise<Object>} when successfully add the company and return company object
    */
   create(param, userId) {
-    return updateParam(param, userId).then(createCompany);
+    return createCompany(updateParam(param, userId));
   }
 
   /**
@@ -169,10 +149,18 @@ export default class CompanyController {
    * @returns {Promise<Object[]>} the array of user object
    */
   getAll(filter, { pageNo, pageSize }, sort) {
-    const query = Company.find(filter, '-_id -__v')
+    let updatedSort = {};
+    // convert back the id to _id
+    if (hasOwnProperty.call(sort, 'id')) {
+      /* eslint no-underscore-dangle: ["error", { "allow": [ "_id"] }]*/
+      updatedSort._id = sort.id;
+    } else {
+      updatedSort = sort;
+    }
+    const query = Company.find(filter)
       .skip(pageNo * pageSize)
       .limit(pageSize)
-      .sort(sort);
+      .sort(updatedSort);
     return doPopulateData(query);
   }
 
@@ -193,7 +181,7 @@ export default class CompanyController {
    * @returns {Promise<Object>} the company object
    */
   get(id) {
-    return getCompany(id, '-_id -__v', true);
+    return getCompany(id, null, true);
   }
 
   /**
@@ -267,32 +255,29 @@ export default class CompanyController {
       .then(company => {
         // filter the company, so it will remain the possible value to be set
         const expectedCompany = toSchemaFormat(company.toJSON());
+        const updatedParam = applyPatch(expectedCompany, patches, userId);
+        // apply the changes and update the values
+        /* eslint no-param-reassign: ["error", { "props": false }]*/
+        Object.keys(updatedParam).forEach(item => {
+          // can't change the id
+          if (item === 'id') {
+            return;
+          }
+          company[item] = updatedParam[item];
+        });
 
-        return applyPatch(expectedCompany, patches, userId)
-          .then(updatedParam => {
-            // apply the changes and update the values
-            /* eslint no-param-reassign: ["error", { "props": false }]*/
-            Object.keys(updatedParam).forEach(item => {
-              // can't change the id
-              if (item === 'id') {
-                return;
-              }
-              company[item] = updatedParam[item];
-            });
-
-            // expect to return null to indicate it is updated instead of create
-            return company.save()
-              .then(() => null);
-          });
+        // expect to return null to indicate it is updated instead of create
+        return company.save()
+          .then(() => null);
       })
       .catch((err) => {
         // not found and create a new record
         if (err && err.name === NotFoundError.name) {
-          // default will have a username
-          return applyPatch({
+          const updatedParam = applyPatch({
             id,
-          }, patches, userId)
-            .then(createCompany);
+          }, patches, userId);
+          // default will have a username
+          return createCompany(updatedParam);
         }
         throw err;
       });
@@ -308,39 +293,27 @@ export default class CompanyController {
    * @returns {Promise<>} when successfully replace the data
    */
   replace(id, param, userId) {
-    return updateParam(param, userId)
-      .then((updatedParam) =>
-        getCompany(id)
-          .then((company) => {
-            // replace the previous the record and create again
-            const { createdBy, createdAt } = company;
-            return this.remove(id)
-              .then(() => {
-                // need to update back the original data
-                const newCompany = new Company(updatedParam);
-                newCompany.createdBy = createdBy;
-                newCompany.createdAt = createdAt;
-                return newCompany.save()
-                // return null to indicate it is updated
-                .then(() => null);
-              });
-          })
-          .catch((err) => {
-            if (err && err.name === NotFoundError.name) {
-              return createCompany(updatedParam);
-            }
-            throw err;
-          })
-      );
-  }
-
-  /**
-   * get the obeject id by company id
-   * @method getObjectId
-   * @param {String} id
-   * @returns {Promise<String>} the mongo object id
-   */
-  static getObjectId(id) {
-    return convertIdToObjectId(id);
+    const updatedParam = updateParam(param, userId);
+    return getCompany(id)
+      .then((company) => {
+        // replace the previous the record and create again
+        const { createdBy, createdAt } = company;
+        return this.remove(id)
+          .then(() => {
+            // need to update back the original data
+            const newCompany = new Company(updatedParam);
+            newCompany.createdBy = createdBy;
+            newCompany.createdAt = createdAt;
+            return newCompany.save()
+            // return null to indicate it is updated
+            .then(() => null);
+          });
+      })
+      .catch((err) => {
+        if (err && err.name === NotFoundError.name) {
+          return createCompany(updatedParam);
+        }
+        throw err;
+      });
   }
 }

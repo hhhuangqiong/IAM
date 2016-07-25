@@ -1,8 +1,10 @@
 import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
 import Q from 'q';
-import timestamp from 'mongoose-timestamp';
 import isUndefined from 'lodash/isUndefined';
+import timestamp from 'mongoose-timestamp';
+
+import mongooseToJSON from '../utils/mongooseToJSON';
 
 function hashPassword(password) {
   const salt = bcrypt.genSaltSync(10);
@@ -19,7 +21,7 @@ const schema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  username: {
+  _id: {
     type: String,
     required: true,
     trim: true,
@@ -109,25 +111,17 @@ const schema = new mongoose.Schema({
       type: String,
     },
   }],
-
   gender: String,
   birthdate: String,
   website: String,
-
   affiliatedCompany: {
-    company: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Company',
-    },
-    department: String,
+    type: String,
+    ref: 'Company',
   },
   assignedCompanies: [{
     _id: false,
-    company: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Company',
-    },
-    department: String,
+    type: String,
+    ref: 'Company',
   }],
   tokens: [{
     _id: false,
@@ -139,35 +133,28 @@ const schema = new mongoose.Schema({
     },
   }],
   createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
     ref: COLLECTION_NAME,
   },
   updatedBy: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
     ref: COLLECTION_NAME,
   },
 }, {
   collection: COLLECTION_NAME,
-  toObject: {
-    virtuals: true,
-  },
-  toJSON: {
-    virtuals: true,
-    transform: (doc, ret) => {
-      /* eslint no-param-reassign: ["error", { "props": false }]*/
-      Object.keys(ret).forEach(key => {
-        if (Array.isArray(ret[key]) && !ret[key].length) {
-          delete ret[key];
-        }
-      });
-      // delete id since username is the key, and_id is kept
-      // which will send along with the request as an user indcation instead of public username
-      delete ret.id;
-    },
-  },
+  toJSON: mongooseToJSON,
 });
 
 schema.plugin(timestamp);
+
+/* eslint no-underscore-dangle: ["error", { "allow": ["_id"] }] */
+schema.virtual('id')
+  .get(function getId() {
+    return this._id;
+  })
+  .set(function setId(id) {
+    this._id = id;
+  });
 
 schema.virtual('password')
   .get(function getPassword() {

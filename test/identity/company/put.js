@@ -38,7 +38,7 @@ describe('PUT /identity/companies/:companyId', () => {
         .send(newCompanyInfo)
         .expect(204)
         .end(() => {
-          Company.findOne({ id: companyInfo.id }).then((company) => {
+          Company.findOne({ _id: companyInfo.id }).then((company) => {
             expect(company.themeType).to.equal(newCompanyInfo.themeType);
             expect(company.address.formatted).to.equal(newCompanyInfo.address.formatted);
             expect(company.country).to.equal(newCompanyInfo.country);
@@ -65,7 +65,7 @@ describe('PUT /identity/companies/:companyId', () => {
           const expectedHeader = `/identity/companies/${id}`;
           expect(res.header).to.have.property('location');
           expect(res.header.location).to.include(expectedHeader);
-          Company.findOne({ id: companyInfo.id }).then((company) => {
+          Company.findOne({ _id: companyInfo.id }).then((company) => {
             expect(company.themeType).to.equal(newCompanyInfo.themeType);
             expect(company.address.formatted).to.equal(newCompanyInfo.address.formatted);
             expect(company.country).to.equal(newCompanyInfo.country);

@@ -149,9 +149,7 @@ describe('GET /identity/companies', () => {
     });
 
     it('successfully gets all the companies using sort', (done) => {
-      const sortBy = 'id';
-      const sortOrder = 'desc';
-      agent.get(`/identity/companies?sortBy=${sortBy}&sortOrder=${sortOrder}`)
+      agent.get('/identity/companies?sortBy=id&sortOrder=desc')
            .expect('Content-Type', /json/)
            .expect(200)
            .end((err, res) => {

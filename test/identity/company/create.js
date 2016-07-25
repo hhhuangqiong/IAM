@@ -78,14 +78,14 @@ describe('POST /identity/companies', () => {
              expect(res.header.location).to.include(expectedHeader);
 
              // also ensure the model has such record
-             Company.findOne({ id: companyInfo.id }).then((company) => {
+             Company.findOne({ _id: companyInfo.id }).then((company) => {
                expect(company.country).to.equal(companyInfo.country);
              })
              .done(done);
            });
     });
 
-    it('successfully creates company', (done) => {
+    it('successfully creates company with more details', (done) => {
       const companyInfo = {
         id: 'companyC',
         country: 'Hong Kong',
@@ -124,7 +124,7 @@ describe('POST /identity/companies', () => {
              const expectedHeader = `/identity/companies/${companyInfo.id}`;
              expect(res.header).to.have.property('location');
              expect(res.header.location).to.include(expectedHeader);
-             Company.findOne({ id: companyInfo.id }).then((company) => {
+             Company.findOne({ _id: companyInfo.id }).then((company) => {
                expect(company.country).to.equal(companyInfo.country);
                expect(company.name).to.equal(companyInfo.name);
                expect(company.themeType).to.equal(companyInfo.themeType);
@@ -204,7 +204,7 @@ describe('POST /identity/companies', () => {
            .send(anotherCompanyInfo)
            .expect(201)
            .end(() => {
-             Company.findOne({ id: anotherCompanyInfo.id }).then((company) => {
+             Company.findOne({ _id: anotherCompanyInfo.id }).then((company) => {
                expect(company.parent.toString()).to.equal(companyId);
                expect(company.id).to.equal(anotherCompanyInfo.id);
              })
