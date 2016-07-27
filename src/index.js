@@ -4,19 +4,20 @@ import healthcheck from 'm800-health-check';
 import { createServer } from './server';
 import { getContainer } from './utils/ioc' ;
 
-const app = createServer();
+createServer().then(app => {
+  const { config, mongoose } = getContainer();
+  const port = config.get('PORT');
 
-const { config, mongoose } = getContainer();
-const port = config.get('PORT');
+  // set up the health check
+  healthcheck(app, {
+    mongodb: {
+      mongoose,
+    },
+  });
 
-// set up the health check
-healthcheck(app, {
-  mongodb: {
-    mongoose,
-  },
-});
-
-// start the server
-http.createServer(app).listen(port, () => {
-  logger.info('Server listening on %d', port);
-});
+  // start the server
+  http.createServer(app).listen(port, () => {
+    logger.info('Server listening on %d', port);
+  });
+})
+.done();

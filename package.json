@@ -51,7 +51,7 @@
     "mongoose-timestamp": "^0.6.0",
     "multer": "^1.1.0",
     "nconf": "^0.8.4",
-    "oidc-provider": "^0.7.1",
+    "oidc-provider": "^0.7.2",
     "q": "^1.4.1",
     "tv4": "^1.2.7",
     "winston": "^2.2.0"

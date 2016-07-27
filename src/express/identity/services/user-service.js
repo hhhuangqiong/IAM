@@ -8,7 +8,7 @@ import {
   DEFAULT_PAGE_NO,
   DEFAULT_USER_SORT_BY,
   DEFAULT_SORT_ORDER,
-} from '../constants/param';
+} from '../../../constants/param';
 
 export function userService(validator, { User, Company }) {
   const baseInfoSchema = Joi.object({

@@ -7,7 +7,7 @@ import Company from '../../../src/collections/company';
 import {
   DEFAULT_PAGE_SIZE,
   DEFAULT_PAGE_NO,
-} from '../../../src/express/identity/constants/param';
+} from '../../../src/constants/param';
 
 function removeDynamicAttribute(company) {
   const myCompany = company;

@@ -7,7 +7,7 @@ import User from '../../../src/collections/user';
 import {
   DEFAULT_PAGE_SIZE,
   DEFAULT_PAGE_NO,
-} from '../../../src/express/identity/constants/param';
+} from '../../../src/constants/param';
 
 function removeDynamicAttribute(user) {
   const myUser = user;

@@ -11,8 +11,9 @@ export default function getAgent() {
   if (agent) {
     return Q.resolve(agent);
   }
-  return mockgoose(mongoose).then(() => {
-    agent = request.agent(createServer());
-    return agent;
-  });
+  return mockgoose(mongoose).then(() =>
+    createServer().then(app => {
+      agent = request.agent(app);
+      return agent;
+    }));
 }

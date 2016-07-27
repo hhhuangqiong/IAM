@@ -1,6 +1,9 @@
 import { getContainer } from '../../utils/ioc';
 
-export function injectAccessRoutes(server) {
+export function injectAccessRoutes(server, { jsonParser, overrideMethod }) {
   const { accessRoleController, accessUserController } = getContainer();
-  server.use('/access', accessRoleController, accessUserController);
+  // set up the route for access and identity
+
+  server.use('/access', jsonParser, overrideMethod,
+    accessRoleController, accessUserController);
 }

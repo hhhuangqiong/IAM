@@ -9,17 +9,18 @@ import { StateManager } from './state-manager';
 
 const env = process.env.NODE_ENV || 'development';
 
-export const initialize = _.memoize(() => {
-  return Q.resolve(env === 'test-local' ? mongoose : mockgoose(mongoose))
-    .then(() => {
-      const server = request.agent(createServer(env));
+export const initialize = _.memoize(() =>
+  Q.resolve(env === 'test-local' ? mongoose : mockgoose(mongoose))
+    .then(() => createServer(env))
+    .then(app => {
+      const server = request.agent(app);
       const state = new StateManager(mongoose);
       return {
         server,
         db: mongoose,
         state,
       };
-    });
-});
+    })
+);
 
 export default initialize;
