@@ -123,7 +123,7 @@ export function expressError(error, req, res) {
       break;
     default:
       res.status(400)
-       .json(errorJSON(20000, 400, error.meesage));
+       .json(errorJSON(20000, 400, error.message));
       break;
   }
 }
