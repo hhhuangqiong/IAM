@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { NotFoundError } from 'common-errors';
+import { NotFoundError, ValidationError } from 'common-errors';
 import Joi from 'joi';
 
 import { rename, mongoose as mongooseUtil, jsonPatch } from '../../../utils';
@@ -244,6 +244,17 @@ export function userService(validator, { User, Company }) {
     return null;
   }
 
+  function* verifyPassword(id, password) {
+    const user = yield User.findOne({ _id: id });
+    if (!user) {
+      throw new NotFoundError('user');
+    }
+    const result = yield user.isValidPassword(password);
+    if (!result) {
+      throw new ValidationError('password');
+    }
+  }
+
   return {
     createUser,
     getUsers,
@@ -251,5 +262,6 @@ export function userService(validator, { User, Company }) {
     deleteUser,
     setUserInfo,
     patchUserInfo,
+    verifyPassword,
   };
 }

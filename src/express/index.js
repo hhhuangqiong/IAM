@@ -3,6 +3,7 @@ import methodOverride from 'method-override';
 
 import { injectAccessRoutes } from './access';
 import { injectIdentityRoutes } from './identity';
+import { injectOpenIdRoutes } from './openid';
 
 export default function injectExpress(server) {
   const jsonParser = bodyParser.json();
@@ -24,5 +25,12 @@ export default function injectExpress(server) {
     jsonParser,
     overrideMethod,
   });
+
+  injectOpenIdRoutes(server, {
+    urlencodedParser,
+    jsonParser,
+    overrideMethod,
+  });
+
   return server;
 }

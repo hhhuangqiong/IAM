@@ -9,5 +9,6 @@
             "auto_reconnect":true
          }
       }
-   }
+   },
+   "APP_URL": "http://localhost:3000"
 }
