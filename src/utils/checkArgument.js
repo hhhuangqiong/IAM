@@ -73,11 +73,11 @@ function members(argumentName, obj, requiredKeys) {
   throw error;
 }
 
-export const check = {
+export const checkArgument = {
   ok,
   schema,
   predicate,
   members,
 };
 
-export default check;
+export default checkArgument;

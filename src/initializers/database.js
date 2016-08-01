@@ -1,5 +1,5 @@
 import logger from 'winston';
-import mongoose from 'mongoose';
+import { getContainer } from '../utils/ioc';
 
 /**
  * Initialize database connection
@@ -12,7 +12,7 @@ export default function initialize(mongodbURI, mongodbOpts = {}) {
   if (!mongodbURI) {
     throw new Error('Uri is required');
   }
-
+  const { mongoose } = getContainer();
   logger.info('Connecting to Mongo on %s', mongodbURI);
   mongoose.connect(mongodbURI, mongodbOpts);
 

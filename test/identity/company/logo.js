@@ -1,18 +1,18 @@
 import { describe, it } from 'mocha';
 import path from 'path';
 import { expect } from 'chai';
-import Grid from 'gridfs-stream';
-import mongoose from 'mongoose';
 import fs from 'fs';
 
 import getAgent from '../../getAgent';
 import Company from '../../../src/collections/company';
+import { getContainer } from '../../../src/utils/ioc';
 
 function removeGridFs(done) {
+  const { mongoose: { connection } } = getContainer();
   // fail to use gridfs to remove all files once
   // directly clean the collection it
-  mongoose.connection.db.dropCollection('fs.files', () => {
-    mongoose.connection.db.dropCollection('fs.chunks', () => {
+  connection.db.dropCollection('fs.files', () => {
+    connection.db.dropCollection('fs.chunks', () => {
       done();
     });
   });
@@ -21,13 +21,10 @@ function removeGridFs(done) {
 describe('perform logo action', () => {
   let agent;
   let gridFs;
-  before((done) => {
-    getAgent().then(mAgent => {
-      agent = mAgent;
-      gridFs = new Grid(mongoose.connection.db, mongoose.mongo);
-      done();
-    });
-  });
+  before(() => getAgent().then(mAgent => {
+    agent = mAgent;
+    gridFs = getContainer().gridFs;
+  }));
 
   describe('POST /identity/companies/:companyid/logo', () => {
     const companyInfo = {
@@ -71,25 +68,13 @@ describe('perform logo action', () => {
       agent.post('/identity/companies/fakeCompany/logo')
         .set('Content-Type', 'multipart/form-data')
         .attach('logo', companyLogo)
-        .expect(404, {
-          result: {
-            status: 404,
-            code: 20001,
-            message: 'Not Found: "company id fakeCompany"',
-          },
-        })
+        .expect(404)
         .end(done);
     });
 
     it('uploads unsuccessfully to the company without logo field', (done) => {
       agent.post(`/identity/companies/${companyInfo.id}/logo`)
-        .expect(422, {
-          result: {
-            status: 422,
-            code: 20001,
-            message: 'Missing argument: logo',
-          },
-        })
+        .expect(422)
         .end(done);
     });
 
@@ -97,13 +82,7 @@ describe('perform logo action', () => {
       agent.post(`/identity/companies/${companyInfo.id}/logo`)
         .set('Content-Type', 'multipart/form-data')
         .attach('logo1', companyLogo)
-        .expect(422, {
-          result: {
-            status: 422,
-            code: 20001,
-            message: 'Invalid or missing argument supplied: LIMIT_UNEXPECTED_FILE on field logo1',
-          },
-        })
+        .expect(422)
         .end(done);
     });
   });
@@ -192,13 +171,7 @@ describe('perform logo action', () => {
 
     it('delete unsuccessfully the logo with wrong companyid', (done) => {
       agent.delete('/identity/companies/dummyCompany/logo')
-        .expect(404, {
-          result: {
-            status: 404,
-            code: 20001,
-            message: 'Not Found: "company id dummyCompany"',
-          },
-        })
+        .expect(404)
         .end(done);
     });
   });
@@ -216,13 +189,7 @@ describe('perform logo action', () => {
 
     it('delete successfully the logo', (done) => {
       agent.delete(`/identity/companies/${companyInfo.id}/logo`)
-        .expect(404, {
-          result: {
-            code: 20001,
-            status: 404,
-            message: 'Not Found: "logo is not found"',
-          },
-        })
+        .expect(404)
         .end(done);
     });
   });

@@ -1,24 +1,29 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import methodOverride from 'method-override';
-import path from 'path';
 import logger from 'winston';
 
 import injectExpress from './express';
 import injectKoa from './koa';
+import ioc from './utils/ioc';
+import database from './initializers/database';
+import { errorHandler } from './initializers/errorHandler';
 
-import nconf from './initializers/nconf';
-import ioc from './initializers/ioc';
-
-export function createServer(env) {
-  // build up the nconf
-  nconf(env, path.resolve(__dirname, './config'));
+let app;
+export function createServer() {
+  if (app) {
+    return app;
+  }
   // set up the container
-  const bottle = ioc();
-  const connection = bottle.container.mongoose;
-  logger.info(`Connect to the monoose ${connection}`);
+  const bottle = ioc.initialize();
 
-  const app = express();
+  // connect to the db when server start
+  const { config } = bottle.container;
+  const connection = database(config.get('mongodb:uri'), config.get('mongodb:options'));
+  logger.info(`Connect to the mongoose ${connection.readyState}`);
+
+  app = express();
+
   // share express settings
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({
@@ -30,6 +35,12 @@ export function createServer(env) {
 
   injectExpress(app);
   injectKoa(app);
+
+   // set up express error handler
+  errorHandler({
+    app,
+    logger,
+  });
 
   return app;
 }

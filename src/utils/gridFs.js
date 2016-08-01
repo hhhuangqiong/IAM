@@ -1,9 +1,9 @@
 import fs from 'fs';
-import * as bottle from '../utils/bottle';
 import mime from 'mime';
 import Q from 'q';
-import nconf from 'nconf';
 import { NotFoundError, ArgumentNullError } from 'common-errors';
+
+import { getContainer } from './ioc';
 
 /**
  * add file into gridFS from path of source
@@ -20,7 +20,7 @@ export function addFile(filePath, options) {
     return Q.reject(new ArgumentNullError(filePath));
   }
   const deferred = Q.defer();
-  const gridFs = bottle.fetchDep(nconf.get('containerName'), 'gridfs');
+  const { gridFs } = getContainer();
   const writeStream = gridFs.createWriteStream({
     filename: options.filename || filePath.split('/').pop(),
     // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
@@ -42,12 +42,12 @@ export function addFile(filePath, options) {
 
 /**
  * get the buffer by the file id
- * @method getById
+ * @method getFile
  * @param {String} id the file id
  * @returns {Promise<Buffer>} return the file
  */
-export function getById(id) {
-  const gridFs = bottle.fetchDep(nconf.get('containerName'), 'gridfs');
+export function getFile(id) {
+  const { gridFs } = getContainer();
   if (!id) {
     return Q.reject(new ArgumentNullError(id));
   }
@@ -85,7 +85,7 @@ export function getById(id) {
  * @throws {ArgumentNullError} missing the file id
  */
 export function removeFile(id) {
-  const gridFs = bottle.fetchDep(nconf.get('containerName'), 'gridfs');
+  const { gridFs } = getContainer();
   if (!id) {
     return Q.reject(new ArgumentNullError(id));
   }
@@ -99,3 +99,9 @@ export function removeFile(id) {
     });
   });
 }
+
+export default {
+  addFile,
+  getFile,
+  removeFile,
+};

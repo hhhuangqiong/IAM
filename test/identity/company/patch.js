@@ -58,13 +58,7 @@ describe('PATCH /identity/companies', () => {
       agent.patch(`/identity/companies/${companyInfo.id}`)
            .set('Content-Type', 'application/json')
            .send(wrongFormat)
-           .expect(422, {
-             result: {
-               status: 422,
-               code: 20003,
-               message: 'Patch requests a set of changes in an array',
-             },
-           })
+           .expect(422)
            .end(done);
     });
 
@@ -77,14 +71,7 @@ describe('PATCH /identity/companies', () => {
       agent.patch('/identity/companies/notExitingComapny')
            .set('Content-Type', 'application/json')
            .send(patches)
-           .expect(422, {
-             result: {
-               status: 422,
-               code: 20003,
-               message: 'Invalid operation number 0: Cannot perform the operation ' +
-               'at a path that does not exist',
-             },
-           })
+           .expect(422)
            .end(done);
     });
 
@@ -150,14 +137,7 @@ describe('PATCH /identity/companies', () => {
       agent.patch(`/identity/companies/${companyInfo.id}`)
            .set('Content-Type', 'application/json')
            .send(patches)
-           .expect(422, {
-             result: {
-               status: 422,
-               code: 20003,
-               message: 'Invalid operation number 0: Operation `op` property ' +
-                'is not one of operations defined in RFC-6902',
-             },
-           })
+           .expect(422)
            .end(done);
     });
 
@@ -170,13 +150,7 @@ describe('PATCH /identity/companies', () => {
       agent.patch(`/identity/companies/${companyInfo.id}`)
            .set('Content-Type', 'application/json')
            .send(patches)
-           .expect(422, {
-             result: {
-               status: 422,
-               code: 20003,
-               message: '/country with Invalid type: number (expected string) ',
-             },
-           })
+           .expect(422)
            .end(done);
     });
 
@@ -189,13 +163,7 @@ describe('PATCH /identity/companies', () => {
       agent.patch(`/identity/companies/${companyInfo.id}`)
            .set('Content-Type', 'application/json')
            .send(patches)
-           .expect(422, {
-             result: {
-               status: 422,
-               code: 20003,
-               message: '/nonExisting with Unknown property (not in schema) ',
-             },
-           })
+           .expect(422)
            .end(done);
     });
   });

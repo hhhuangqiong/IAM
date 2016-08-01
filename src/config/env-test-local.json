@@ -1,5 +1,4 @@
 {
-  "containerName": "maaii-iam",
   "mongodb":{
     "uri":"mongodb://localhost/maaii-iam-test",
     "options":{}

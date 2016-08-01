@@ -65,7 +65,7 @@ describe('PUT /identity/companies/:companyId', () => {
           const expectedHeader = `/identity/companies/${id}`;
           expect(res.header).to.have.property('location');
           expect(res.header.location).to.include(expectedHeader);
-          Company.findOne({ _id: companyInfo.id }).then((company) => {
+          Company.findOne({ _id: id }).then((company) => {
             expect(company.themeType).to.equal(newCompanyInfo.themeType);
             expect(company.address.formatted).to.equal(newCompanyInfo.address.formatted);
             expect(company.country).to.equal(newCompanyInfo.country);
@@ -82,13 +82,7 @@ describe('PUT /identity/companies/:companyId', () => {
       agent.put(`/identity/companies/${unknowId}`)
           .set('Content-Type', 'application/json')
           .send(myCompanyInfo)
-          .expect(422, {
-            result: {
-              code: 20003,
-              status: 422,
-              message: '/address with Invalid type: string (expected object) ',
-            },
-          })
+          .expect(422)
           .end(done);
     });
 
@@ -117,13 +111,7 @@ describe('PUT /identity/companies/:companyId', () => {
       agent.put('/identity/companies/newIdTest')
         .set('Content-Type', 'application/json')
         .send(newCompanyInfo)
-        .expect(422, {
-          result: {
-            code: 20001,
-            status: 422,
-            message: 'Missing argument: country',
-          },
-        })
+        .expect(422)
         .end(done);
     });
   });

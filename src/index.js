@@ -1,14 +1,13 @@
 import http from 'http';
 import logger from 'winston';
 import healthcheck from 'm800-health-check';
-import mongoose from 'mongoose';
-
 import { createServer } from './server';
+import { getContainer } from './utils/ioc' ;
 
-const env = process.env.NODE_ENV || 'development';
-const port = process.env.PORT || '3000';
+const app = createServer();
 
-const app = createServer(env);
+const { config, mongoose } = getContainer();
+const port = config.get('PORT');
 
 // set up the health check
 healthcheck(app, {

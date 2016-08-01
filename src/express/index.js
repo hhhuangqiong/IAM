@@ -1,13 +1,9 @@
-import { router as accessRouter } from './access';
-import { router as identityRouter } from './identity';
-
-const ACCESS_PREFIX = '/access';
-const IDENTITY_PREFIX = '/identity';
+import { injectAccessRoutes } from './access';
+import { injectIdentityRoutes } from './identity';
 
 export default function injectExpress(server) {
   // set up the route for access and identity
-  server.use(ACCESS_PREFIX, accessRouter);
-  server.use(IDENTITY_PREFIX, identityRouter);
-
+  injectAccessRoutes(server);
+  injectIdentityRoutes(server);
   return server;
 }

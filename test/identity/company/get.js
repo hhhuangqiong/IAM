@@ -37,6 +37,7 @@ describe('GET /identity/companies', () => {
           country: 'Hong Kong',
           reseller: count === 0,
           name: 'Another name',
+          active: true,
           themeType: 'awesome',
           address: {
             formatted: '2 Tim Mei Avenue, Tamar, Hong Kong',
@@ -91,7 +92,7 @@ describe('GET /identity/companies', () => {
 
     it('successfully gets all the companies using param limit', (done) => {
       const size = 5;
-      agent.get(`/identity/companies?size=${size}`)
+      agent.get(`/identity/companies?pageSize=${size}`)
            .expect('Content-Type', /json/)
            .expect(200)
            .end((err, res) => {
@@ -110,7 +111,7 @@ describe('GET /identity/companies', () => {
 
     it('successfully gets all the companies using param page', (done) => {
       const pageNo = 1;
-      agent.get(`/identity/companies?page=${pageNo}`)
+      agent.get(`/identity/companies?pageNo=${pageNo}`)
            .expect('Content-Type', /json/)
            .expect(200)
            .end((err, res) => {
@@ -131,7 +132,7 @@ describe('GET /identity/companies', () => {
     it('successfully gets all the companies using param page and limit', (done) => {
       const pageNo = 1;
       const pageSize = 5;
-      agent.get(`/identity/companies?page=${pageNo}&size=${pageSize}`)
+      agent.get(`/identity/companies?pageNo=${pageNo}&pageSize=${pageSize}`)
            .expect('Content-Type', /json/)
            .expect(200)
            .end((err, res) => {
@@ -179,13 +180,7 @@ describe('GET /identity/companies', () => {
 
     it('fails get the non-existing company data', (done) => {
       agent.get('/identity/companies/company123')
-           .expect(404, {
-             result: {
-               status: 404,
-               code: 20001,
-               message: 'Not Found: "company id company123"',
-             },
-           })
+           .expect(404)
            .end(done);
     });
   });

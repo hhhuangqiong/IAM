@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import Q from 'q';
-import mongoose from 'mongoose';
 import mockgoose from 'mockgoose';
+import mongoose from 'mongoose';
 import request from 'supertest';
 
 import { createServer } from './../../src/server';

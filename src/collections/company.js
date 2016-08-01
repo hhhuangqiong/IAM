@@ -1,14 +1,11 @@
 import mongoose from 'mongoose';
 import timestamp from 'mongoose-timestamp';
 
-import * as gridFs from '../utils/gridfs';
-import mongooseToJSON from '../utils/mongooseToJSON';
-
-const COLLECTION_NAME = 'Company';
+import { toJSON } from '../utils/mongoose';
 
 const schema = new mongoose.Schema({
   parent: {
-    ref: COLLECTION_NAME,
+    ref: 'Company',
     type: String,
   },
   _id: {
@@ -35,6 +32,10 @@ const schema = new mongoose.Schema({
     region: String,
     postalCode: String,
     country: String,
+  },
+  active: {
+    type: Boolean,
+    default: true,
   },
   timezone: String,
   accountManager: String,
@@ -68,13 +69,13 @@ const schema = new mongoose.Schema({
     type: String,
   },
 }, {
-  collection: COLLECTION_NAME,
-  toJSON: mongooseToJSON,
+  collection: 'Company',
+  toJSON,
+  versionKey: false,
 });
 
 schema.plugin(timestamp);
 
-/* eslint no-underscore-dangle: ["error", { "allow": ["_id"] }] */
 schema.virtual('id')
   .get(function getId() {
     return this._id;
@@ -83,24 +84,5 @@ schema.virtual('id')
     this._id = id;
   });
 
-schema.method('addLogo', function addLogo(filePath, options = {}) {
-  // set unlinkFile to true which removes file after storing into mongodb
-  return gridFs.addFile(filePath, Object.assign(options, { unlinkFile: true }))
-        .then((fileDoc) => {
-          this.logo = fileDoc._id;
-          return this.save().then(() => this.logo);
-        });
-});
-
-schema.method('removeLogo', function removeLogo() {
-  return gridFs.removeFile(this.logo).then(() => {
-    this.logo = undefined;
-    return this.save();
-  });
-});
-
-schema.static('getLogo', (id) => gridFs.getById(id));
-
-const company = mongoose.model(COLLECTION_NAME, schema);
-
-export default company;
+export const Company = mongoose.model('Company', schema);
+export default Company;

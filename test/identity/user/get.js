@@ -108,7 +108,7 @@ describe('GET /identity/users', () => {
 
     it('successfully gets users using small size param', (done) => {
       const size = 5;
-      agent.get(`/identity/users?size=${size}`)
+      agent.get(`/identity/users?pageSize=${size}`)
            .expect('Content-Type', /json/)
            .expect(200)
            .end((err, res) => {
@@ -127,7 +127,7 @@ describe('GET /identity/users', () => {
 
     it('successfully gets users using large size param', (done) => {
       const size = 100;
-      agent.get(`/identity/users?size=${size}`)
+      agent.get(`/identity/users?pageSize=${size}`)
            .expect('Content-Type', /json/)
            .expect(200)
            .end((err, res) => {
@@ -146,7 +146,7 @@ describe('GET /identity/users', () => {
 
     it('successfully gets all the users using page no param', (done) => {
       const pageNo = 1;
-      agent.get(`/identity/users?page=${pageNo}`)
+      agent.get(`/identity/users?pageNo=${pageNo}`)
            .expect('Content-Type', /json/)
            .expect(200)
            .end((err, res) => {
@@ -169,7 +169,7 @@ describe('GET /identity/users', () => {
     it('successfully gets all the users using param page and limit', (done) => {
       const pageNo = 1;
       const pageSize = 5;
-      agent.get(`/identity/users?page=${pageNo}&size=${pageSize}`)
+      agent.get(`/identity/users?pageNo=${pageNo}&pageSize=${pageSize}`)
            .expect('Content-Type', /json/)
            .expect(200)
            .end((err, res) => {
@@ -219,14 +219,7 @@ describe('GET /identity/users', () => {
 
     it('fails get the non-existing user data', (done) => {
       agent.get('/identity/users/nonExistingUser')
-           .expect(404, {
-             result: {
-               status: 404,
-               code: 20001,
-               message: 'Invalid or missing argument supplied: user ' +
-                 'id nonExistingUser is not found',
-             },
-           })
+           .expect(404)
            .end(done);
     });
   });

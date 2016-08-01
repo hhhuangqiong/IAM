@@ -1,10 +1,10 @@
-import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
 import Q from 'q';
 import isUndefined from 'lodash/isUndefined';
 import timestamp from 'mongoose-timestamp';
 
-import mongooseToJSON from '../utils/mongooseToJSON';
+import { toJSON } from '../utils/mongoose';
 
 function hashPassword(password) {
   const salt = bcrypt.genSaltSync(10);
@@ -15,7 +15,6 @@ function hashPassword(password) {
     }));
 }
 
-const COLLECTION_NAME = 'User';
 const schema = new mongoose.Schema({
   isRoot: {
     type: Boolean,
@@ -134,20 +133,20 @@ const schema = new mongoose.Schema({
   }],
   createdBy: {
     type: String,
-    ref: COLLECTION_NAME,
+    ref: 'User',
   },
   updatedBy: {
     type: String,
-    ref: COLLECTION_NAME,
+    ref: 'User',
   },
 }, {
-  collection: COLLECTION_NAME,
-  toJSON: mongooseToJSON,
+  collection: 'User',
+  toJSON,
+  versionKey: false,
 });
 
 schema.plugin(timestamp);
 
-/* eslint no-underscore-dangle: ["error", { "allow": ["_id"] }] */
 schema.virtual('id')
   .get(function getId() {
     return this._id;
@@ -192,5 +191,5 @@ schema.method('isValidPassword', function isValidPassword(password) {
 
 schema.static('hashPassword', hashPassword);
 
-const user = mongoose.model(COLLECTION_NAME, schema);
-export default user;
+export const User = mongoose.model('User', schema);
+export default User;

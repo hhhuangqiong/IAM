@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import Joi from 'joi';
 import { ValidationError } from 'common-errors';
 
-import check from '../util/check';
+import { checkArgument as check } from './checkArgument';
 
 export function validator() {
   function joiErrorToValidationError(joiError) {

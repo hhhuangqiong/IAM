@@ -3,8 +3,7 @@ import Joi from 'joi';
 import { NotFoundError, ValidationError } from 'common-errors';
 
 import { combinePermissions } from './combine-permissions';
-
-import { check, rename } from './../util';
+import { rename } from './../../../utils';
 
 const PERMISSION = {
   CREATE: 'create',
@@ -15,15 +14,7 @@ const PERMISSION = {
 
 const PERMISSIONS = _.values(PERMISSION);
 
-export function accessService(imports) {
-  check.members('imports', imports, [
-    'validator',
-    'models',
-  ]);
-
-  const validator = imports.validator;
-  const { Role, Company, User } = imports.models;
-
+export function accessService(validator, { Role, Company, User }) {
   const permissionsEnumSchema = Joi.string().valid(PERMISSIONS);
   const permissionsSchema = Joi.object().pattern(/.+/, Joi.array().items(permissionsEnumSchema));
 

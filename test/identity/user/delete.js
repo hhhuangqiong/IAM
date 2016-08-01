@@ -48,13 +48,7 @@ describe('DELETE /identity/users/:id', () => {
 
     it('successfully deletes the non-existing company record', (done) => {
       agent.delete('/identity/users/notExist@sample.org')
-           .expect(404, {
-             result: {
-               code: 20001,
-               status: 404,
-               message: 'Invalid or missing argument supplied: user id notExist@sample.org is not found',
-             },
-           })
+           .expect(404)
            .end(done);
     });
   });

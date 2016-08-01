@@ -66,13 +66,7 @@ describe('DELETE /identity/companies/:id', () => {
 
     it('successfully deletes the non-existing company record', (done) => {
       agent.delete('/identity/companies/companyNotExist')
-           .expect(404, {
-             result: {
-               code: 20001,
-               status: 404,
-               message: 'Not Found: "company id companyNotExist"',
-             },
-           })
+           .expect(404)
            .end(done);
     });
   });

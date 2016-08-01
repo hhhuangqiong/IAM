@@ -1,16 +1,9 @@
 import wrap from 'co-express';
 import * as _ from 'lodash';
+import { Router } from 'express';
 
-import { check } from './../util';
-
-export function roleController(imports) {
-  check.members('imports', imports, [
-    'router',
-    'accessService',
-  ]);
-
-  const router = imports.router;
-  const access = imports.accessService;
+export function roleController(access) {
+  const router = new Router();
 
   function* getRoles(req, res, next) {
     try {
@@ -89,4 +82,6 @@ export function roleController(imports) {
   router.put('/roles/:roleId/permissions', wrap(setRolePermissions));
   router.post('/roles/:roleId/users', wrap(assignRoleToUser));
   router.delete('/roles/:roleId/users/:username', wrap(revokeRoleFromUser));
+
+  return router;
 }

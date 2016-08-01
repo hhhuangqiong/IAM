@@ -88,13 +88,7 @@ describe('PUT /identity/users/:id', () => {
       agent.put(`/identity/users/${unknowId}`)
           .set('Content-Type', 'application/json')
           .send(myUserInfo)
-          .expect(422, {
-            result: {
-              code: 20003,
-              status: 422,
-              message: '/address with Unknown property (not in schema) ',
-            },
-          })
+          .expect(422)
           .end(done);
     });
   });

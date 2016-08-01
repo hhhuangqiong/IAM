@@ -20,13 +20,7 @@ describe('POST /identity/users', () => {
 
     it('fails to create company without any content', (done) => {
       agent.post('/identity/users')
-           .expect(422, {
-             result: {
-               code: 20001,
-               message: 'Missing argument: id',
-               status: 422,
-             },
-           })
+           .expect(422)
            .end(done);
     });
 
@@ -37,13 +31,7 @@ describe('POST /identity/users', () => {
       agent.post('/identity/users')
            .set('Content-Type', 'application/json')
            .send(userInfo)
-           .expect(422, {
-             result: {
-               code: 20001,
-               message: 'Missing argument: id',
-               status: 422,
-             },
-           })
+           .expect(422)
            .end(done);
     });
 
@@ -175,13 +163,7 @@ describe('POST /identity/users', () => {
       agent.post('/identity/users')
            .set('Content-Type', 'application/json')
            .send(userInfo)
-           .expect(422, {
-             result: {
-               code: 20003,
-               status: 422,
-               message: '/address with Unknown property (not in schema) ',
-             },
-           })
+           .expect(422)
            .end(done);
     });
   });

@@ -19,13 +19,7 @@ describe('POST /identity/companies', () => {
 
     it('fails to create company without any content', (done) => {
       agent.post('/identity/companies')
-           .expect(422, {
-             result: {
-               code: 20001,
-               message: 'Missing argument: id',
-               status: 422,
-             },
-           })
+           .expect(422)
            .end(done);
     });
 
@@ -36,13 +30,7 @@ describe('POST /identity/companies', () => {
       agent.post('/identity/companies')
            .set('Content-Type', 'application/json')
            .send(companyInfo)
-           .expect(422, {
-             result: {
-               code: 20001,
-               message: 'Missing argument: id',
-               status: 422,
-             },
-           })
+           .expect(422)
            .end(done);
     });
 
@@ -53,13 +41,7 @@ describe('POST /identity/companies', () => {
       agent.post('/identity/companies')
            .set('Content-Type', 'application/json')
            .send(companyInfo)
-           .expect(422, {
-             result: {
-               code: 20001,
-               message: 'Missing argument: country',
-               status: 422,
-             },
-           })
+           .expect(422)
            .end(done);
     });
 
@@ -149,13 +131,7 @@ describe('POST /identity/companies', () => {
       agent.post('/identity/companies')
            .set('Content-Type', 'application/json')
            .send(companyInfo)
-           .expect(422, {
-             result: {
-               code: 20003,
-               status: 422,
-               message: '/address with Invalid type: string (expected object) ',
-             },
-           })
+           .expect(422)
            .end(done);
     });
   });
@@ -183,13 +159,7 @@ describe('POST /identity/companies', () => {
       agent.post('/identity/companies')
            .set('Content-Type', 'application/json')
            .send(companyInfo)
-           .expect(409, {
-             result: {
-               code: 20002,
-               message: 'The specified \'companyD\' value is already in use for: ',
-               status: 409,
-             },
-           })
+           .expect(409)
            .end(done);
     });
 
