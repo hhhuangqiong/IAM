@@ -8,9 +8,9 @@ import mongoose from 'mongoose';
  * @param {Object} mongoOpts MongoDB connection options
  * @returns {Object} the connection
  */
-export default function initialize(mongodbURI, mongodbOpts) {
-  if (!mongodbURI || !mongodbOpts) {
-    throw new Error('Both uri & options are required');
+export default function initialize(mongodbURI, mongodbOpts = {}) {
+  if (!mongodbURI) {
+    throw new Error('Uri is required');
   }
 
   logger.info('Connecting to Mongo on %s', mongodbURI);
