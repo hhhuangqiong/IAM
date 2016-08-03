@@ -1,8 +1,9 @@
-import { getProvider } from './openid/provider';
+import { getContainer } from '../utils/ioc';
 
 export default function injectKoa(server) {
   // mount the koa on top of the express
-  return getProvider().then(provider => {
+  const { openIdProvider } = getContainer();
+  return openIdProvider.then(provider => {
     server.use('/openid/core', provider.app.callback());
     return server;
   });

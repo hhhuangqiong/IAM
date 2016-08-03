@@ -14,6 +14,8 @@ import { roleController } from '../express/access/controllers/role-controller';
 import { userController as roleUserController } from '../express/access/controllers/user-controller';
 import { userController } from '../express/identity/controllers/user-controller';
 import { companyController } from '../express/identity/controllers/company-controller';
+import { openIdController } from '../express/openid/openid-controller';
+import { setUp } from '../koa/openid/provider';
 import { collections } from '../collections';
 import { validator } from './validator';
 
@@ -74,6 +76,10 @@ export function initialize() {
 
   // identity user controller
   iocBottle.service('identityUserController', userController, 'userService');
+
+  iocBottle.factory('openIdProvider', ({ config }) => setUp(config));
+
+  iocBottle.service('openIdController', openIdController, 'openIdProvider');
 
   return iocBottle;
 }

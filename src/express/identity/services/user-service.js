@@ -249,10 +249,11 @@ export function userService(validator, { User, Company }) {
     if (!user) {
       throw new NotFoundError('user');
     }
-    const result = yield user.isValidPassword(password);
+    const result = user.isValidPassword(password);
     if (!result) {
       throw new ValidationError('password');
     }
+    return result;
   }
 
   return {

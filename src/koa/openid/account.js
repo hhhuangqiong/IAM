@@ -1,8 +1,8 @@
+import co from 'co';
 import { getContainer } from '../../utils/ioc';
 
 export default class Account {
   constructor(accountId, profile) {
-    this.userService = getContainer().userService;
     this.accountId = accountId;
     this.profile = profile;
     return this;
@@ -14,10 +14,16 @@ export default class Account {
   }
   // find the login by id password
   static findByLogin(id, password) {
-    return this.userService.verifyPassword(id, password).then(() => this.findById(id));
+    const { userService } = getContainer();
+    const wrappedVerifyPassword = co.wrap(userService.verifyPassword);
+    return wrappedVerifyPassword.call(userService, id, password)
+     .then(() => this.findById(id));
   }
 
   static findById(id) {
-    return this.userService.getUser(id).then((profile) => new Account(id, profile));
+    const { userService } = getContainer();
+    const wrappedGetUser = co.wrap(userService.getUser);
+    return wrappedGetUser.call(userService, { id })
+     .then((profile) => new Account(id, profile));
   }
 }
