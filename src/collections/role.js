@@ -8,7 +8,7 @@ const schema = new mongoose.Schema({
   company: { type: Types.ObjectId, ref: 'Company', required: true },
   service: { type: String, required: true },
   permissions: { type: Types.Mixed },
-  users: [{ type: Types.ObjectId, ref: 'User' }],
+  users: [{ type: Types.String, ref: 'User' }],
 }, {
   collection: 'Role',
   versionKey: false,

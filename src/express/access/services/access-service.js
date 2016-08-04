@@ -5,20 +5,11 @@ import { NotFoundError, ValidationError } from 'common-errors';
 import { combinePermissions } from './combine-permissions';
 import { rename } from './../../../utils';
 
-const PERMISSION = {
-  CREATE: 'create',
-  UPDATE: 'update',
-  READ: 'read',
-  DELETE: 'delete',
-};
-
-const PERMISSIONS = _.values(PERMISSION);
 
 export function accessService(validator, { Role, Company, User }) {
-  const permissionsEnumSchema = Joi.string().valid(PERMISSIONS);
-  const permissionsSchema = Joi.object().pattern(/.+/, Joi.array().items(permissionsEnumSchema));
+  const permissionsSchema = Joi.object().pattern(/.+/, Joi.array().items(Joi.string()));
 
-  const createRoleCommandSchema = Joi.object({
+  const createRoleCommandSchema = Joi.object().keys({
     name: Joi.string(),
     company: Joi.string(),
     service: Joi.string(),
@@ -30,7 +21,7 @@ export function accessService(validator, { Role, Company, User }) {
   function* createRole(command) {
     const sanitizedCommand = validator.sanitize(command, createRoleCommandSchema);
     const companyId = sanitizedCommand.company;
-    const company = yield Company.findOne({ _id: companyId }).select('_id');
+    const company = yield Company.findById(companyId).select('_id');
     if (!company) {
       throw new NotFoundError('Company');
     }
@@ -55,7 +46,7 @@ export function accessService(validator, { Role, Company, User }) {
   function* getRoles(query) {
     const sanitizedQuery = validator.sanitize(query, getRolesQuerySchema);
     const filters = _.pickBy(sanitizedQuery, x => _.isString(x) && x.length > 0);
-    const roles = yield Role.find(filters).lean().select('-permissions -users');
+    const roles = yield Role.find(filters).lean().select('-users');
     return roles.map(x => rename(x, { _id: 'id' }));
   }
 
@@ -68,33 +59,25 @@ export function accessService(validator, { Role, Company, User }) {
     yield Role.remove({ _id: sanitizedCommand.roleId });
   }
 
-  const getRolePermissionsQuerySchema = Joi.object({
-    roleId: Joi.string().required(),
-  });
+  const updateRoleCommandSchema = createRoleCommandSchema
+    .keys({ id: Joi.string().required() })
+    .rename('roleId', 'id', { override: true });
 
-  function* getRolePermissions(query) {
-    const sanitizedQuery = validator.sanitize(query, getRolePermissionsQuerySchema);
-    const role = yield Role.findOne({ _id: sanitizedQuery.roleId }).select('permissions');
+  function* updateRole(command) {
+    const sanitizedCommand = validator.sanitize(command, updateRoleCommandSchema);
+    const company = yield Company.findById(sanitizedCommand.company);
+    if (!company) {
+      throw new NotFoundError('Company');
+    }
+    const role = yield Role.findOneAndUpdate(
+      { _id: sanitizedCommand.id },
+      { $set: _.omit(sanitizedCommand, 'id') },
+      { new: true }
+    ).select('-users');
     if (!role) {
       throw new NotFoundError('Role');
     }
-    return role.toJSON().permissions;
-  }
-
-  const setRolePermissionsCommandSchema = Joi.object({
-    roleId: Joi.string(),
-    permissions: permissionsSchema,
-  });
-
-  function* setRolePermissions(command) {
-    const sanitizedCommand = validator.sanitize(command, setRolePermissionsCommandSchema);
-    const role = yield Role.findOne({ _id: command.roleId });
-    if (!role) {
-      throw new NotFoundError('Role');
-    }
-    role.permissions = command.permissions;
-    yield role.save();
-    return sanitizedCommand.permissions;
+    return rename(role.toJSON(), { _id: 'id' });
   }
 
   const getUserPermissionsQuerySchema = Joi.object({
@@ -154,8 +137,7 @@ export function accessService(validator, { Role, Company, User }) {
     createRole,
     getRoles,
     deleteRole,
-    getRolePermissions,
-    setRolePermissions,
+    updateRole,
     assignRole,
     revokeRole,
     getUserPermissions,

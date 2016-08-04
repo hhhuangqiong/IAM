@@ -34,23 +34,11 @@ export function roleController(access) {
     }
   }
 
-  function* getRolePermissions(req, res, next) {
+  function* updateRole(req, res, next) {
     try {
-      const permissions = yield access.getRolePermissions(req.params);
-      res.json(permissions);
-    } catch (e) {
-      next(e);
-    }
-  }
-
-  function* setRolePermissions(req, res, next) {
-    try {
-      const command = {
-        roleId: req.params.roleId,
-        permissions: req.body,
-      };
-      const permissions = yield access.setRolePermissions(command);
-      res.json(permissions);
+      const command = _.extend({}, req.body, req.params);
+      const result = yield access.updateRole(command);
+      res.json(result);
     } catch (e) {
       next(e);
     }
@@ -78,8 +66,7 @@ export function roleController(access) {
   router.post('/roles', wrap(postRole));
   router.get('/roles', wrap(getRoles));
   router.delete('/roles/:roleId', wrap(deleteRole));
-  router.get('/roles/:roleId/permissions', wrap(getRolePermissions));
-  router.put('/roles/:roleId/permissions', wrap(setRolePermissions));
+  router.put('/roles/:roleId', wrap(updateRole));
   router.post('/roles/:roleId/users', wrap(assignRoleToUser));
   router.delete('/roles/:roleId/users/:username', wrap(revokeRoleFromUser));
 
