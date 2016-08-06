@@ -56,7 +56,7 @@ export default class MongoAdapter {
     }
     const document = Object.assign({ _id: id }, payload, { expiresAt });
     return getCollection(this.name)
-      .then(collection => collection.insert(document));
+      .then(collection => collection.findOneAndUpdate({ _id: id }, document, { upsert: true }));
   }
 
   /**
