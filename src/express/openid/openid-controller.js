@@ -1,7 +1,14 @@
 import { Router } from 'express';
 import wrap from 'co-express';
+import _ from 'lodash';
+import bodyParser from 'body-parser';
 
-export function openIdController(getProvider) {
+const jsonParser = bodyParser.json();
+const urlencodedParser = bodyParser.urlencoded({
+  extended: true,
+});
+
+export function openIdController(getProvider, userService) {
   const router = new Router();
 
   function* login(req, res, next) {
@@ -32,18 +39,58 @@ export function openIdController(getProvider) {
       res.status(500).end();
       return;
     }
-    const provider = yield getProvider;
-    const grantData = JSON.parse(grant).params;
-    const client = provider.get('Client').find(grantData.client_id);
-
+    const grantData = JSON.parse(grant);
     res.render('signIn', {
       grant: req.params.grant,
-      client,
-      request: grantData,
+      clientId: grantData.params.client_id,
+      redirectURL: grantData.params.redirect_uri,
+      details: grantData.details,
     });
   }
 
-  router.post('/login', wrap(login));
+
+  function* requestResetPassword(req, res, next) {
+    const command = _.extend({}, req.body, req.query);
+    try {
+      yield userService.requestResetPassword(command);
+      res.sendStatus(204);
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  function* setPassword(req, res, next) {
+    const command = _.extend({}, req.body, req.query);
+    try {
+      yield userService.setPassword(_.pick(command, ['id', 'token', 'password', 'event']));
+      // redirect to the redirect url
+      if (command.redirectURL) {
+        res.redirect(decodeURIComponent(command.redirectURL));
+        return;
+      }
+      // @TODO if no redirect url mention, may refer to the IAM index page
+      res.sendStatus(204);
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  function resetPasswordPage(req, res) {
+    res.render('resetPassword');
+  }
+
+  function setPasswordPage(req, res) {
+    res.render('setPassword');
+  }
+
+  router.post('/login', jsonParser, urlencodedParser, wrap(login));
   router.get('/interaction/:grant', wrap(loginInteraction));
+
+  router.get('/resetPassword', resetPasswordPage);
+  router.get('/setPassword', setPasswordPage);
+
+  router.post('/resetPassword', jsonParser, urlencodedParser, wrap(requestResetPassword));
+  router.post('/setPassword', jsonParser, urlencodedParser, wrap(setPassword));
+
   return router;
 }

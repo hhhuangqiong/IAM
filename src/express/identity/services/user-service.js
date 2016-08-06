@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { NotFoundError, ValidationError } from 'common-errors';
 import Joi from 'joi';
+import moment from 'moment';
 
 import { rename, mongoose as mongooseUtil, jsonPatch } from '../../../utils';
 import {
@@ -10,9 +11,11 @@ import {
   DEFAULT_SORT_ORDER,
 } from '../../../constants/param';
 
-export function userService(validator, { User, Company }) {
+const SET_PW_TOKEN = 'setPassword';
+const RESET_PW_TOKEN = 'resetPassword';
+
+export function userService(validator, { User, Company }, mailService) {
   const baseInfoSchema = Joi.object({
-    password: Joi.string(),
     name: Joi.object({
       formatted: Joi.string(),
       familyName: Joi.string(),
@@ -21,6 +24,7 @@ export function userService(validator, { User, Company }) {
       honorificPrefix: Joi.string(),
       honorificSuffix: Joi.string(),
     }),
+    password: Joi.string(),
     nickName: Joi.string(),
     profileUrl: Joi.string(),
     title: Joi.string(),
@@ -96,9 +100,11 @@ export function userService(validator, { User, Company }) {
   }
 
   const createUserCommandSchema = baseInfoSchema.keys({
-    id: Joi.string().required(),
+    id: Joi.string().email().required(),
     isRoot: Joi.boolean().default(false),
     active: Joi.boolean().default(false),
+    clientId: Joi.string(),
+    redirectURL: Joi.string(),
   });
 
   function* createUser(command) {
@@ -108,6 +114,13 @@ export function userService(validator, { User, Company }) {
 
     try {
       const user = yield User.create(sanitizedCommand);
+      // create sign up tokens
+      const token = yield mailService.sendSignUpEmail(user._id, {
+        clientId: sanitizedCommand.clientId,
+        redirectURL: sanitizedCommand.redirectURL,
+      });
+      user.tokens.push(User.makeToken(SET_PW_TOKEN, token));
+      yield user.save();
       return user.toJSON();
     } catch (e) {
       throw mongooseUtil.errorHandler(e);
@@ -115,7 +128,7 @@ export function userService(validator, { User, Company }) {
   }
 
   const getUsersCommandSchema = baseInfoSchema.keys({
-    id: Joi.string(),
+    id: Joi.string().email(),
     isRoot: Joi.boolean(),
     active: Joi.boolean(),
     pageNo: Joi.number().positive().default(DEFAULT_PAGE_NO),
@@ -147,7 +160,7 @@ export function userService(validator, { User, Company }) {
   }
 
   const getUserCommandSchema = Joi.object({
-    id: Joi.string().required(),
+    id: Joi.string().email().required(),
   });
 
   function* getUser(command) {
@@ -160,7 +173,7 @@ export function userService(validator, { User, Company }) {
   }
 
   const deleteUserCommandSchema = Joi.object({
-    id: Joi.string().required(),
+    id: Joi.string().email().required(),
   });
 
   function* deleteUser(command) {
@@ -173,7 +186,7 @@ export function userService(validator, { User, Company }) {
   }
 
   const updateUserCommandSchema = baseInfoSchema.keys({
-    id: Joi.string().required(),
+    id: Joi.string().email().required(),
     isRoot: Joi.boolean(),
     active: Joi.boolean(),
   });
@@ -202,7 +215,7 @@ export function userService(validator, { User, Company }) {
   }
 
   const patchUserCommandSchema = Joi.object({
-    id: Joi.string().required(),
+    id: Joi.string().email().required(),
     patches: Joi.array().items(),
   });
 
@@ -228,7 +241,7 @@ export function userService(validator, { User, Company }) {
     jsonPatch(currentUser, sanitizedCommand.patches);
     // create a new user when fail to find existing one
     if (!user) {
-      return yield yield createUser(currentUser);
+      return yield createUser(currentUser);
     }
 
     // if password still empty, no need to update
@@ -244,16 +257,82 @@ export function userService(validator, { User, Company }) {
     return null;
   }
 
-  function* verifyPassword(id, password) {
-    const user = yield User.findOne({ _id: id });
+  const verifyPasswordCommandSchema = Joi.object({
+    id: Joi.string().email().required(),
+    password: Joi.string().required(),
+  });
+
+  function* verifyPassword(command) {
+    const sanitizedCommand = validator.sanitize(command, verifyPasswordCommandSchema);
+    const user = yield User.findOne({ _id: sanitizedCommand.id });
     if (!user) {
       throw new NotFoundError('user');
     }
-    const result = user.isValidPassword(password);
+    const result = user.isValidPassword(sanitizedCommand.password);
     if (!result) {
       throw new ValidationError('password');
     }
     return result;
+  }
+
+  const setPasswordCommandSchema = Joi.object({
+    id: Joi.string().email().required(),
+    token: Joi.string().required(),
+    password: Joi.string().required(),
+    event: Joi.string().valid(RESET_PW_TOKEN, SET_PW_TOKEN).required(),
+  });
+
+  function* setPassword(command) {
+    const sanitizedCommand = validator.sanitize(command, setPasswordCommandSchema);
+    const user = yield User.findOne({ _id: sanitizedCommand.id });
+    if (!user) {
+      throw new NotFoundError('user');
+    }
+    const tokenSet = _.find(user.tokens, token => token.event === sanitizedCommand.event
+      && token.value === sanitizedCommand.token);
+    if (!tokenSet) {
+      throw new ValidationError('invalid token');
+    }
+    // consume the token
+    user.tokens = _.without(user.tokens, tokenSet);
+    // SET password has no expiration time
+    if (sanitizedCommand.event === RESET_PW_TOKEN) {
+      const hoursBefore = moment(moment()).diff(tokenSet.createdAt, 'hours');
+      if (hoursBefore >= 3) {
+        // save the consumed status before throw exception
+        yield user.save();
+        throw new ValidationError('token is expired');
+      }
+    }
+
+    // set the password
+    user.password = sanitizedCommand.password;
+    yield user.save();
+  }
+
+  const resetPasswordCommandSchema = Joi.object({
+    id: Joi.string().email().required(),
+    clientId: Joi.string(),
+    redirectURL: Joi.string(),
+  });
+
+  function* requestResetPassword(command) {
+    const sanitizedCommand = validator.sanitize(command, resetPasswordCommandSchema);
+    const user = yield User.findOne({ _id: sanitizedCommand.id });
+    if (!user) {
+      throw new NotFoundError('user');
+    }
+    // remove previous reset pw token and create reset pw token
+    user.tokens = _.reject(user.tokens, token => token.event === RESET_PW_TOKEN);
+    // cancel the current password
+    user.password = undefined;
+    const token = yield mailService.sendResetPasswordEmail(sanitizedCommand.id, {
+      clientId: sanitizedCommand.clientId,
+      redirectURL: sanitizedCommand.redirectURL,
+    });
+    const tokenSet = User.makeToken(RESET_PW_TOKEN, token);
+    user.tokens.push(tokenSet);
+    yield user.save();
   }
 
   return {
@@ -264,5 +343,7 @@ export function userService(validator, { User, Company }) {
     setUserInfo,
     patchUserInfo,
     verifyPassword,
+    setPassword,
+    requestResetPassword,
   };
 }

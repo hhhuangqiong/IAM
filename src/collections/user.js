@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import Q from 'q';
 import isUndefined from 'lodash/isUndefined';
 import timestamp from 'mongoose-timestamp';
+import randtoken from 'rand-token';
 
 import { toJSON } from '../utils/mongoose';
 
@@ -186,10 +187,16 @@ schema.pre('save', function preSave(next) {
 });
 
 schema.method('isValidPassword', function isValidPassword(password) {
-  return bcrypt.compareSync(password, this.hashedPassword);
+  return this.hashedPassword && bcrypt.compareSync(password, this.hashedPassword);
 });
 
 schema.static('hashPassword', hashPassword);
+
+schema.static('makeToken', (event, val) => ({
+  event,
+  value: val || randtoken.generate(16),
+  createdAt: new Date(),
+}));
 
 export const User = mongoose.model('User', schema);
 export default User;

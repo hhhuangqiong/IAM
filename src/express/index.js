@@ -26,11 +26,7 @@ export default function injectExpress(server) {
     overrideMethod,
   });
 
-  injectOpenIdRoutes(server, {
-    urlencodedParser,
-    jsonParser,
-    overrideMethod,
-  });
+  injectOpenIdRoutes(server);
 
   return server;
 }
