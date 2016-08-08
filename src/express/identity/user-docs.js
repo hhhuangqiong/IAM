@@ -245,7 +245,7 @@
    * @apiParam {Number} [size=20] the page size
    * @apiParam {Number} [page=0] the page number
    * @apiParam {String="id", "updatedAt", "createdAt"} [sortBy=id] sort by field
-   * @apiParam {String="asc","desc","ascending","descending","1","-1"} [sortOrder=asc] sort by order
+   * @apiParam {String="asc","desc"} [sortOrder=asc] sort by order
    * @apiSuccess {Number} total the total number
    * @apiSuccess {Number} page_size the number of result per page
    * @apiSuccess {Number} page_no the current page number
