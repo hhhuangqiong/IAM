@@ -12,7 +12,7 @@ export const toJSON = {
     // delete empty arrays, key _id which is duplicated with id
     Object.keys(ret).forEach(key => {
       // delete _id as it is diplayed in form of id.
-      if (Array.isArray(ret[key]) && !ret[key].length || key === '_id' || key === 'tokens') {
+      if (Array.isArray(ret[key]) && !ret[key].length || ['_id', 'tokens', 'hashedPassword', 'salt'].indexOf(key) > -1) {
         delete ret[key];
       }
     });
