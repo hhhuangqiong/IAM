@@ -1,24 +1,41 @@
 import { Provider } from 'oidc-provider/lib';
 import Q from 'q';
+import _ from 'lodash';
 
 import MongoAdapter from './adapters/mongodb';
 import Account from './account';
-import { config as openIdConfig, certificates } from './settings';
 import { SIGN_COOKIES_KEY } from '../../constants/cookiesKey';
 
-export function setUp(config) {
+export function setUp(config, openIdConfig, certificates) {
   // set up the mongo provider
-  openIdConfig.adapter = MongoAdapter;
+  const providerConfig = config;
+  providerConfig.adapter = MongoAdapter;
+
   // get the issuer from the config and prefix
   const issuer = `${config.get('APP_URL')}/openid/core`;
-  const provider = new Provider(issuer, openIdConfig);
+  const provider = new Provider(issuer, providerConfig);
   provider.app.keys = SIGN_COOKIES_KEY;
 
   // set the property onto Account
   Object.defineProperty(provider, 'Account', {
     value: Account,
   });
+
   return Q.all(certificates.map(cert => provider.addKey(cert)))
-    .then(() => Q.all(config.get('openid:clients').map(client => provider.addClient(client))))
+    .then(() => Q.all(_.map(config.get('openid:clients'), client => {
+      const mClient = client;
+      // if import from env variable, it will be string only
+      // convert back into arrays
+      if (typeof client.grant_types === 'string') {
+        mClient.grant_types = client.grant_types.split(',');
+      }
+      if (typeof client.redirect_uris === 'string') {
+        mClient.redirect_uris = client.redirect_uris.split(',');
+      }
+      if (typeof client.post_logout_redirect_uris === 'string') {
+        mClient.post_logout_redirect_uris = client.post_logout_redirect_uris.split(',');
+      }
+      return provider.addClient(mClient);
+    })))
     .then(() => provider);
 }

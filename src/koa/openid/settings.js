@@ -1,9 +1,12 @@
+const WEEK = 60 * 60 * 24 * 7 * 1000;
 export const config = {
   features: {
+    discovery: true,
     clientCredentials: true,
     encryption: true,
     introspection: true,
-    registration: true,
+    registration: false,
+    refreshToken: false,
     request: true,
     requestUri: true,
     revocation: true,
@@ -11,6 +14,19 @@ export const config = {
   },
   interactionPath: function interactionPath(grant) {
     return `/openid/interaction/${grant}`;
+  },
+  cookies: {
+    long: {
+      httpOnly: true,
+      // the time limit for the each login session on IAM
+      maxAge: 2 * WEEK,
+      signed: true,
+    },
+  },
+  ttl: {
+    AccessToken: 2 * 60 * 60, // 2 hours
+    AuthorizationCode: 10 * 60, // 10 minutes
+    IdToken: 2 * 60 * 60, // 2 hours
   },
 };
 
