@@ -28,12 +28,14 @@ describe('perform logo action', () => {
 
   describe('POST /identity/companies/:companyid/logo', () => {
     const companyInfo = {
-      id: 'CompanyJ',
       country: 'Hong Kong',
     };
+    let companyId;
     const companyLogo = path.resolve(__dirname, '../../res/logo.png');
     // insert the data first
-    before((done) => Company.create(companyInfo).done(() => done()));
+    before(() => Company.create(companyInfo).then(company => {
+      companyId = company._id.toString();
+    }));
 
     // remove all the data
     after((done) => {
@@ -42,7 +44,7 @@ describe('perform logo action', () => {
     });
 
     it('uploads successfully the logo to the company', (done) => {
-      agent.post(`/identity/companies/${companyInfo.id}/logo`)
+      agent.post(`/identity/companies/${companyId}/logo`)
         .set('Content-Type', 'multipart/form-data')
         .attach('logo', companyLogo)
         .expect(201)
@@ -50,7 +52,7 @@ describe('perform logo action', () => {
           expect(res.header).to.have.property('location');
           expect(res.body).to.have.property('id');
           expect(res.header.location).to.include(res.body.id);
-          Company.findOne({ _id: companyInfo.id }).then((company) => {
+          Company.findOne({ _id: companyId }).then((company) => {
             expect(company).to.have.property('logo');
             expect(company.logo.toString()).to.equal(res.body.id);
           }).then(() => {
@@ -65,7 +67,7 @@ describe('perform logo action', () => {
     });
 
     it('uploads unsuccessfully the logo to the non-existing company', (done) => {
-      agent.post('/identity/companies/fakeCompany/logo')
+      agent.post('/identity/companies/57a047f8281063f8149af640/logo')
         .set('Content-Type', 'multipart/form-data')
         .attach('logo', companyLogo)
         .expect(404)
@@ -73,13 +75,13 @@ describe('perform logo action', () => {
     });
 
     it('uploads unsuccessfully to the company without logo field', (done) => {
-      agent.post(`/identity/companies/${companyInfo.id}/logo`)
+      agent.post(`/identity/companies/${companyId}/logo`)
         .expect(422)
         .end(done);
     });
 
     it('uploads unsuccessfully to the company with unexpected file field', (done) => {
-      agent.post(`/identity/companies/${companyInfo.id}/logo`)
+      agent.post(`/identity/companies/${companyId}/logo`)
         .set('Content-Type', 'multipart/form-data')
         .attach('logo1', companyLogo)
         .expect(422)
@@ -89,7 +91,6 @@ describe('perform logo action', () => {
 
   describe('GET /identity/companies/logo/:logoId', () => {
     const companyInfo = {
-      id: 'CompanyK',
       country: 'Hong Kong',
     };
     const companyLogo = path.resolve(__dirname, '../../res/logo.png');
@@ -119,24 +120,30 @@ describe('perform logo action', () => {
         .end(done);
     });
 
-    it('get unsuccessfully the logo with wrong id', (done) => {
+    it('get unsuccessfully the logo with wrong id format', (done) => {
       agent.get('/identity/companies/logo/wrongId')
+        .expect(422)
+        .end(done);
+    });
+
+    it('get unsuccessfully the logo with wrong id', (done) => {
+      agent.get('/identity/companies/logo/57a047f8281063f8149af6a3')
         .expect(404)
         .end(done);
     });
 
     it('get unsuccessfully the logo without id', (done) => {
       agent.get('/identity/companies/logo')
-        .expect(404)
+        .expect(422)
         .end(done);
     });
   });
 
   describe('DELETE /identity/companies/:companyId/logo with logo', () => {
     const companyInfo = {
-      id: 'CompanyL',
       country: 'Hong Kong',
     };
+    let companyId;
     const companyLogo = path.resolve(__dirname, '../../res/logo.png');
     // insert the data first
     before((done) => {
@@ -146,7 +153,9 @@ describe('perform logo action', () => {
         // update the value for the company logo with logo file object id
         /* eslint no-underscore-dangle: ["error", { "allow": ["company", "_id"] }]*/
         companyInfo.logo = file._id;
-        Company.create(companyInfo).done(() => done());
+        Company.create(companyInfo).then(company => {
+          companyId = company._id.toString();
+        }).done(done);
       });
     });
 
@@ -157,11 +166,11 @@ describe('perform logo action', () => {
     });
 
     it('delete successfully the logo', (done) => {
-      agent.delete(`/identity/companies/${companyInfo.id}/logo`)
+      agent.delete(`/identity/companies/${companyId}/logo`)
         .expect(204)
         .end(() => {
           // expect the Company info logo link is removed
-          Company.findOne({ _id: companyInfo.id })
+          Company.findOne({ _id: companyId })
             .then((myCompany) => {
               expect(myCompany.logo).to.equal(undefined);
               done();
@@ -170,25 +179,33 @@ describe('perform logo action', () => {
     });
 
     it('delete unsuccessfully the logo with wrong companyid', (done) => {
-      agent.delete('/identity/companies/dummyCompany/logo')
+      agent.delete('/identity/companies/57a04694281063f8149af633/logo')
         .expect(404)
+        .end(done);
+    });
+
+    it('delete unsuccessfully the logo with wrong companyid format', (done) => {
+      agent.delete('/identity/companies/wrongFormat/logo')
+        .expect(422)
         .end(done);
     });
   });
 
   describe('DELETE /identity/companies/:companyId/logo without logoFile', () => {
     const companyInfo = {
-      id: 'CompanyP',
       country: 'Hong Kong',
     };
+    let companyId;
     // insert the data first
-    before(() => Company.create(companyInfo));
+    before(() => Company.create(companyInfo).then(company => {
+      companyId = company._id.toString();
+    }));
 
     // remove all the data
     after((done) => Company.remove({}, done));
 
     it('delete successfully the logo', (done) => {
-      agent.delete(`/identity/companies/${companyInfo.id}/logo`)
+      agent.delete(`/identity/companies/${companyId}/logo`)
         .expect(404)
         .end(done);
     });

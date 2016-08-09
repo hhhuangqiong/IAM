@@ -1,9 +1,19 @@
 import { NotFoundError } from 'common-errors';
 import Joi from 'joi';
 
+const idRegExp = /^[0-9a-fA-F]{24}$/;
 export function logoService(validator, { Company }, storage) {
+  // helper function to get company
+  function* findOneCompany(id) {
+    const company = yield Company.findOne({ _id: id });
+    if (!company) {
+      throw new NotFoundError('company');
+    }
+    return company;
+  }
+
   const getLogoCommandSchema = Joi.object({
-    id: Joi.string().required(),
+    id: Joi.string().regex(idRegExp).required(),
   });
 
   function* getLogo(command) {
@@ -13,15 +23,12 @@ export function logoService(validator, { Company }, storage) {
   }
 
   const deleteLogoCommandSchema = Joi.object({
-    id: Joi.string().required(),
+    id: Joi.string().regex(idRegExp).required(),
   });
 
   function* deleteLogo(command) {
     const sanitizedCommand = validator.sanitize(command, deleteLogoCommandSchema);
-    const company = yield Company.findOne({ _id: sanitizedCommand.id });
-    if (!company) {
-      throw new NotFoundError('company');
-    }
+    const company = yield findOneCompany(sanitizedCommand.id);
     if (!company.logo) {
       throw new NotFoundError('company logo');
     }
@@ -32,14 +39,14 @@ export function logoService(validator, { Company }, storage) {
   }
 
   const createLogoCommandSchema = Joi.object({
-    id: Joi.string().required(),
+    id: Joi.string().regex(idRegExp).required(),
     logo: Joi.object().required(),
   });
 
   function* createLogo(command) {
     const sanitizedCommand = validator.sanitize(command, createLogoCommandSchema);
     const file = command.logo;
-    const company = yield Company.findOne({ _id: sanitizedCommand.id });
+    const company = yield findOneCompany(sanitizedCommand.id);
     if (!company) {
       throw new NotFoundError('company');
     }

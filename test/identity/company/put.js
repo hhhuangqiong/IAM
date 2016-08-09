@@ -14,13 +14,15 @@ describe('PUT /identity/companies/:companyId', () => {
   });
 
   describe('replace the data', () => {
+    let companyId;
     const companyInfo = {
-      id: 'CompanyHK',
       country: 'Hong Kong',
       themeType: 'blue',
     };
     // insert the data first
-    before((done) => Company.create(companyInfo).done(() => done()));
+    before(() => Company.create(companyInfo).then(company => {
+      companyId = company._id.toString();
+    }));
 
     // remove all the data
     after((done) => Company.remove({}, done));
@@ -33,12 +35,12 @@ describe('PUT /identity/companies/:companyId', () => {
           formatted: 'USA',
         },
       };
-      agent.put(`/identity/companies/${companyInfo.id}`)
+      agent.put(`/identity/companies/${companyId}`)
         .set('Content-Type', 'application/json')
         .send(newCompanyInfo)
         .expect(204)
         .end(() => {
-          Company.findOne({ _id: companyInfo.id }).then((company) => {
+          Company.findOne({ _id: companyId }).then((company) => {
             expect(company.themeType).to.equal(newCompanyInfo.themeType);
             expect(company.address.formatted).to.equal(newCompanyInfo.address.formatted);
             expect(company.country).to.equal(newCompanyInfo.country);
@@ -47,7 +49,7 @@ describe('PUT /identity/companies/:companyId', () => {
     });
 
     it('put successfully and create the data with new id', (done) => {
-      const id = 'newNonExistingId';
+      const id = '57a047f8281063f8149af641';
       const newCompanyInfo = {
         country: 'USA',
         themeType: 'red',
@@ -62,10 +64,11 @@ describe('PUT /identity/companies/:companyId', () => {
           id,
         })
         .end((err, res) => {
-          const expectedHeader = `/identity/companies/${id}`;
+          expect(res.body).to.have.property('id');
+          const expectedHeader = `/identity/companies/${res.body.id}`;
           expect(res.header).to.have.property('location');
           expect(res.header.location).to.include(expectedHeader);
-          Company.findOne({ _id: id }).then((company) => {
+          Company.findOne({ _id: res.body.id }).then((company) => {
             expect(company.themeType).to.equal(newCompanyInfo.themeType);
             expect(company.address.formatted).to.equal(newCompanyInfo.address.formatted);
             expect(company.country).to.equal(newCompanyInfo.country);
@@ -84,21 +87,6 @@ describe('PUT /identity/companies/:companyId', () => {
           .send(myCompanyInfo)
           .expect(422)
           .end(done);
-    });
-
-    it('put unsuccessfully with missing id', (done) => {
-      const newCompanyInfo = {
-        country: 'USA',
-        themeType: 'red',
-        address: {
-          formatted: 'USA',
-        },
-      };
-      agent.put('/identity/companies')
-        .set('Content-Type', 'application/json')
-        .send(newCompanyInfo)
-        .expect(404)
-        .end(done);
     });
 
     it('put unsuccessfully with missing required field', (done) => {

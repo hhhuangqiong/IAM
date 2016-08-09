@@ -29,14 +29,13 @@ describe('GET /identity/companies', () => {
   describe('get all the companies', () => {
     let companyArray = [];
     // insert the data first
-    before((done) => {
+    before(() => {
       let count = 0;
       while (count < 25) {
         companyArray.push({
-          id: `company${count}`,
+          name: `company${count}`,
           country: 'Hong Kong',
           reseller: count === 0,
-          name: 'Another name',
           active: true,
           themeType: 'awesome',
           address: {
@@ -65,8 +64,14 @@ describe('GET /identity/companies', () => {
         count++;
       }
       // auto sort the data first
-      companyArray = sortBy(companyArray, ['id']);
-      Company.create(companyArray, done);
+      companyArray = sortBy(companyArray, ['name']);
+      return Company.create(companyArray).
+        then(result => {
+          // update the record for the array id and later compare with them
+          result.forEach((item, index) => {
+            companyArray[index].id = item._id.toString();
+          });
+        });
     });
 
     // remove all the data
@@ -179,8 +184,14 @@ describe('GET /identity/companies', () => {
     });
 
     it('fails get the non-existing company data', (done) => {
-      agent.get('/identity/companies/company123')
+      agent.get('/identity/companies/57a047f8281063f8149af64a')
            .expect(404)
+           .end(done);
+    });
+
+    it('fails get the invalid company id', (done) => {
+      agent.get('/identity/companies/wrongIdFormat')
+           .expect(422)
            .end(done);
     });
   });

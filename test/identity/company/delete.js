@@ -14,10 +14,10 @@ describe('DELETE /identity/companies/:id', () => {
   });
 
   describe('delete the company', () => {
+    let companyId;
     // insert the data first
-    before((done) => {
+    before(() => {
       const company = {
-        id: 'companyA',
         country: 'Hong Kong',
         reseller: false,
         name: 'Another name',
@@ -45,19 +45,21 @@ describe('DELETE /identity/companies/:id', () => {
           email: 'MarcoFa@abc.com',
         }],
       };
-      Company.create(company, done);
+      return Company.create(company)
+        .then(mCompany => {
+          companyId = mCompany._id.toString();
+        });
     });
 
     // remove all the data
     after((done) => Company.remove({}, done));
 
     it('successfully deletes the company record', (done) => {
-      const id = 'companyA';
-      agent.delete(`/identity/companies/${id}`)
+      agent.delete(`/identity/companies/${companyId}`)
            .expect(204)
            .end(() => {
              // check the mongo and expect no more record
-             Company.findOne({ _id: id }).then((company) => {
+             Company.findOne({ _id: companyId }).then((company) => {
                expect(company).to.equal(null);
                done();
              });
@@ -65,7 +67,7 @@ describe('DELETE /identity/companies/:id', () => {
     });
 
     it('successfully deletes the non-existing company record', (done) => {
-      agent.delete('/identity/companies/companyNotExist')
+      agent.delete('/identity/companies/57a047f8281063f8149af643')
            .expect(404)
            .end(done);
     });

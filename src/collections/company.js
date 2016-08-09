@@ -8,11 +8,6 @@ const schema = new mongoose.Schema({
     ref: 'Company',
     type: String,
   },
-  _id: {
-    type: String,
-    unique: true,
-    required: true,
-  },
   country: {
     type: String,
     required: true,

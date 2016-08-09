@@ -23,17 +23,6 @@ describe('POST /identity/companies', () => {
            .end(done);
     });
 
-    it('fails to create company without id', (done) => {
-      const companyInfo = {
-        country: 'Hong Kong',
-      };
-      agent.post('/identity/companies')
-           .set('Content-Type', 'application/json')
-           .send(companyInfo)
-           .expect(422)
-           .end(done);
-    });
-
     it('fails to create company without country', (done) => {
       const companyInfo = {
         id: 'companyA',
@@ -47,7 +36,7 @@ describe('POST /identity/companies', () => {
 
     it('successfully creates company', (done) => {
       const companyInfo = {
-        id: 'companyB',
+        name: 'companyB',
         country: 'Hong Kong',
       };
       agent.post('/identity/companies')
@@ -55,12 +44,17 @@ describe('POST /identity/companies', () => {
            .send(companyInfo)
            .expect(201)
            .end((err, res) => {
-             const expectedHeader = `/identity/companies/${companyInfo.id}`;
+             if (err) {
+               done(err);
+               return;
+             }
+             expect(res.body).to.have.property('id');
+             const expectedHeader = `/identity/companies/${res.body.id}`;
              expect(res.header).to.have.property('location');
              expect(res.header.location).to.include(expectedHeader);
 
              // also ensure the model has such record
-             Company.findOne({ _id: companyInfo.id }).then((company) => {
+             Company.findOne({ _id: res.body.id }).then((company) => {
                expect(company.country).to.equal(companyInfo.country);
              })
              .done(done);
@@ -69,7 +63,6 @@ describe('POST /identity/companies', () => {
 
     it('successfully creates company with more details', (done) => {
       const companyInfo = {
-        id: 'companyC',
         country: 'Hong Kong',
         reseller: true,
         name: 'Another name',
@@ -103,10 +96,11 @@ describe('POST /identity/companies', () => {
            .send(companyInfo)
            .expect(201)
            .end((err, res) => {
-             const expectedHeader = `/identity/companies/${companyInfo.id}`;
+             expect(res.body).to.have.property('id');
+             const expectedHeader = `/identity/companies/${res.body.id}`;
              expect(res.header).to.have.property('location');
              expect(res.header.location).to.include(expectedHeader);
-             Company.findOne({ _id: companyInfo.id }).then((company) => {
+             Company.findOne({ _id: res.body.id }).then((company) => {
                expect(company.country).to.equal(companyInfo.country);
                expect(company.name).to.equal(companyInfo.name);
                expect(company.themeType).to.equal(companyInfo.themeType);
@@ -133,53 +127,6 @@ describe('POST /identity/companies', () => {
            .send(companyInfo)
            .expect(422)
            .end(done);
-    });
-  });
-
-  describe('create another company when there is existing company', () => {
-    const companyInfo = {
-      id: 'companyD',
-      country: 'Hong Kong',
-    };
-    let companyId;
-
-    // insert the data first
-    before((done) => Company.create(companyInfo)
-      .then((company) => {
-        /* eslint no-underscore-dangle: ["error", { "allow": ["company", "_id"] }]*/
-        companyId = company._id.toString();
-        done();
-      })
-    );
-
-    // clean up the data
-    after((done) => Company.remove({}, done));
-
-    it('fails to create duplicate company id', (done) => {
-      agent.post('/identity/companies')
-           .set('Content-Type', 'application/json')
-           .send(companyInfo)
-           .expect(409)
-           .end(done);
-    });
-
-    it('create a new company and link up when parent company is mentioned', (done) => {
-      const anotherCompanyInfo = {
-        parent: 'companyD',
-        id: 'companyE',
-        country: 'Hong Kong',
-      };
-      agent.post('/identity/companies')
-           .set('Content-Type', 'application/json')
-           .send(anotherCompanyInfo)
-           .expect(201)
-           .end(() => {
-             Company.findOne({ _id: anotherCompanyInfo.id }).then((company) => {
-               expect(company.parent.toString()).to.equal(companyId);
-               expect(company.id).to.equal(anotherCompanyInfo.id);
-             })
-             .done(done);
-           });
     });
   });
 });

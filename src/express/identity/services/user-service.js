@@ -135,11 +135,29 @@ export function userService(validator, { User, Company }, mailService) {
     pageSize: Joi.number().positive().default(DEFAULT_PAGE_SIZE),
     sortBy: Joi.string().default(DEFAULT_USER_SORT_BY),
     sortOrder: Joi.string().valid('asc', 'desc').default(DEFAULT_SORT_ORDER),
-  });
+    search: Joi.string(),
+    ids: Joi.string(),
+  }).without('id', ['ids', 'search']) // id, ids or seach can't exist together
+  .without('ids', 'search');
 
   function* getUsers(command) {
     const sanitizedCommand = validator.sanitize(command, getUsersCommandSchema);
     let filters = _.omit(sanitizedCommand, ['sortBy', 'sortOrder', 'pageNo', 'pageSize']);
+    // search will perform search by id
+    // perform search by id contain the filter param which similar to SQL like
+    if (filters.search) {
+      try {
+        filters.id = new RegExp(`.*${filters.search}.*`, 'i');
+        delete filters.search;
+      } catch (ex) {
+        throw new ValidationError('invalid search');
+      }
+    } else if (filters.ids) {
+      filters.id = {
+        $in: filters.ids.split(','),
+      };
+      delete filters.ids;
+    }
     // update the filter with the _id key
     filters = rename(filters, { id: '_id' });
     let sort = {};

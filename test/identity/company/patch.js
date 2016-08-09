@@ -15,8 +15,8 @@ describe('PATCH /identity/companies', () => {
   });
 
   describe('patch existing user', () => {
+    let companyId;
     const companyInfo = {
-      id: 'companyC',
       country: 'Hong Kong',
       reseller: true,
       name: 'Another name',
@@ -46,7 +46,10 @@ describe('PATCH /identity/companies', () => {
     };
 
     // insert the data first
-    before((done) => Company.create(companyInfo, done));
+    before(() => Company.create(companyInfo)
+      .then(company => {
+        companyId = company._id.toString();
+      }));
 
     // remove all the data
     after((done) => Company.remove({}, done));
@@ -55,7 +58,7 @@ describe('PATCH /identity/companies', () => {
       const wrongFormat = {
         wrong: 'format',
       };
-      agent.patch(`/identity/companies/${companyInfo.id}`)
+      agent.patch(`/identity/companies/${companyId}`)
            .set('Content-Type', 'application/json')
            .send(wrongFormat)
            .expect(422)
@@ -68,7 +71,7 @@ describe('PATCH /identity/companies', () => {
         path: '/password',
         value: 'company',
       }];
-      agent.patch('/identity/companies/notExitingComapny')
+      agent.patch('/identity/companies/57a047f8281063f814aaaa43')
            .set('Content-Type', 'application/json')
            .send(patches)
            .expect(422)
@@ -76,7 +79,7 @@ describe('PATCH /identity/companies', () => {
     });
 
     it('patches with a new companyid and create company with right operation', (done) => {
-      const newId = 'notExistedUsername123';
+      const newId = '57a047f8281163fc149af64b';
       const patches = [{
         op: 'add',
         path: '/country',
@@ -93,10 +96,11 @@ describe('PATCH /identity/companies', () => {
            .send(patches)
            .expect(201)
            .end((err, res) => {
-             const expectedHeader = `/identity/companies/${newId}`;
+             expect(res.body).to.have.property('id');
+             const expectedHeader = `/identity/companies/${res.body.id}`;
              expect(res.header).to.have.property('location');
              expect(res.header.location).to.include(expectedHeader);
-             Company.findOne({ _id: newId }).then((company) => {
+             Company.findOne({ _id: res.body.id }).then((company) => {
                const localCompany = company.toJSON();
                expect(localCompany.country).to.equal(patches[0].value);
                expect(localCompany.address).to.deep.equal(patches[1].value);
@@ -114,12 +118,12 @@ describe('PATCH /identity/companies', () => {
         email: 'hi@gmail.com',
       });
       const patches = jsonpatch.generate(observer);
-      agent.patch(`/identity/companies/${companyInfo.id}`)
+      agent.patch(`/identity/companies/${companyId}`)
            .set('Content-Type', 'application/json')
            .send(patches)
            .expect(204)
            .end(() => {
-             Company.findOne({ _id: companyInfo.id }).then((company) => {
+             Company.findOne({ _id: companyId }).then((company) => {
                const localCompany = company.toJSON();
                expect(localCompany.timezone).to.equal(companyInfo.timezone);
                expect(localCompany.technicalContact).to.deep.equal(companyInfo.technicalContact);
@@ -134,7 +138,7 @@ describe('PATCH /identity/companies', () => {
         path: '/country',
         value: 'universe',
       }];
-      agent.patch(`/identity/companies/${companyInfo.id}`)
+      agent.patch(`/identity/companies/${companyId}`)
            .set('Content-Type', 'application/json')
            .send(patches)
            .expect(422)
@@ -147,7 +151,7 @@ describe('PATCH /identity/companies', () => {
         path: '/country',
         value: 123,
       }];
-      agent.patch(`/identity/companies/${companyInfo.id}`)
+      agent.patch(`/identity/companies/${companyId}`)
            .set('Content-Type', 'application/json')
            .send(patches)
            .expect(422)
@@ -160,7 +164,7 @@ describe('PATCH /identity/companies', () => {
         path: '/nonExisting',
         value: 'dummy',
       }];
-      agent.patch(`/identity/companies/${companyInfo.id}`)
+      agent.patch(`/identity/companies/${companyId}`)
            .set('Content-Type', 'application/json')
            .send(patches)
            .expect(422)
