@@ -36,12 +36,13 @@ export function companyController(companyService, logoService) {
 
   function* getCompanies(req, res, next) {
     try {
-      const { total, pageSize, pageNo, companies } = yield companyService.getCompanies(req.query);
+      const { total, pageTotal, pageSize, pageNo, companies } = yield companyService.getCompanies(req.query);
       const result = {
         total,
-        page_size: pageSize,
-        page_no: pageNo,
-        resources: companies.map((comp) => formatCompany(comp, req)),
+        pageTotal,
+        pageSize,
+        pageNo,
+        items: companies.map((comp) => formatCompany(comp, req)),
       };
       res.status(200);
       res.json(result);

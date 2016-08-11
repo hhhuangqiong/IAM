@@ -84,11 +84,11 @@ describe('GET /identity/companies', () => {
            .end((err, res) => {
              expect(res).to.have.property('body');
              expect(res.body.total).to.equal(companyArray.length);
-             expect(res.body.page_size).to.equal(DEFAULT_PAGE_SIZE);
-             expect(res.body.page_no).to.equal(DEFAULT_PAGE_NO);
-             expect(res.body.resources).to.have.lengthOf(DEFAULT_PAGE_SIZE);
+             expect(res.body.pageSize).to.equal(DEFAULT_PAGE_SIZE);
+             expect(res.body.pageNo).to.equal(DEFAULT_PAGE_NO);
+             expect(res.body.items).to.have.lengthOf(DEFAULT_PAGE_SIZE);
              for (let i = 0; i < DEFAULT_PAGE_SIZE; i++) {
-               const currentObj = removeDynamicAttribute(res.body.resources[i]);
+               const currentObj = removeDynamicAttribute(res.body.items[i]);
                expect(currentObj).to.deep.equal(companyArray[i]);
              }
              done();
@@ -103,11 +103,11 @@ describe('GET /identity/companies', () => {
            .end((err, res) => {
              expect(res).to.have.property('body');
              expect(res.body.total).to.equal(companyArray.length);
-             expect(res.body.page_no).to.equal(DEFAULT_PAGE_NO);
-             expect(res.body.page_size).to.equal(size);
-             expect(res.body.resources).to.have.lengthOf(size);
+             expect(res.body.pageNo).to.equal(DEFAULT_PAGE_NO);
+             expect(res.body.pageSize).to.equal(size);
+             expect(res.body.items).to.have.lengthOf(size);
              for (let i = 0; i < size; i++) {
-               const currentObj = removeDynamicAttribute(res.body.resources[i]);
+               const currentObj = removeDynamicAttribute(res.body.items[i]);
                expect(currentObj).to.deep.equal(companyArray[i]);
              }
              done();
@@ -123,11 +123,11 @@ describe('GET /identity/companies', () => {
              const expectedItemNo = companyArray.length - pageNo * DEFAULT_PAGE_SIZE;
              expect(res).to.have.property('body');
              expect(res.body.total).to.equal(companyArray.length);
-             expect(res.body.page_no).to.equal(pageNo);
-             expect(res.body.page_size).to.equal(DEFAULT_PAGE_SIZE);
-             expect(res.body.resources).to.have.lengthOf(expectedItemNo);
+             expect(res.body.pageNo).to.equal(pageNo);
+             expect(res.body.pageSize).to.equal(DEFAULT_PAGE_SIZE);
+             expect(res.body.items).to.have.lengthOf(expectedItemNo);
              for (let i = 0; i < expectedItemNo; i++) {
-               const currentObj = removeDynamicAttribute(res.body.resources[i]);
+               const currentObj = removeDynamicAttribute(res.body.items[i]);
                expect(currentObj).to.deep.equal(companyArray[pageNo * DEFAULT_PAGE_SIZE + i]);
              }
              done();
@@ -143,11 +143,11 @@ describe('GET /identity/companies', () => {
            .end((err, res) => {
              expect(res).to.have.property('body');
              expect(res.body.total).to.equal(companyArray.length);
-             expect(res.body.page_no).to.equal(pageNo);
-             expect(res.body.page_size).to.equal(pageSize);
-             expect(res.body.resources).to.have.lengthOf(pageSize);
+             expect(res.body.pageNo).to.equal(pageNo);
+             expect(res.body.pageSize).to.equal(pageSize);
+             expect(res.body.items).to.have.lengthOf(pageSize);
              for (let i = 0; i < pageSize; i++) {
-               const currentObj = removeDynamicAttribute(res.body.resources[i]);
+               const currentObj = removeDynamicAttribute(res.body.items[i]);
                expect(currentObj).to.deep.equal(companyArray[pageNo * pageSize + i]);
              }
              done();
@@ -161,10 +161,10 @@ describe('GET /identity/companies', () => {
            .end((err, res) => {
              expect(res).to.have.property('body');
              expect(res.body.total).to.equal(companyArray.length);
-             expect(res.body.page_size).to.equal(DEFAULT_PAGE_SIZE);
-             expect(res.body.resources).to.have.lengthOf(DEFAULT_PAGE_SIZE);
+             expect(res.body.pageSize).to.equal(DEFAULT_PAGE_SIZE);
+             expect(res.body.items).to.have.lengthOf(DEFAULT_PAGE_SIZE);
              for (let i = 0; i < DEFAULT_PAGE_SIZE; i++) {
-               const currentObj = removeDynamicAttribute(res.body.resources[i]);
+               const currentObj = removeDynamicAttribute(res.body.items[i]);
                expect(currentObj).to.deep.equal(companyArray[companyArray.length - 1 - i]);
              }
              done();

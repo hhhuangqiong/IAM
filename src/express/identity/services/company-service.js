@@ -124,6 +124,7 @@ export function companyService(validator, { Company }, logoService) {
     const total = yield Company.find(filters).count();
     return {
       total,
+      pageTotal: Math.ceil(total / sanitizedCommand.pageSize),
       pageNo: sanitizedCommand.pageNo,
       pageSize: sanitizedCommand.pageSize,
       companies: companies.map((company) => company.toJSON()),

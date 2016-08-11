@@ -173,6 +173,7 @@ export function userService(validator, { User, Company }, mailService) {
     const total = yield User.find(filters).count();
     return {
       total,
+      pageTotal: Math.ceil(total / sanitizedCommand.pageSize),
       pageNo: sanitizedCommand.pageNo,
       pageSize: sanitizedCommand.pageSize,
       users: users.map((user) => user.toJSON()),

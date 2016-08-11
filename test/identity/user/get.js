@@ -95,11 +95,11 @@ describe('GET /identity/users', () => {
            .end((err, res) => {
              expect(res).to.have.property('body');
              expect(res.body.total).to.equal(userArray.length);
-             expect(res.body.page_size).to.equal(DEFAULT_PAGE_SIZE);
-             expect(res.body.page_no).to.equal(DEFAULT_PAGE_NO);
-             expect(res.body.resources).to.have.lengthOf(DEFAULT_PAGE_SIZE);
+             expect(res.body.pageSize).to.equal(DEFAULT_PAGE_SIZE);
+             expect(res.body.pageNo).to.equal(DEFAULT_PAGE_NO);
+             expect(res.body.items).to.have.lengthOf(DEFAULT_PAGE_SIZE);
              for (let i = 0; i < DEFAULT_PAGE_SIZE; i++) {
-               const currentObj = removeDynamicAttribute(res.body.resources[i]);
+               const currentObj = removeDynamicAttribute(res.body.items[i]);
                expect(currentObj).to.deep.equal(userArray[i]);
              }
              done();
@@ -114,11 +114,11 @@ describe('GET /identity/users', () => {
            .end((err, res) => {
              expect(res).to.have.property('body');
              expect(res.body.total).to.equal(userArray.length);
-             expect(res.body.page_no).to.equal(DEFAULT_PAGE_NO);
-             expect(res.body.page_size).to.equal(size);
-             expect(res.body.resources).to.have.lengthOf(size);
+             expect(res.body.pageNo).to.equal(DEFAULT_PAGE_NO);
+             expect(res.body.pageSize).to.equal(size);
+             expect(res.body.items).to.have.lengthOf(size);
              for (let i = 0; i < size; i++) {
-               const currentObj = removeDynamicAttribute(res.body.resources[i]);
+               const currentObj = removeDynamicAttribute(res.body.items[i]);
                expect(currentObj).to.deep.equal(userArray[i]);
              }
              done();
@@ -133,11 +133,11 @@ describe('GET /identity/users', () => {
            .end((err, res) => {
              expect(res).to.have.property('body');
              expect(res.body.total).to.equal(userArray.length);
-             expect(res.body.page_no).to.equal(DEFAULT_PAGE_NO);
-             expect(res.body.page_size).to.equal(size);
-             expect(res.body.resources).to.have.lengthOf(userArray.length);
+             expect(res.body.pageNo).to.equal(DEFAULT_PAGE_NO);
+             expect(res.body.pageSize).to.equal(size);
+             expect(res.body.items).to.have.lengthOf(userArray.length);
              for (let i = 0; i < userArray.length; i++) {
-               const currentObj = removeDynamicAttribute(res.body.resources[i]);
+               const currentObj = removeDynamicAttribute(res.body.items[i]);
                expect(currentObj).to.deep.equal(userArray[i]);
              }
              done();
@@ -154,11 +154,11 @@ describe('GET /identity/users', () => {
                pageNo * DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZE);
              expect(res).to.have.property('body');
              expect(res.body.total).to.equal(userArray.length);
-             expect(res.body.page_no).to.equal(pageNo);
-             expect(res.body.page_size).to.equal(DEFAULT_PAGE_SIZE);
-             expect(res.body.resources).to.have.lengthOf(expectedItemNo);
+             expect(res.body.pageNo).to.equal(pageNo);
+             expect(res.body.pageSize).to.equal(DEFAULT_PAGE_SIZE);
+             expect(res.body.items).to.have.lengthOf(expectedItemNo);
              for (let i = 0; i < expectedItemNo; i++) {
-               const currentObj = removeDynamicAttribute(res.body.resources[i]);
+               const currentObj = removeDynamicAttribute(res.body.items[i]);
                const expectedIndex = pageNo * DEFAULT_PAGE_SIZE + i;
                expect(currentObj).to.deep.equal(userArray[expectedIndex]);
              }
@@ -175,11 +175,11 @@ describe('GET /identity/users', () => {
            .end((err, res) => {
              expect(res).to.have.property('body');
              expect(res.body.total).to.equal(userArray.length);
-             expect(res.body.page_no).to.equal(pageNo);
-             expect(res.body.page_size).to.equal(pageSize);
-             expect(res.body.resources).to.have.lengthOf(pageSize);
+             expect(res.body.pageNo).to.equal(pageNo);
+             expect(res.body.pageSize).to.equal(pageSize);
+             expect(res.body.items).to.have.lengthOf(pageSize);
              for (let i = 0; i < pageSize; i++) {
-               const currentObj = removeDynamicAttribute(res.body.resources[i]);
+               const currentObj = removeDynamicAttribute(res.body.items[i]);
                expect(currentObj).to.deep.equal(userArray[pageNo * pageSize + i]);
              }
              done();
@@ -195,10 +195,10 @@ describe('GET /identity/users', () => {
            .end((err, res) => {
              expect(res).to.have.property('body');
              expect(res.body.total).to.equal(userArray.length);
-             expect(res.body.page_size).to.equal(DEFAULT_PAGE_SIZE);
-             expect(res.body.resources).to.have.lengthOf(DEFAULT_PAGE_SIZE);
+             expect(res.body.pageSize).to.equal(DEFAULT_PAGE_SIZE);
+             expect(res.body.items).to.have.lengthOf(DEFAULT_PAGE_SIZE);
              for (let i = 0; i < DEFAULT_PAGE_SIZE; i++) {
-               const currentObj = removeDynamicAttribute(res.body.resources[i]);
+               const currentObj = removeDynamicAttribute(res.body.items[i]);
                expect(currentObj).to.deep.equal(userArray[userArray.length - 1 - i]);
              }
              done();

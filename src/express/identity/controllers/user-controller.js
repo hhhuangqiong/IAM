@@ -33,12 +33,13 @@ export function userController(userService) {
 
   function* getUsers(req, res, next) {
     try {
-      const { total, pageNo, pageSize, users } = yield userService.getUsers(req.query);
+      const { total, pageTotal, pageNo, pageSize, users } = yield userService.getUsers(req.query);
       const result = {
         total,
-        page_size: pageSize,
-        page_no: pageNo,
-        resources: users,
+        pageTotal,
+        pageSize,
+        pageNo,
+        items: users,
       };
       res.status(200);
       res.json(result);
