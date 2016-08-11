@@ -14,6 +14,7 @@ import {
 const SET_PW_TOKEN = 'setPassword';
 const RESET_PW_TOKEN = 'resetPassword';
 
+const objectIdRegExp = /^[0-9a-fA-F]{24}$/;
 export function userService(validator, { User, Company }, mailService) {
   const baseInfoSchema = Joi.object({
     name: Joi.object({
@@ -77,8 +78,8 @@ export function userService(validator, { User, Company }, mailService) {
     gender: Joi.string(),
     birthdate: Joi.string(),
     website: Joi.string(),
-    affiliatedCompany: Joi.string(),
-    assignedCompanies: Joi.array().items(Joi.string()),
+    affiliatedCompany: Joi.string().regex(objectIdRegExp),
+    assignedCompanies: Joi.array().items(Joi.string().regex(objectIdRegExp)),
   });
 
   function* validateCompany(companyId) {
@@ -131,6 +132,7 @@ export function userService(validator, { User, Company }, mailService) {
     id: Joi.string().email(),
     isRoot: Joi.boolean(),
     active: Joi.boolean(),
+    affiliatedCompany: Joi.string().regex(objectIdRegExp),
     pageNo: Joi.number().positive().default(DEFAULT_PAGE_NO),
     pageSize: Joi.number().positive().default(DEFAULT_PAGE_SIZE),
     sortBy: Joi.string().default(DEFAULT_USER_SORT_BY),

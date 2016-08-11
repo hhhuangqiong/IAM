@@ -6,7 +6,7 @@ import { toJSON } from '../utils/mongoose';
 const schema = new mongoose.Schema({
   parent: {
     ref: 'Company',
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
   },
   country: {
     type: String,

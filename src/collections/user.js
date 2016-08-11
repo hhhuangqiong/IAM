@@ -115,12 +115,12 @@ const schema = new mongoose.Schema({
   birthdate: String,
   website: String,
   affiliatedCompany: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'Company',
   },
   assignedCompanies: [{
     _id: false,
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'Company',
   }],
   tokens: [{
