@@ -1,6 +1,7 @@
 import { Provider } from 'oidc-provider/lib';
 import Q from 'q';
 import _ from 'lodash';
+import logger from 'winston';
 
 import MongoAdapter from './adapters/mongodb';
 import Account from './account';
@@ -8,7 +9,7 @@ import { SIGN_COOKIES_KEY } from '../../constants/cookiesKey';
 
 export function setUp(config, openIdConfig, certificates) {
   // set up the mongo provider
-  const providerConfig = config;
+  const providerConfig = openIdConfig;
   providerConfig.adapter = MongoAdapter;
 
   // get the issuer from the config and prefix
@@ -19,6 +20,16 @@ export function setUp(config, openIdConfig, certificates) {
   // set the property onto Account
   Object.defineProperty(provider, 'Account', {
     value: Account,
+  });
+
+  // log all the errors
+  const errorType = ['server_error', 'authorization.error', 'end_session.error',
+  'introspection.error', 'discovery.error', 'grant.error', 'userinfo.error', 'revocation.error'];
+
+  _.each(errorType, type => {
+    provider.on(type, error => {
+      logger.error(`[OPENID]${type}:${error}`);
+    });
   });
 
   return Q.all(certificates.map(cert => provider.addKey(cert)))
