@@ -16,7 +16,7 @@ export default class Account {
   static findByLogin(id, password) {
     const { userService } = getContainer();
     const wrappedVerifyPassword = co.wrap(userService.verifyPassword);
-    return wrappedVerifyPassword.call(userService, id, password)
+    return wrappedVerifyPassword.call(userService, { id, password })
      .then(() => this.findById(id));
   }
 

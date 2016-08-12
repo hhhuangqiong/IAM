@@ -28,14 +28,14 @@ describe('GET /identity/users', () => {
     });
   });
 
-  describe('get all the companies', () => {
+  describe('get all the users', () => {
     let userArray = [];
     // insert the data first
     before((done) => {
       let count = 0;
       while (count < 45) {
         userArray.push({
-          id: `user${count}`,
+          id: `user${count}@test.com`,
           isRoot: count === 0,
           name: {
             familyName: 'bigFamily',
@@ -218,7 +218,7 @@ describe('GET /identity/users', () => {
     });
 
     it('fails get the non-existing user data', (done) => {
-      agent.get('/identity/users/nonExistingUser')
+      agent.get('/identity/users/nonExistingUser@abc.com')
            .expect(404)
            .end(done);
     });

@@ -2,9 +2,12 @@ import { describe, it } from 'mocha';
 import { expect } from 'chai';
 import jsonpatch from 'fast-json-patch';
 import bcrypt from 'bcrypt';
+import sinon from 'sinon';
+import Q from 'q';
 
 import getAgent from '../../getAgent';
 import User from '../../../src/collections/user';
+import { getContainer } from '../../../src/utils/ioc';
 
 describe('PATCH /identity/users', () => {
   let agent;
@@ -69,12 +72,19 @@ describe('PATCH /identity/users', () => {
         value: 'MIIDQzCCAqygAwIBAgICEAAwDQYJKoZIhvcNAQEFBQAwTjELMAkGA1UEBhMCV=',
       }],
     };
-
+    let stubToken;
     // insert the data first
-    before((done) => User.create(userInfo, done));
+    before((done) => {
+      const { emailService } = getContainer();
+      stubToken = sinon.stub(emailService, 'sendSignUpEmail').returns(Q.resolve('dummyToken'));
+      User.create(userInfo, done);
+    });
 
     // remove all the data
-    after((done) => User.remove({}, done));
+    after((done) => {
+      stubToken.restore();
+      User.remove({}, done);
+    });
 
     it('patches with incorrect operation', (done) => {
       const wrongFormat = {
@@ -93,7 +103,7 @@ describe('PATCH /identity/users', () => {
         path: '/password',
         value: 'th1omas',
       }];
-      agent.patch('/identity/users/notExistedUsername')
+      agent.patch('/identity/users/notExistedUsername@test.com')
            .set('Content-Type', 'application/json')
            .send(patches)
            .expect(422)
@@ -101,7 +111,7 @@ describe('PATCH /identity/users', () => {
     });
 
     it('patches with a new id and create user with right operation', (done) => {
-      const newName = 'notExistedUsername123';
+      const newName = 'notExistedUsername@test.com';
       const patches = [{
         op: 'add',
         path: '/password',

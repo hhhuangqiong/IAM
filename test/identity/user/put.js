@@ -1,8 +1,11 @@
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
+import sinon from 'sinon';
+import Q from 'q';
 
 import getAgent from '../../getAgent';
 import User from '../../../src/collections/user';
+import { getContainer } from '../../../src/utils/ioc';
 
 describe('PUT /identity/users/:id', () => {
   let agent;
@@ -22,11 +25,19 @@ describe('PUT /identity/users/:id', () => {
         giveName: 'my',
       },
     };
+    let stubToken;
     // insert the data first
-    before((done) => User.create(userInfo).done(() => done()));
+    before((done) => {
+      const { emailService } = getContainer();
+      stubToken = sinon.stub(emailService, 'sendSignUpEmail').returns(Q.resolve('dummyToken'));
+      User.create(userInfo).done(() => done());
+    });
 
     // remove all the data
-    after((done) => User.remove({}, done));
+    after((done) => {
+      stubToken.restore();
+      User.remove({}, done);
+    });
 
     it('put successfully and replace the data', (done) => {
       const newUserInfo = {
@@ -51,7 +62,7 @@ describe('PUT /identity/users/:id', () => {
     });
 
     it('put successfully and create the data with new id', (done) => {
-      const id = 'newNonExistingId';
+      const id = 'newNonExistingId@test.com';
       const newUserInfo = {
         title: 'USA',
         gender: 'female',
@@ -80,7 +91,7 @@ describe('PUT /identity/users/:id', () => {
     });
 
     it('unsuccessfully put user with invalid data format', (done) => {
-      const unknowId = 'unknownRandomIdNewPut';
+      const unknowId = 'unknownRandomIdNewPut@test.com';
       const myUserInfo = {
         country: 'Hong Kong',
         address: 'Hong Kong',

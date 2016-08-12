@@ -2,6 +2,7 @@ import Bottle from 'bottlejs';
 import Grid from 'gridfs-stream';
 import mongoose from 'mongoose';
 import Q from 'q';
+import M800MailClient from 'm800-mail-service-client';
 
 import nconf from '../initializers/nconf';
 import gridFs from './gridFs';
@@ -9,6 +10,7 @@ import gridFs from './gridFs';
 import { companyService } from '../express/identity/services/company-service';
 import { logoService } from '../express/identity/services/logo-service';
 import { userService } from '../express/identity/services/user-service';
+import { emailService } from '../express/identity/services/email-service';
 import { accessService } from '../express/access/services/access-service';
 import { roleController } from '../express/access/controllers/role-controller';
 import { userController as roleUserController } from '../express/access/controllers/user-controller';
@@ -59,8 +61,14 @@ export function initialize() {
   // company service
   iocBottle.service('companyService', companyService, 'validator', 'models', 'logoService');
 
+  iocBottle.factory('emailClient', ({ config }) =>
+    new M800MailClient({ baseUrl: config.get('MAIL_SERVICE_URL') })
+  );
+
+  // email service
+  iocBottle.service('emailService', emailService, 'emailClient', 'config');
   // user service
-  iocBottle.service('userService', userService, 'validator', 'models');
+  iocBottle.service('userService', userService, 'validator', 'models', 'emailService');
 
   // access service
   iocBottle.service('accessService', accessService, 'validator', 'models');
@@ -79,7 +87,7 @@ export function initialize() {
 
   iocBottle.factory('openIdProvider', ({ config }) => setUp(config));
 
-  iocBottle.service('openIdController', openIdController, 'openIdProvider');
+  iocBottle.service('openIdController', openIdController, 'openIdProvider', 'userService');
 
   return iocBottle;
 }

@@ -1,7 +1,9 @@
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
-import bcrypt from 'bcrypt';
+import sinon from 'sinon';
+import Q from 'q';
 
+import { getContainer } from '../../../src/utils/ioc';
 import getAgent from '../../getAgent';
 import User from '../../../src/collections/user';
 
@@ -15,6 +17,14 @@ describe('POST /identity/users', () => {
   });
 
   describe('create a user', () => {
+    let stubToken;
+    before(() => {
+      const { emailService } = getContainer();
+      stubToken = sinon.stub(emailService, 'sendSignUpEmail').returns(Q.resolve('dummyToken'));
+    });
+    after(() => {
+      stubToken.restore();
+    });
     // remove all the data after each test
     afterEach((done) => User.remove({}, done));
 
@@ -135,10 +145,9 @@ describe('POST /identity/users', () => {
            });
     });
 
-    it('successfully creates user with encrpted password stored', (done) => {
+    it('successfully creates user and generate a token for set password', (done) => {
       const userInfo = {
-        id: 'companyB',
-        password: '123456',
+        id: 'companyB@test.com',
       };
       agent.post('/identity/users')
            .set('Content-Type', 'application/json')
@@ -146,10 +155,9 @@ describe('POST /identity/users', () => {
            .expect(201)
            .end(() => {
              User.findOne({ _id: userInfo.id }).then((user) => {
-               expect(user.salt).not.to.equal(undefined);
-               expect(user.hashedPassword).not.to.equal(undefined);
-               expect(bcrypt.compareSync(userInfo.password, user.hashedPassword)).to.equal(true);
-               expect(bcrypt.compareSync('abcdef', user.hashedPassword)).not.to.equal(true);
+               expect(user.tokens).to.have.lengthOf(1);
+               expect(user.tokens[0].event).to.equal('setPassword');
+               expect(user.tokens[0].value).to.equal('dummyToken');
              })
              .done(done);
            });
