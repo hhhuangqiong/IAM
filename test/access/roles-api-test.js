@@ -5,6 +5,7 @@ import { Types } from 'mongoose';
 const ObjectId = Types.ObjectId;
 
 import { initialize } from './test-context';
+import { toPlainObject } from './test-util';
 
 let context;
 
@@ -12,11 +13,12 @@ before('initialize test context', () => initialize().then(ctx => {
   context = ctx;
 }));
 
+after('clean database state', () => context.state.set({}));
+
 describe('POST /access/roles', () => {
   it('responds with 201 and role resource', (done) => {
     const company = {
       _id: new ObjectId(),
-      id: 'ACME',
       country: 'US',
     };
 
@@ -46,9 +48,10 @@ describe('POST /access/roles', () => {
   });
 
   it('responds with 404 when non existing company id is passed', (done) => {
+    const nonExistingId = new ObjectId();
     const role = {
       name: 'Sales Manager',
-      company: new ObjectId().toString(),
+      company: nonExistingId,
       service: 'iam',
       permissions: {
         resource1: ['read'],
@@ -65,7 +68,7 @@ describe('POST /access/roles', () => {
   it('responds with 422 when empty name is passed', (done) => {
     const role = {
       name: '',
-      company: new ObjectId().toString(),
+      company: 'm800.com',
       service: 'iam',
       permissions: {
         resource1: ['read'],
@@ -84,18 +87,25 @@ describe('GET /access/roles', () => {
   it('returns roles filtered by service and company id', (done) => {
     const company1Id = new ObjectId();
     const company2Id = new ObjectId();
-    const now = new Date();
 
     const roles = [{
       _id: new ObjectId(),
       name: 'CEO',
       company: company1Id,
       service: 'wlp',
+      permissions: {
+        res1: ['create', 'update'],
+        res2: ['create', 'update', 'delete', 'read'],
+      },
     }, {
       _id: new ObjectId(),
       name: 'CTO',
       company: company1Id,
       service: 'wlp',
+      permissions: {
+        res1: ['create', 'update'],
+        res2: ['create', 'update', 'delete', 'read'],
+      },
     }, {
       _id: new ObjectId(),
       name: 'Sales Manager',
@@ -106,6 +116,10 @@ describe('GET /access/roles', () => {
       name: 'Director',
       company: company2Id,
       service: 'wlp',
+      permissions: {
+        res1: ['create', 'update'],
+        res2: ['create', 'update', 'delete', 'read'],
+      },
     }];
 
     context.state.set({ Role: roles })
@@ -167,12 +181,16 @@ describe('DELETE /access/roles/:roleId', () => {
   });
 });
 
-describe('PUT /access/roles/:roleId/permissions', () => {
-  it('responds with 200 permissions object', (done) => {
+describe('PUT /access/roles/:id', () => {
+  it('responds with 200 and updated role object', (done) => {
+    const company = {
+      _id: new ObjectId(),
+      country: 'US',
+    };
     const role = {
       _id: new ObjectId(),
       name: 'CEO',
-      company: new ObjectId(),
+      company: company._id,
       service: 'wlp',
       permissions: {
         sms: ['read'],
@@ -180,79 +198,47 @@ describe('PUT /access/roles/:roleId/permissions', () => {
       },
     };
 
-    const permissions = {
-      sms: ['create', 'read', 'update', 'delete'],
-      calls: ['create', 'read', 'update', 'delete'],
-    };
+    const updatedRole = _.extend({}, role, {
+      id: role._id.toString(),
+      name: 'CTO',
+      permissions: {
+        calls: ['read'],
+      },
+    });
+    delete updatedRole._id;
 
-    context.state.set({ Role: role })
+    context.state.set({ Role: role, Company: company })
       .then(() => {
         context.server
-          .put(`/access/roles/${role._id}/permissions`)
-          .send(permissions)
+          .put(`/access/roles/${role._id}`)
+          .send(updatedRole)
           .expect(200)
           .expect(res => {
-            expect(res.body).to.eql(permissions);
+            const data = res.body;
+            const expected = toPlainObject(updatedRole);
+            const actual = _.omit(data, 'createdAt', 'updatedAt');
+            expect(expected).to.eql(actual);
+            expect(data.updatedAt).to.be.greaterThan(data.createdAt);
           })
           .end(done);
       })
       .done();
   });
-  it('responds with 422 when invalid permission is passed', (done) => {
+
+  it('responds with 404 when role does not exist', (done) => {
+    const nonExistingId = new ObjectId();
     const role = {
-      _id: new ObjectId(),
       name: 'CEO',
-      company: new ObjectId(),
+      company: new ObjectId().toString(),
       service: 'wlp',
       permissions: {
         sms: ['read'],
         calls: ['create', 'read', 'update', 'delete'],
       },
     };
-
-    const permissions = {
-      sms: ['create', 'read', 'update', 'delete'],
-      calls: ['create', 'read', 'update', '$invalid'],
-    };
-
-    context.state.set({ Role: role })
-      .then(() => {
-        context.server
-          .put(`/access/roles/${role._id}/permissions`)
-          .send(permissions)
-          .expect(422)
-          .end(done);
-      })
-      .done();
-  });
-});
-
-describe('GET /access/roles/:roleId/permissions', () => {
-  it('responds with 200 and permissions resource', (done) => {
-    const role = {
-      _id: new ObjectId(),
-      name: 'CEO',
-      company: new ObjectId(),
-      service: 'wlp',
-      permissions: {
-        sms: ['read'],
-        calls: ['create', 'read', 'update', 'delete'],
-      },
-    };
-
-    context.state.set({ Role: role })
-      .then(() => {
-        context.server
-          .get(`/access/roles/${role._id}/permissions`)
-          .expect(200, role.permissions)
-          .end(done);
-      })
-      .done();
-  });
-  it('responds with 404 for not existing role', (done) => {
-    const roleId = new ObjectId();
     context.server
-      .get(`/access/roles/${roleId}/permissions`)
+      .put(`/access/roles/${nonExistingId}`)
+      .send(role)
       .expect(404)
       .end(done);
   });
@@ -272,8 +258,7 @@ describe('POST /access/roles/:roleId/users', () => {
     };
 
     const user = {
-      _id: new ObjectId(),
-      username: 'johndoe@tests.com',
+      _id: 'johndoe@tests.com',
       country: 'US',
     };
 
@@ -301,7 +286,7 @@ describe('POST /access/roles/:roleId/users', () => {
         calls: ['create', 'read', 'update', 'delete'],
       },
     };
-    const username = new ObjectId();
+    const username = 'test@username.com';
     context.state.set({ Role: role })
       .then(() => {
         context.server
@@ -318,15 +303,14 @@ describe('DELETE /access/roles/:roleId/users/:userId', () => {
   it('responds with 204 and updates role in database', (done) => {
     const Role = context.db.model('Role');
     const user = {
-      _id: new ObjectId(),
-      username: 'johndoe@tests.com',
+      _id: 'johndoe@tests.com',
     };
     const role = {
       _id: new ObjectId(),
       name: 'CEO',
       company: new ObjectId(),
       service: 'wlp',
-      users: [user._id.toString()],
+      users: [user._id],
       permissions: {
         sms: ['read'],
         calls: ['create', 'read', 'update', 'delete'],
