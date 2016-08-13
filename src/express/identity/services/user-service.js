@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { NotFoundError, ValidationError } from 'common-errors';
+import { NotFoundError, ValidationError, Error } from 'common-errors';
 import Joi from 'joi';
 import moment from 'moment';
 
@@ -113,13 +113,24 @@ export function userService(validator, { User, Company }, mailService) {
     // verify the company id
     yield validateCompanies(sanitizedCommand);
 
+    let user;
+    let token;
     try {
-      const user = yield User.create(sanitizedCommand);
+      user = yield User.create(sanitizedCommand);
+    } catch (e) {
+      throw mongooseUtil.errorHandler(e);
+    }
+    try {
       // create sign up tokens
-      const token = yield mailService.sendSignUpEmail(user._id, {
+      token = yield mailService.sendSignUpEmail(user._id, {
         clientId: sanitizedCommand.clientId,
         redirectURL: sanitizedCommand.redirectURL,
       });
+    } catch (e) {
+      throw new Error(`Failed to deliver email to ${user._id}`);
+    }
+
+    try {
       user.tokens.push(User.makeToken(SET_PW_TOKEN, token));
       yield user.save();
       return user.toJSON();
@@ -347,10 +358,17 @@ export function userService(validator, { User, Company }, mailService) {
     user.tokens = _.reject(user.tokens, token => token.event === RESET_PW_TOKEN);
     // cancel the current password
     user.password = undefined;
-    const token = yield mailService.sendResetPasswordEmail(sanitizedCommand.id, {
-      clientId: sanitizedCommand.clientId,
-      redirectURL: sanitizedCommand.redirectURL,
-    });
+    let token;
+
+    try {
+      token = yield mailService.sendResetPasswordEmail(sanitizedCommand.id, {
+        clientId: sanitizedCommand.clientId,
+        redirectURL: sanitizedCommand.redirectURL,
+      });
+    } catch (e) {
+      throw new Error(`Failed to deliver email to ${sanitizedCommand.id}`);
+    }
+
     const tokenSet = User.makeToken(RESET_PW_TOKEN, token);
     user.tokens.push(tokenSet);
     yield user.save();

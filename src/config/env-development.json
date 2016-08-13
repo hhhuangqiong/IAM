@@ -26,8 +26,12 @@
   "email": {
     "from": "noreply@m800.com",
     "templates": {
-      "iam-signUp": {},
-      "iam-resetPassword": {}
+      "iam-signUp": {
+        "subject": "Plesae confirm your email"
+      },
+      "iam-resetPassword": {
+        "subject": "Reset your password"
+      }
     }
   }
 }

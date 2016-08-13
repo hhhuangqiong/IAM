@@ -25,14 +25,14 @@ export function emailService(emailClient, config) {
     const templateName = 'iam-signUp';
     const mailHeader = getMailHeader(email, templateName);
     const mailTemplate = getMailTemplate(email, 'setPassword', templateName, client);
-    return Q.ninvoke(emailClient, 'send', mailHeader, mailTemplate);
+    return Q.ninvoke(emailClient, 'send', mailHeader, mailTemplate, client);
   }
 
   function sendResetPasswordEmail(email, client = { }) {
     const templateName = 'iam-resetPassword';
     const mailHeader = getMailHeader(email, templateName);
     const mailTemplate = getMailTemplate(email, 'resetPassword', templateName, client);
-    return Q.ninvoke(emailClient, 'send', mailHeader, mailTemplate);
+    return Q.ninvoke(emailClient, 'send', mailHeader, mailTemplate, client);
   }
   return {
     sendSignUpEmail,
