@@ -44,31 +44,10 @@ export function roleController(access) {
     }
   }
 
-  function* assignRoleToUser(req, res, next) {
-    try {
-      const command = _.extend({}, req.body, req.params);
-      const assignment = yield access.assignRole(command);
-      res.json(assignment);
-    } catch (e) {
-      next(e);
-    }
-  }
-
-  function* revokeRoleFromUser(req, res, next) {
-    try {
-      yield access.revokeRole(req.params);
-      res.sendStatus(204);
-    } catch (e) {
-      next(e);
-    }
-  }
-
   router.post('/roles', wrap(postRole));
   router.get('/roles', wrap(getRoles));
   router.delete('/roles/:roleId', wrap(deleteRole));
   router.put('/roles/:roleId', wrap(updateRole));
-  router.post('/roles/:roleId/users', wrap(assignRoleToUser));
-  router.delete('/roles/:roleId/users/:username', wrap(revokeRoleFromUser));
 
   return router;
 }

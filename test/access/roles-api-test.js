@@ -244,97 +244,98 @@ describe('PUT /access/roles/:id', () => {
   });
 });
 
-describe('POST /access/roles/:roleId/users', () => {
-  it('responds with 200 and role assignment resource', (done) => {
-    const role = {
-      _id: new ObjectId(),
-      name: 'CEO',
-      company: new ObjectId(),
-      service: 'wlp',
-      permissions: {
-        sms: ['read'],
-        calls: ['create', 'read', 'update', 'delete'],
-      },
-    };
-
+describe('PUT /access/users/:username/roles', () => {
+  it('responds with 200 and all roles with respect to company and service filter', () => {
     const user = {
-      _id: 'johndoe@tests.com',
+      _id: 'user@example.com',
+      name: 'John Doe',
+    };
+    const m800 = {
+      _id: new ObjectId(),
+      name: 'M800',
+      country: 'HK',
+    };
+    const coke = {
+      _id: new ObjectId(),
+      name: 'Coca Cola',
       country: 'US',
     };
-
-    context.state.set({ Role: role, User: user })
-      .then(() => {
-        context.server
-          .post(`/access/roles/${role._id}/users`)
-          .send({ username: user._id })
-          .expect(200, {
-            username: user._id.toString(),
-            roleId: role._id.toString(),
-          })
-          .end(done);
-      })
-      .done();
-  });
-  it('responds with 404 when non existing username is passed', (done) => {
-    const role = {
+    const companies = [m800, coke];
+    const m800admin = {
       _id: new ObjectId(),
-      name: 'CEO',
-      company: new ObjectId(),
+      name: 'M800-Admin',
       service: 'wlp',
-      permissions: {
-        sms: ['read'],
-        calls: ['create', 'read', 'update', 'delete'],
-      },
+      company: m800._id,
+      users: [],
     };
-    const username = 'test@username.com';
-    context.state.set({ Role: role })
-      .then(() => {
-        context.server
-          .post(`/access/roles/${role._id}/users`)
-          .send({ username })
-          .expect(404)
-          .end(done);
-      })
-      .done();
-  });
-});
-
-describe('DELETE /access/roles/:roleId/users/:userId', () => {
-  it('responds with 204 and updates role in database', (done) => {
-    const Role = context.db.model('Role');
-    const user = {
-      _id: 'johndoe@tests.com',
-    };
-    const role = {
+    const m800manager = {
       _id: new ObjectId(),
-      name: 'CEO',
-      company: new ObjectId(),
+      name: 'M800-Manager',
       service: 'wlp',
+      company: m800._id,
       users: [user._id],
-      permissions: {
-        sms: ['read'],
-        calls: ['create', 'read', 'update', 'delete'],
-      },
     };
+    const m800employee = {
+      _id: new ObjectId(),
+      name: 'M800-Employee',
+      service: 'wlp',
+      company: m800._id,
+      users: [user._id],
+    };
+    const cokeAdmin = {
+      _id: new ObjectId(),
+      name: 'Coke-Admin',
+      service: 'wlp',
+      company: coke._id,
+      users: [user._id],
+    };
+    const cokeEmployee = {
+      _id: new ObjectId(),
+      name: 'Coke-Employee',
+      service: 'live-connect',
+      company: coke._id,
+      users: [user._id],
+    };
+    const roles = [
+      m800admin,
+      m800manager,
+      m800employee,
+      cokeAdmin,
+      cokeEmployee,
+    ];
 
-    context.state.set({ Role: role, User: user })
-      .then(() => {
-        context.server
-          .delete(`/access/roles/${role._id}/users/${user._id}`)
-          .expect(204)
-          .end(err => {
-            if (err) {
-              return done(err);
-            }
-            return Role.findOne({ _id: role._id })
-              .then(updatedRole => {
-                expect(updatedRole.users).to.have.length(0);
-                done();
-              })
-              .catch(done)
-              .done();
+    const reqQuery = {
+      service: 'wlp',
+      company: m800._id.toString(),
+    };
+    const reqBody = [m800admin, m800employee]
+      .map(x => ({ id: x._id.toString() }));
+
+    return context.state.set({
+      Company: companies,
+      User: user,
+      Role: roles,
+    }).then(() => context.server
+        .put(`/access/users/${user._id}/roles`)
+        .query(reqQuery)
+        .send(reqBody)
+    ).then((res) => {
+      return context.state.get(['Role'])
+        .then(state => {
+          // Check that "Coke" roles ware left unmodified
+          const cokeRoles = state.Role.filter(x => x.company.toString() === coke._id.toString());
+          _.each(cokeRoles, role => {
+            expect(role.users).to.have.lengthOf(1);
           });
-      })
-      .done();
+          // Check that M800 manager role now doesn't contain users
+          const managerRole = state.Role.find(x => x._id.toString() === m800manager._id.toString());
+          expect(managerRole.users).to.have.lengthOf(0);
+
+          // Check that only roles for the WLP service and M800 company returned
+          const expectedRoleIds = reqBody.map(x => x.id).sort();
+          const actualRoleIds = res.body.map(x => x.id).sort();
+          expect(expectedRoleIds).to.eql(actualRoleIds);
+        });
+    });
   });
 });

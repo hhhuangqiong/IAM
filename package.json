@@ -89,6 +89,7 @@
     "nyc": "^7.0.0",
     "rimraf": "^2.5.3",
     "sinon": "^1.17.5",
-    "supertest": "^1.2.0"
+    "supertest": "^1.2.0",
+    "supertest-as-promised": "^4.0.0"
   }
 }

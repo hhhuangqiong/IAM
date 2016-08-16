@@ -15,6 +15,16 @@ export function userController(access) {
     }
   }
 
+  function* setUserRoles(req, res, next) {
+    try {
+      const command = _.extend({}, req.params, req.query, { roles: req.body });
+      const roles = yield access.updateUserRoles(command);
+      res.json(roles);
+    } catch (e) {
+      next(e);
+    }
+  }
+
   function* getUserPermissions(req, res, next) {
     try {
       const query = _.extend({}, req.params, req.query);
@@ -26,6 +36,7 @@ export function userController(access) {
   }
 
   router.get('/users/:username/roles', wrap(getUserRoles));
+  router.put('/users/:username/roles', wrap(setUserRoles));
   router.get('/users/:username/permissions', wrap(getUserPermissions));
 
   return router;
