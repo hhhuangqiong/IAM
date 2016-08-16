@@ -236,7 +236,7 @@ export function userService(validator, { User, Company }, mailService) {
     // pull the internal properties
     const userInfo = _.difference(_.keys(user.toJSON()),
       ['createdAt', 'updatedAt', 'createdBy', 'updatedBy',
-      'password', 'hashedPassword', 'salt', 'displayName', 'tokens']);
+      'password', 'hashedPassword', 'salt', 'displayName', 'tokens', 'isVerified']);
     const additional = _.difference(userInfo, _.keys(sanitizedCommand));
     // remove extra keys that aren't set
     _(additional).each(key => _.set(user, key, undefined));
@@ -264,7 +264,7 @@ export function userService(validator, { User, Company }, mailService) {
       // ignore internal properties
       currentUser = _.omit(user.toJSON(),
        ['createdAt', 'updatedAt', 'createdBy', 'updatedBy',
-        'password', 'hashedPassword', 'salt', 'displayName', 'tokens']);
+        'password', 'hashedPassword', 'salt', 'displayName', 'tokens', 'isVerified']);
       // always set password to be empty string
       currentUser.password = '';
     }

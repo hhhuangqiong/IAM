@@ -15,6 +15,7 @@ function removeDynamicAttribute(user) {
   delete myUser.updatedAt;
   delete myUser.createdBy;
   delete myUser.updatedBy;
+  delete myUser.isVerified;
   delete myUser._id;
   return myUser;
 }

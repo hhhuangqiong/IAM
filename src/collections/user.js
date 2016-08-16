@@ -4,6 +4,7 @@ import Q from 'q';
 import isUndefined from 'lodash/isUndefined';
 import timestamp from 'mongoose-timestamp';
 import randtoken from 'rand-token';
+import { find } from 'lodash';
 
 import { toJSON } from '../utils/mongoose';
 
@@ -170,6 +171,13 @@ schema.virtual('displayName')
       return '';
     }
     return `${this.name.givenName} ${this.name.familyName}`;
+  });
+
+// to determine whether user has verified by consuming the set password token
+// which was sent when creating user and removed when consumed.
+schema.virtual('isVerified')
+  .get(function isVerified() {
+    return !find(this.tokens, token => token.event === 'setPassword');
   });
 
 schema.pre('save', function preSave(next) {
