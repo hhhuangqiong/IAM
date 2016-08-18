@@ -98,39 +98,44 @@ export function accessService(validator, { Role, Company, User }) {
     return permissions;
   }
 
-  const assignRoleCommandSchema = Joi.object({
+  const updateUserRolesSchema = Joi.object({
     username: Joi.string().required(),
-    roleId: Joi.string().required(),
+    service: Joi.string(),
+    company: Joi.string(),
+    roles: Joi.array().items(
+      Joi.object({ id: Joi.string().required() })
+        .options({ stripUnknown: true })
+    ),
   });
 
-  function* assignRole(command) {
-    const sanitizedCommand = validator.sanitize(command, assignRoleCommandSchema);
-    const user = yield User.findById(sanitizedCommand.username).select('_id');
+  // HACK: Dumb implementation for now, no ideas and time to make it better
+  function* updateUserRoles(command) {
+    const user = yield User.findById(command.username).select('_id');
     if (!user) {
       throw new NotFoundError('User');
     }
-    const query = { _id: sanitizedCommand.roleId };
-    const update = { $addToSet: { users: user._id } };
-    const role = yield Role.findOneAndUpdate(query, update).select('_id');
-    if (!role) {
-      throw new NotFoundError('Role');
-    }
-    return sanitizedCommand;
-  }
-
-  const revokeRoleCommandSchema = Joi.object({
-    username: Joi.string().required(),
-    roleId: Joi.string().required(),
-  });
-
-  function* revokeRole(command) {
-    const sanitizedCommand = validator.sanitize(command, revokeRoleCommandSchema);
-    const query = { _id: sanitizedCommand.roleId };
-    const update = { $pull: { users: sanitizedCommand.username } };
-    const role = yield Role.findOneAndUpdate(query, update);
-    if (!role) {
-      throw new NotFoundError('Role');
-    }
+    const sanitizedCommand = validator.sanitize(command, updateUserRolesSchema);
+    // Remove user from all the roles he is assigned to
+    let query = {
+      users: sanitizedCommand.username,
+      service: sanitizedCommand.service,
+      company: sanitizedCommand.company,
+    };
+    query = _.pickBy(query, _.negate(_.isUndefined));
+    let update = { $pull: { users: sanitizedCommand.username } };
+    yield Role.update(query, update, { multi: true });
+    // Assign user to all requested roles
+    query = _.omit({
+      ...query,
+      _id: { $in: sanitizedCommand.roles.map(x => x.id) },
+    }, 'users');
+    update = { $addToSet: { users: sanitizedCommand.username } };
+    yield Role.update(query, update, { multi: true });
+    return yield getRoles({
+      service: sanitizedCommand.service,
+      company: sanitizedCommand.company,
+      username: sanitizedCommand.username,
+    });
   }
 
   return {
@@ -138,8 +143,7 @@ export function accessService(validator, { Role, Company, User }) {
     getRoles,
     deleteRole,
     updateRole,
-    assignRole,
-    revokeRole,
+    updateUserRoles,
     getUserPermissions,
   };
 }

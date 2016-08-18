@@ -28,7 +28,7 @@ export class StateManager {
         .then(() => resolvedState);
     });
   }
-  get(models = []) {
+  get(models = this.db.modelNames()) {
     const existingKeys = this.db.modelNames();
     const requestedKeys = _.isArray(models) ? models : _.clone(existingKeys);
     const diff = _.difference(requestedKeys, existingKeys);
@@ -37,7 +37,6 @@ export class StateManager {
       const undefinedModels = diff.join(', ');
       throw new Error(`Undefined model(s): ${undefinedModels}`);
     }
-
     const promises = requestedKeys.map(key => {
       const model = this.db.model(key);
       return model.find().then(docs => ([key, docs]));
