@@ -84,7 +84,7 @@ export function companyService(validator, { Company }, logoService) {
     name: Joi.string(),
     country: Joi.string(),
     parent: Joi.string().regex(idRegExp),
-    pageNo: Joi.number().positive().default(DEFAULT_PAGE_NO),
+    page: Joi.number().positive().default(DEFAULT_PAGE_NO),
     pageSize: Joi.number().positive().default(DEFAULT_PAGE_SIZE),
     sortBy: Joi.string().default(DEFAULT_COMPANY_SORT_BY),
     sortOrder: Joi.string().valid('asc', 'desc').default(DEFAULT_SORT_ORDER),
@@ -95,7 +95,7 @@ export function companyService(validator, { Company }, logoService) {
 
   function* getCompanies(command) {
     const sanitizedCommand = validator.sanitize(command, getCompaniesCommandSchema);
-    let filters = _.omit(sanitizedCommand, ['sortBy', 'sortOrder', 'pageNo', 'pageSize']);
+    let filters = _.omit(sanitizedCommand, ['sortBy', 'sortOrder', 'page', 'pageSize']);
     // search will perform search by name
     // perform search by id contain the filter param which similar to SQL like
     if (filters.search) {
@@ -105,7 +105,8 @@ export function companyService(validator, { Company }, logoService) {
       } catch (ex) {
         throw new ValidationError('invalid search');
       }
-    } else if (filters.ids) {
+    }
+    if (filters.ids) {
       filters.id = {
         $in: filters.ids.split(','),
       };
@@ -118,14 +119,14 @@ export function companyService(validator, { Company }, logoService) {
     // update the sortBy with the _id key
     sort = rename(sort, { id: '_id' });
     const companies = yield Company.find(filters)
-      .skip(sanitizedCommand.pageNo * sanitizedCommand.pageSize)
+      .skip((sanitizedCommand.page - 1) * sanitizedCommand.pageSize)
       .limit(sanitizedCommand.pageSize)
       .sort(sort);
     const total = yield Company.find(filters).count();
     return {
       total,
       pageTotal: Math.ceil(total / sanitizedCommand.pageSize),
-      pageNo: sanitizedCommand.pageNo,
+      page: sanitizedCommand.page,
       pageSize: sanitizedCommand.pageSize,
       companies: companies.map((company) => company.toJSON()),
     };

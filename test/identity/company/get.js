@@ -85,7 +85,7 @@ describe('GET /identity/companies', () => {
              expect(res).to.have.property('body');
              expect(res.body.total).to.equal(companyArray.length);
              expect(res.body.pageSize).to.equal(DEFAULT_PAGE_SIZE);
-             expect(res.body.pageNo).to.equal(DEFAULT_PAGE_NO);
+             expect(res.body.page).to.equal(DEFAULT_PAGE_NO);
              expect(res.body.items).to.have.lengthOf(DEFAULT_PAGE_SIZE);
              for (let i = 0; i < DEFAULT_PAGE_SIZE; i++) {
                const currentObj = removeDynamicAttribute(res.body.items[i]);
@@ -103,7 +103,7 @@ describe('GET /identity/companies', () => {
            .end((err, res) => {
              expect(res).to.have.property('body');
              expect(res.body.total).to.equal(companyArray.length);
-             expect(res.body.pageNo).to.equal(DEFAULT_PAGE_NO);
+             expect(res.body.page).to.equal(DEFAULT_PAGE_NO);
              expect(res.body.pageSize).to.equal(size);
              expect(res.body.items).to.have.lengthOf(size);
              for (let i = 0; i < size; i++) {
@@ -114,41 +114,41 @@ describe('GET /identity/companies', () => {
            });
     });
 
-    it('successfully gets all the companies using param page', (done) => {
-      const pageNo = 1;
-      agent.get(`/identity/companies?pageNo=${pageNo}`)
+    it('successfully gets the companies using param page', (done) => {
+      const pageNo = 2;
+      agent.get(`/identity/companies?page=${pageNo}`)
            .expect('Content-Type', /json/)
            .expect(200)
            .end((err, res) => {
-             const expectedItemNo = companyArray.length - pageNo * DEFAULT_PAGE_SIZE;
+             const expectedItemNo = companyArray.length - (pageNo - 1) * DEFAULT_PAGE_SIZE;
              expect(res).to.have.property('body');
              expect(res.body.total).to.equal(companyArray.length);
-             expect(res.body.pageNo).to.equal(pageNo);
+             expect(res.body.page).to.equal(pageNo);
              expect(res.body.pageSize).to.equal(DEFAULT_PAGE_SIZE);
              expect(res.body.items).to.have.lengthOf(expectedItemNo);
              for (let i = 0; i < expectedItemNo; i++) {
                const currentObj = removeDynamicAttribute(res.body.items[i]);
-               expect(currentObj).to.deep.equal(companyArray[pageNo * DEFAULT_PAGE_SIZE + i]);
+               expect(currentObj).to.deep.equal(companyArray[(pageNo - 1) * DEFAULT_PAGE_SIZE + i]);
              }
              done();
            });
     });
 
-    it('successfully gets all the companies using param page and limit', (done) => {
-      const pageNo = 1;
+    it('successfully gets the companies using param page and limit', (done) => {
+      const pageNo = 2;
       const pageSize = 5;
-      agent.get(`/identity/companies?pageNo=${pageNo}&pageSize=${pageSize}`)
+      agent.get(`/identity/companies?page=${pageNo}&pageSize=${pageSize}`)
            .expect('Content-Type', /json/)
            .expect(200)
            .end((err, res) => {
              expect(res).to.have.property('body');
              expect(res.body.total).to.equal(companyArray.length);
-             expect(res.body.pageNo).to.equal(pageNo);
+             expect(res.body.page).to.equal(pageNo);
              expect(res.body.pageSize).to.equal(pageSize);
              expect(res.body.items).to.have.lengthOf(pageSize);
              for (let i = 0; i < pageSize; i++) {
                const currentObj = removeDynamicAttribute(res.body.items[i]);
-               expect(currentObj).to.deep.equal(companyArray[pageNo * pageSize + i]);
+               expect(currentObj).to.deep.equal(companyArray[(pageNo - 1) * pageSize + i]);
              }
              done();
            });

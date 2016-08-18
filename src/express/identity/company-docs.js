@@ -167,23 +167,28 @@
 * @apiName GetCompanies
 * @apiGroup company
 * @apiDescription get the companies
-* @apiParam {Number} [size=20] the page size
+* @apiParam {String} [id] filter by id
+* @apiParam {String[]} [ids] the ids array
+* @apiParam {Number} [pageSize=20] the page size
 * @apiParam {Number} [page=0] the page number
+* @apiParam {String} [search] search by name which is case insensitive
 * @apiParam {String="id", "createdAt","updatedAt"} [sortBy=id] sort by field
 * @apiParam {String="asc","desc"} [sortOrder=asc] sort by order
 * @apiSuccess {Number} total the total number
-* @apiSuccess {Number} page_size the number of result per page
-* @apiSuccess {Number} page_no the current page number
-* @apiSuccess {Company[]} resources array of Company Object
+* @apiSuccess {Number} pageTotal the total number of page
+* @apiSuccess {Number} pageSize the number of result per page
+* @apiSuccess {Number} page the current page number
+* @apiSuccess {Company[]} items array of Company Object
 * @apiUse companyData
 * @apiUse errorObject
 * @apiSuccessExample {json} Success-Response:
 *     HTTP/1.1 200 OK
 *     {
 *          "total": 1,
-*          "page_size": 20,
-*          "page_no": 0,
-*          "resources": [
+*          "pageTotal": 1,
+*          "pageSize": 20,
+*          "page": 0,
+*          "items": [
 *            {
 *              "updatedAt": "2016-07-17T12:44:46.194Z",
 *              "createdAt": "2016-07-16T17:28:27.222Z",

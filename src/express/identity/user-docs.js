@@ -242,23 +242,27 @@
    * @apiGroup user
    * @apiDescription get the users
    * @apiParam {String} [id] filter by id
-   * @apiParam {Number} [size=20] the page size
+   * @apiParam {String[]} [ids] the ids array
+   * @apiParam {Number} [pageSize=20] the page size
    * @apiParam {Number} [page=0] the page number
+   * @apiParam {String} [search] search by user id which is case insensitive
    * @apiParam {String="id", "updatedAt", "createdAt"} [sortBy=id] sort by field
    * @apiParam {String="asc","desc"} [sortOrder=asc] sort by order
    * @apiSuccess {Number} total the total number
-   * @apiSuccess {Number} page_size the number of result per page
-   * @apiSuccess {Number} page_no the current page number
-   * @apiSuccess {Company[]} resources array of Company Object
+   * @apiSuccess {Number} pageSize the number of result per page
+   * @apiSuccess {Number} page the current page number
+   * @apiSuccess {Number} pageTotal the total page
+   * @apiSuccess {Company[]} items array of Company Object
    * @apiUse userData
    * @apiUse errorObject
    * @apiSuccessExample {json} Success-Response:
    *     HTTP/1.1 200 OK
    *     {
    *          "total": 1,
-   *          "page_size": 20,
-   *          "page_no": 0,
-   *          "resources": [{
+   *          "pageSize": 20,
+   *          "page": 1,
+   *          "pageTotal": 1,
+   *          "items": [{
    *            "_id": "578fd41e59aa0a4fad48913c",
    *            "createdAt": "2016-07-20T19:42:22.398Z",
    *            "updatedAt": "2016-07-20T19:42:22.398Z",

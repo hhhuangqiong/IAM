@@ -97,7 +97,7 @@ describe('GET /identity/users', () => {
              expect(res).to.have.property('body');
              expect(res.body.total).to.equal(userArray.length);
              expect(res.body.pageSize).to.equal(DEFAULT_PAGE_SIZE);
-             expect(res.body.pageNo).to.equal(DEFAULT_PAGE_NO);
+             expect(res.body.page).to.equal(DEFAULT_PAGE_NO);
              expect(res.body.items).to.have.lengthOf(DEFAULT_PAGE_SIZE);
              for (let i = 0; i < DEFAULT_PAGE_SIZE; i++) {
                const currentObj = removeDynamicAttribute(res.body.items[i]);
@@ -115,7 +115,7 @@ describe('GET /identity/users', () => {
            .end((err, res) => {
              expect(res).to.have.property('body');
              expect(res.body.total).to.equal(userArray.length);
-             expect(res.body.pageNo).to.equal(DEFAULT_PAGE_NO);
+             expect(res.body.page).to.equal(DEFAULT_PAGE_NO);
              expect(res.body.pageSize).to.equal(size);
              expect(res.body.items).to.have.lengthOf(size);
              for (let i = 0; i < size; i++) {
@@ -134,7 +134,7 @@ describe('GET /identity/users', () => {
            .end((err, res) => {
              expect(res).to.have.property('body');
              expect(res.body.total).to.equal(userArray.length);
-             expect(res.body.pageNo).to.equal(DEFAULT_PAGE_NO);
+             expect(res.body.page).to.equal(DEFAULT_PAGE_NO);
              expect(res.body.pageSize).to.equal(size);
              expect(res.body.items).to.have.lengthOf(userArray.length);
              for (let i = 0; i < userArray.length; i++) {
@@ -146,21 +146,21 @@ describe('GET /identity/users', () => {
     });
 
     it('successfully gets all the users using page no param', (done) => {
-      const pageNo = 1;
-      agent.get(`/identity/users?pageNo=${pageNo}`)
+      const pageNo = 2;
+      agent.get(`/identity/users?page=${pageNo}`)
            .expect('Content-Type', /json/)
            .expect(200)
            .end((err, res) => {
              const expectedItemNo = Math.min(userArray.length -
-               pageNo * DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZE);
+               (pageNo - 1) * DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZE);
              expect(res).to.have.property('body');
              expect(res.body.total).to.equal(userArray.length);
-             expect(res.body.pageNo).to.equal(pageNo);
+             expect(res.body.page).to.equal(pageNo);
              expect(res.body.pageSize).to.equal(DEFAULT_PAGE_SIZE);
              expect(res.body.items).to.have.lengthOf(expectedItemNo);
              for (let i = 0; i < expectedItemNo; i++) {
                const currentObj = removeDynamicAttribute(res.body.items[i]);
-               const expectedIndex = pageNo * DEFAULT_PAGE_SIZE + i;
+               const expectedIndex = (pageNo - 1) * DEFAULT_PAGE_SIZE + i;
                expect(currentObj).to.deep.equal(userArray[expectedIndex]);
              }
              done();
@@ -168,20 +168,20 @@ describe('GET /identity/users', () => {
     });
 
     it('successfully gets all the users using param page and limit', (done) => {
-      const pageNo = 1;
+      const pageNo = 2;
       const pageSize = 5;
-      agent.get(`/identity/users?pageNo=${pageNo}&pageSize=${pageSize}`)
+      agent.get(`/identity/users?page=${pageNo}&pageSize=${pageSize}`)
            .expect('Content-Type', /json/)
            .expect(200)
            .end((err, res) => {
              expect(res).to.have.property('body');
              expect(res.body.total).to.equal(userArray.length);
-             expect(res.body.pageNo).to.equal(pageNo);
+             expect(res.body.page).to.equal(pageNo);
              expect(res.body.pageSize).to.equal(pageSize);
              expect(res.body.items).to.have.lengthOf(pageSize);
              for (let i = 0; i < pageSize; i++) {
                const currentObj = removeDynamicAttribute(res.body.items[i]);
-               expect(currentObj).to.deep.equal(userArray[pageNo * pageSize + i]);
+               expect(currentObj).to.deep.equal(userArray[(pageNo - 1) * pageSize + i]);
              }
              done();
            });
