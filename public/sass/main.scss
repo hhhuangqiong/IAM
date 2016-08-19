@@ -1,0 +1,102 @@
+// Import foundation util for unit and breakpoint
+@import "foundation-sites/scss/util/util";
+
+$app: 'iam' !default;
+
+// Settings: Global variables, site-wide settings, config switches, etc.
+$namespace: #{$app}-;
+$global-spacing: 16px;
+@import "settings.global";
+
+$inuit-namespace: $namespace;
+$inuit-base-line-height: $global-spacing;
+@import "inuit-defaults/settings.defaults";
+
+$global-radius: 5px;
+@import "settings.foundation";
+
+@import "./settings/global";
+@import "./settings/foundation";
+
+// Tools: Site-wide mixins and functions.
+@import "inuit-functions/tools.functions";
+@import "tools.mixins";
+@import "tools.animate";
+@import "tools.text";
+
+// Generic: Low-specificity, far-reaching rulesets (e.g. resets).
+@import "foundation-sites/scss/global";
+@include foundation-global-styles;
+
+@import 'foundation-sites/scss/grid/grid';
+@include foundation-flex-grid;
+
+// Base: Unclassed HTML elements (e.g. a {}, blockquote {}, address {}).
+@import "foundation-sites/scss/typography/base";
+@include foundation-typography-base;
+
+@import "base.page";
+@import "base.type";
+@import "base.form";
+
+@import "foundation-sites/scss/forms/forms";
+@include foundation-forms;
+
+@import './utils/mixin';
+@import './utils/helper';
+
+// base
+@import './base/base';
+@import './base/reset';
+@import './base/typography';
+
+
+// Objects: Objects, abstractions, and design patterns (e.g. .media {}).
+$inuit-media-gutter: $global-padding;
+@import "inuit-media/objects.media";
+
+@import "objects.circle";
+@import "objects.icon";
+@import "objects.ellipsis";
+@import "objects.flex-grid";
+
+$inuit-box-padding: $global-padding;
+$inuit-enable-box--flush: true;
+$inuit-enable-box--large: true;
+$inuit-enable-box--huge: true;
+@import "inuit-box/objects.box";
+@import "objects.wrappers";
+
+// layouts
+@import "./layouts/common";
+@import "./layouts/account-password-base";
+
+// Components: Discrete, complete chunks of UI (e.g. .carousel {}). This is the one layer that inuitcss doesn’t get involved with.
+@import "foundation-sites/scss/components/button";
+@include foundation-button;
+@import "foundation-sites/scss/components/label";
+@include foundation-label;
+
+@import "components.buttons";
+
+// components
+@import './components/button';
+@import './components/form';
+@import './components/panel';
+
+// pages
+@import './pages/account-password-section';
+@import './pages/reset-password';
+@import './pages/change-password';
+
+
+// Trumps: High-specificity, very explicit selectors. Overrides and helper classes (e.g. .hidden {}).
+@import "inuit-clearfix/trumps.clearfix";
+$inuit-margin: 16px;
+$inuit-enable-margins: true;
+$inuit-enable-margins--tiny: true;
+$inuit-enable-margins--small: true;
+@import "inuit-spacing/trumps.spacing";
+@import "trumps.float";
+@import "trumps.colors";
+@import "trumps.alignments";

@@ -1,0 +1,43 @@
+$primary-color: #D72C30;
+$secondary-color: #9E9E9E;
+$alert-color: #F03C52;
+$success-color: #6CB814;
+$warning-color: #C0B528;
+$info-color: #4A90E2;
+
+$master-theme-color: #F12C3D;
+$secondary-theme-color: $primary-color;
+$master-theme-bg-color: #F5F5F3;
+$secondary-theme-bg-color: $white;
+$title-text-color: #4A4A4A;
+$title-alt-text-color: #33485F;
+$body-text-color: $title-text-color;
+$body-alt-text-color: #9B9B9B;
+$dum-color: $secondary-color;
+$body-alt-text-color: #9B9B9B;
+$title-alt-text-color: #33485F;
+$outline-color: #E5E5E5;
+$outline-alt-color: #CFCFCF;
+$placeholder-color: $primary-color;
+
+$font-size-xspecial: rem-calc(48);
+$font-size-special: rem-calc(32);
+$font-size-big-title: rem-calc(28);
+$font-size-title: rem-calc(24);
+$font-size-big: rem-calc(18);
+$font-size-normal: rem-calc(14);
+$font-size-small: rem-calc(12);
+
+$font-weight-bold: bold;
+$font-weight-normal: normal;
+$font-weight-light: 300;
+
+$row-width: $global-width;
+
+$global-shadow: 0px 2px 2px #C7C7C7;
+
+$body-font-size: $font-size-normal;
+$title-font-size: $font-size-big;
+$table-hover-bg-color: #EFFBFF;
+$list-hover-bg-color: #EFFBFF;
+$input-placeholder-font-color: #A7A5A5;

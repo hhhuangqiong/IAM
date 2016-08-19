@@ -1,0 +1,24 @@
+/*------------------------------------*\
+    reset
+\*------------------------------------*/
+
+input[type="text"],
+input[type="password"] {
+  box-shadow: none;
+}
+
+::-webkit-input-placeholder {
+  color: $input-placeholder-font-color;
+}
+
+:-moz-placeholder { /* Firefox 18- */
+   color: $input-placeholder-font-color;
+}
+
+::-moz-placeholder {  /* Firefox 19+ */
+   color: $input-placeholder-font-color;
+}
+
+:-ms-input-placeholder {
+   color: $input-placeholder-font-color;
+}

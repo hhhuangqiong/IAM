@@ -1,0 +1,154 @@
+
+//mixins for BEM
+@mixin e($name) {
+  @at-root &__#{$name} {
+    @content;
+  }
+}
+
+@mixin m($name) {
+  @at-root &--#{"" + $name} {
+    @content;
+  }
+}
+
+@mixin clear-float(){
+  &:after {
+    content: "";
+    display: block;
+    clear: both;
+  }
+}
+
+@mixin linear-gradient($gradientLine, $colorStops...) {
+  background-image: -webkit-linear-gradient($gradientLine, $colorStops);
+  background-image:    -moz-linear-gradient($gradientLine, $colorStops);
+  background-image:      -o-linear-gradient($gradientLine, $colorStops);
+  @if length($gradientLine) == 2 {
+    background-image: linear-gradient(to #{inverse-side(nth($gradientLine, 1))} #{inverse-side(nth($gradientLine, 2))}, $colorStops);
+  } @else {
+    background-image: linear-gradient(to #{inverse-side($gradientLine)}, $colorStops);
+  }
+}
+
+@mixin transition($transition...) {
+  -webkit-transition: $transition;
+  -moz-transition: $transition;
+  -o-transition: $transition;
+  transition: $transition;
+}
+
+@mixin transition-property($properties...) {
+  -webkit-transition-property: $properties;
+  -moz-transition-property: $properties;
+  -o-transition-property: $properties;
+  transition-property: $properties;
+}
+
+// define the color of placeholder
+@mixin input-placeholder($color) {
+  ::placeholder{
+    color: $color;
+  }
+}
+
+@mixin triangle-downward($color: $black) {
+  border-left: 5px solid white;
+  border-top: 5px solid $color;
+  border-right: 5px solid white;
+  display: inline-block;
+}
+
+@mixin triangle-upward($color: $black) {
+  border-left: 5px solid white;
+  border-bottom: 5px solid $color;
+  border-right: 5px solid white;
+  display: inline-block;
+}
+
+@mixin dashed-border($width, $color: $grey-500, $radius: $global-radius) {
+  border-style: dashed;
+  border-width: $width;
+  border-color: $color;
+  border-radius: $radius;
+}
+
+// We can control whether or not we have inset shadows edges.
+// $active - Default: true, Options: false
+@mixin inset-shadow($active:true) {
+  box-shadow: $shiny-edge-size $shiny-edge-color inset;
+
+  @if $active { &:active {
+    box-shadow: $shiny-edge-size $shiny-edge-active-color inset; } }
+}
+
+// We use this to add transitions to elements
+// $property - Default: all, Options: http://www.w3.org/TR/css3-transitions/#animatable-properties
+// $speed - Default: 300ms
+// $ease - Default: ease-out, Options: http://css-tricks.com/almanac/properties/t/transition-timing-function/
+@mixin single-transition($property:all, $speed:300ms, $ease:ease-out) {
+  @include transition($property, $speed, $ease);
+}
+
+// We use this to add single or multiple transitions to elements
+// $property - Default: all, Options: http://www.w3.org/TR/css3-transitions/#animatable-properties
+// $speed - Default: 300ms
+// $ease - Default: ease-out, Options: http://css-tricks.com/almanac/properties/t/transition-timing-function/
+// $delay - Default: null (0s)
+@mixin transition($property:all, $speed:300ms, $ease:ease-out, $delay:null) {
+  $transition: none;
+
+  @if length($property) > 1 {
+
+    @each $transition_list in $property {
+      $_property: $property;
+      $_speed: $speed;
+      $_ease: $ease;
+      $_delay: $delay;
+
+      @for $i from 1 through length($transition_list) {
+
+        @if $i == 1 {
+          $_property: nth($transition_list, $i);
+        }
+
+        @if length($transition_list) > 1 {
+          @if $i == 2 {
+            $_speed: nth($transition_list, $i);
+          }
+        }
+
+        @if length($transition_list) > 2 {
+          @if $i == 3 {
+            $_ease: nth($transition_list, $i);
+          }
+        }
+
+        @if length($transition_list) > 3 {
+          @if $i == 4 {
+            $_delay: nth($transition_list, $i);
+          }
+        }
+      }
+
+      @if $transition == none {
+        $transition: $_property $_speed $_ease $_delay;
+      } @else {
+        $transition: $transition, $_property $_speed $_ease $_delay;
+      }
+    }
+  }
+  @else {
+
+    @each $prop in $property {
+
+      @if $transition == none {
+        $transition: $prop $speed $ease $delay;
+      } @else {
+        $transition: $transition, $prop $speed $ease $delay;
+      }
+    }
+  }
+
+  transition: $transition;
+}

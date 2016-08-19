@@ -1,0 +1,12 @@
+.form-field {
+  margin: 0 rem-calc(10) rem-calc(10) 0;
+
+  .field-name {
+    display: inline-block;
+    margin-bottom: rem-calc(5);
+  }
+
+  input, .Select {
+    margin-bottom: $global-spacing / 2;
+  }
+}

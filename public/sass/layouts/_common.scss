@@ -1,0 +1,15 @@
+input[type="text"],
+input[type="password"] {
+  box-shadow: none;
+}
+.app-bg{
+  background-color: $master-theme-bg-color;
+  padding-bottom: 30px;
+}
+
+.server-error-wrapper{
+  min-height: 56px;
+}
+.inline-error-wrapper{
+  min-height: 16px;
+}

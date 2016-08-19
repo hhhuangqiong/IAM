@@ -87,7 +87,7 @@ export function openIdController(getProvider, userService) {
       return;
     }
     const grantData = JSON.parse(grant);
-    const result = {
+    const appMeta = {
       grant: req.params.grant,
       clientId: grantData.params.client_id,
       redirectURL: grantData.params.redirect_uri,
@@ -95,9 +95,12 @@ export function openIdController(getProvider, userService) {
     };
     // to read the error message if there is param and pass to render page
     if (req.query.error) {
-      result.error = req.query.error;
+      appMeta.error = req.query.error;
     }
-    res.render('signIn', result);
+    res.render('App', {
+      page: 'login',
+      appMeta,
+    });
   }
 
 
@@ -128,7 +131,9 @@ export function openIdController(getProvider, userService) {
   }
 
   function resetPasswordPage(req, res) {
-    res.render('resetPassword');
+    res.render('App', {
+      page: 'resetPassword',
+    });
   }
 
   function setPasswordPage(req, res) {
