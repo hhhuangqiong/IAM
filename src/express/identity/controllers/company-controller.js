@@ -62,6 +62,16 @@ export function companyController(companyService, logoService) {
     }
   }
 
+  function* getDescendantCompanies(req, res, next) {
+    try {
+      const companies = yield companyService.getDescendantCompanies(req.params);
+      res.status(200);
+      res.json(companies.map((comp) => formatCompany(comp, req)));
+    } catch (e) {
+      next(e);
+    }
+  }
+
   function* deleteCompany(req, res, next) {
     try {
       yield companyService.deleteCompany(req.params);
@@ -146,6 +156,7 @@ export function companyController(companyService, logoService) {
   router.post('/companies', wrap(postCompany));
   router.get('/companies', wrap(getCompanies));
   router.get('/companies/:id', wrap(getCompany));
+  router.get('/companies/:id/descedants', wrap(getDescendantCompanies));
   router.delete('/companies/:id', wrap(deleteCompany));
   router.put('/companies/:id', wrap(putCompany));
   router.patch('/companies/:id', wrap(patchCompany));
