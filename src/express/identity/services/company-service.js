@@ -226,10 +226,30 @@ export function companyService(validator, { Company }, logoService) {
     return null;
   }
 
+  const getDescendantsCommandSchema = Joi.object({
+    id: Joi.string().regex(idRegExp).required(),
+  });
+
+  function* getDescendants(companyId, descedants) {
+    const companies = yield Company.find({ parent: companyId });
+    for (const company of companies) {
+      descedants.push(company);
+      yield getDescendants(company._id, descedants);
+    }
+  }
+
+  function* getDescendantCompanies(command) {
+    const sanitizedCommand = validator.sanitize(command, getDescendantsCommandSchema);
+    const descedants = [];
+    yield getDescendants(sanitizedCommand.id, descedants);
+    return descedants;
+  }
+
   return {
     createCompany,
     getCompanies,
     getCompany,
+    getDescendantCompanies,
     deleteCompany,
     setCompanyInfo,
     patchCompanyInfo,

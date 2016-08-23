@@ -1,6 +1,7 @@
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
-import sortBy from 'lodash/sortBy';
+import { sortBy, values, omit, pick } from 'lodash';
+import Q from 'q';
 
 import getAgent from '../../getAgent';
 import Company from '../../../src/collections/company';
@@ -193,6 +194,107 @@ describe('GET /identity/companies', () => {
       agent.get('/identity/companies/wrongIdFormat')
            .expect(422)
            .end(done);
+    });
+  });
+
+  describe('get all the companies relationship', () => {
+    const companyIdMapping = {};
+    function addChildCompany(parent, no) {
+      return Company.create({
+        parent,
+        name: `Company${no}`,
+        country: 'Hong Kong',
+      }).then(company => {
+        companyIdMapping[company.name] = company._id.toString();
+        return company;
+      });
+    }
+    // prepare the tree
+    // each first node will have two children and 3 levels now
+    before(() => {
+      Company.create({
+        name: 'Company0',
+        country: 'Hong Kong',
+      }).then(company => {
+        companyIdMapping[company.name] = company._id;
+        return company;
+      }).then(company => Q.all([addChildCompany(company._id, 1), addChildCompany(company._id, 2)]))
+      .then(result => Q.all([addChildCompany(result[0]._id, 3), addChildCompany(result[0]._id, 4)]))
+      .then(result => Q.all([addChildCompany(result[0]._id, 5), addChildCompany(result[0]._id, 6)]));
+    });
+    // remove all the data
+    after((done) => Company.remove({}, done));
+
+    it('successfully gets all the descedants from root 0', (done) => {
+      agent.get(`/identity/companies/${companyIdMapping.Company0}/descedants`)
+           .expect('Content-Type', /json/)
+           .end((err, res) => {
+             expect(res).to.have.property('body');
+             expect(res.body).to.have.lengthOf(6);
+             const ids = values(omit(companyIdMapping, 'Company0'));
+             for (let i = 0; i < res.body.length; i++) {
+               expect(res.body[i].id).to.be.oneOf(ids);
+             }
+             done();
+           });
+    });
+
+    it('successfully gets all the descedants from node 1', (done) => {
+      agent.get(`/identity/companies/${companyIdMapping.Company1}/descedants`)
+           .expect('Content-Type', /json/)
+           .end((err, res) => {
+             expect(res).to.have.property('body');
+             expect(res.body).to.have.lengthOf(4);
+             const ids = values(omit(companyIdMapping, 'Company0', 'Company1', 'Company2'));
+             for (let i = 0; i < res.body.length; i++) {
+               expect(res.body[i].id).to.be.oneOf(ids);
+             }
+             done();
+           });
+    });
+
+    it('successfully gets all the descedants from node 3', (done) => {
+      agent.get(`/identity/companies/${companyIdMapping.Company3}/descedants`)
+           .expect('Content-Type', /json/)
+           .end((err, res) => {
+             expect(res).to.have.property('body');
+             expect(res.body).to.have.lengthOf(2);
+             const ids = values(pick(companyIdMapping, 'Company5', 'Company6'));
+             for (let i = 0; i < res.body.length; i++) {
+               expect(res.body[i].id).to.be.oneOf(ids);
+             }
+             done();
+           });
+    });
+
+    it('successfully gets no descedants from the leaf 4', (done) => {
+      agent.get(`/identity/companies/${companyIdMapping.Company4}/descedants`)
+           .expect('Content-Type', /json/)
+           .end((err, res) => {
+             expect(res).to.have.property('body');
+             expect(res.body).to.have.lengthOf(0);
+             done();
+           });
+    });
+
+    it('successfully gets no descedants from the leaf 2', (done) => {
+      agent.get(`/identity/companies/${companyIdMapping.Company2}/descedants`)
+           .expect('Content-Type', /json/)
+           .end((err, res) => {
+             expect(res).to.have.property('body');
+             expect(res.body).to.have.lengthOf(0);
+             done();
+           });
+    });
+
+    it('successfully gets no descedants from the leaf 5', (done) => {
+      agent.get(`/identity/companies/${companyIdMapping.Company5}/descedants`)
+           .expect('Content-Type', /json/)
+           .end((err, res) => {
+             expect(res).to.have.property('body');
+             expect(res.body).to.have.lengthOf(0);
+             done();
+           });
     });
   });
 });
