@@ -156,7 +156,7 @@ export function companyController(companyService, logoService) {
   router.post('/companies', wrap(postCompany));
   router.get('/companies', wrap(getCompanies));
   router.get('/companies/:id', wrap(getCompany));
-  router.get('/companies/:id/descedants', wrap(getDescendantCompanies));
+  router.get('/companies/:id/descendants', wrap(getDescendantCompanies));
   router.delete('/companies/:id', wrap(deleteCompany));
   router.put('/companies/:id', wrap(putCompany));
   router.patch('/companies/:id', wrap(patchCompany));
