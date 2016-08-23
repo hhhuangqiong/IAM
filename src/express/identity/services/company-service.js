@@ -233,7 +233,7 @@ export function companyService(validator, { Company }, logoService) {
   function* getDescendants(companyId, descendants) {
     const companies = yield Company.find({ parent: companyId });
     for (const company of companies) {
-      descendants.push(company);
+      descendants.push(company.toJSON());
       yield getDescendants(company._id, descendants);
     }
   }
