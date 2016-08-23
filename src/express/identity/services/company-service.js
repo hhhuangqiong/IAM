@@ -230,19 +230,19 @@ export function companyService(validator, { Company }, logoService) {
     id: Joi.string().regex(idRegExp).required(),
   });
 
-  function* getDescendants(companyId, descedants) {
+  function* getDescendants(companyId, descendants) {
     const companies = yield Company.find({ parent: companyId });
     for (const company of companies) {
-      descedants.push(company);
-      yield getDescendants(company._id, descedants);
+      descendants.push(company);
+      yield getDescendants(company._id, descendants);
     }
   }
 
   function* getDescendantCompanies(command) {
     const sanitizedCommand = validator.sanitize(command, getDescendantsCommandSchema);
-    const descedants = [];
-    yield getDescendants(sanitizedCommand.id, descedants);
-    return descedants;
+    const descendants = [];
+    yield getDescendants(sanitizedCommand.id, descendants);
+    return descendants;
   }
 
   return {

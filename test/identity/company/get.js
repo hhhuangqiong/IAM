@@ -225,8 +225,8 @@ describe('GET /identity/companies', () => {
     // remove all the data
     after((done) => Company.remove({}, done));
 
-    it('successfully gets all the descedants from root 0', (done) => {
-      agent.get(`/identity/companies/${companyIdMapping.Company0}/descedants`)
+    it('successfully gets all the descendants from root 0', (done) => {
+      agent.get(`/identity/companies/${companyIdMapping.Company0}/descendants`)
            .expect('Content-Type', /json/)
            .end((err, res) => {
              expect(res).to.have.property('body');
@@ -239,8 +239,8 @@ describe('GET /identity/companies', () => {
            });
     });
 
-    it('successfully gets all the descedants from node 1', (done) => {
-      agent.get(`/identity/companies/${companyIdMapping.Company1}/descedants`)
+    it('successfully gets all the descendants from node 1', (done) => {
+      agent.get(`/identity/companies/${companyIdMapping.Company1}/descendants`)
            .expect('Content-Type', /json/)
            .end((err, res) => {
              expect(res).to.have.property('body');
@@ -253,8 +253,8 @@ describe('GET /identity/companies', () => {
            });
     });
 
-    it('successfully gets all the descedants from node 3', (done) => {
-      agent.get(`/identity/companies/${companyIdMapping.Company3}/descedants`)
+    it('successfully gets all the descendants from node 3', (done) => {
+      agent.get(`/identity/companies/${companyIdMapping.Company3}/descendants`)
            .expect('Content-Type', /json/)
            .end((err, res) => {
              expect(res).to.have.property('body');
@@ -267,8 +267,8 @@ describe('GET /identity/companies', () => {
            });
     });
 
-    it('successfully gets no descedants from the leaf 4', (done) => {
-      agent.get(`/identity/companies/${companyIdMapping.Company4}/descedants`)
+    it('successfully gets no descendants from the leaf 4', (done) => {
+      agent.get(`/identity/companies/${companyIdMapping.Company4}/descendants`)
            .expect('Content-Type', /json/)
            .end((err, res) => {
              expect(res).to.have.property('body');
@@ -277,8 +277,8 @@ describe('GET /identity/companies', () => {
            });
     });
 
-    it('successfully gets no descedants from the leaf 2', (done) => {
-      agent.get(`/identity/companies/${companyIdMapping.Company2}/descedants`)
+    it('successfully gets no descendants from the leaf 2', (done) => {
+      agent.get(`/identity/companies/${companyIdMapping.Company2}/descendants`)
            .expect('Content-Type', /json/)
            .end((err, res) => {
              expect(res).to.have.property('body');
@@ -287,8 +287,8 @@ describe('GET /identity/companies', () => {
            });
     });
 
-    it('successfully gets no descedants from the leaf 5', (done) => {
-      agent.get(`/identity/companies/${companyIdMapping.Company5}/descedants`)
+    it('successfully gets no descendants from the leaf 5', (done) => {
+      agent.get(`/identity/companies/${companyIdMapping.Company5}/descendants`)
            .expect('Content-Type', /json/)
            .end((err, res) => {
              expect(res).to.have.property('body');
