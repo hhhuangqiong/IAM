@@ -118,12 +118,6 @@ export function openIdController(getProvider, userService) {
     const command = _.extend({}, req.body, req.query);
     try {
       yield userService.setPassword(_.pick(command, ['id', 'token', 'password', 'event']));
-      // redirect to the redirect url
-      if (command.redirectURL) {
-        res.redirect(decodeURIComponent(command.redirectURL));
-        return;
-      }
-      // @TODO if no redirect url mention, may refer to the IAM index page
       res.sendStatus(204);
     } catch (e) {
       next(e);
