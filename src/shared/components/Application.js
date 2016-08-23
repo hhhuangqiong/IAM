@@ -1,9 +1,11 @@
 import React, { PropTypes } from 'react';
 import { IntlProvider } from 'react-intl';
 import { Provider as ReduxProvider } from 'react-redux';
+import InlineSVG from 'svg-inline-react';
 import M800ThemeProvider from 'm800-web-styleguide/lib/common/M800ThemeProvider';
 import configureStore from '../store/configureStore';
 
+import symbol from 'm800-web-styleguide/assets/symbols/symbol-defs.svg';
 import '../../../public/sass/main.scss';
 
 require('es6-promise').polyfill();
@@ -20,6 +22,7 @@ const Application = (props) => {
   return (
     <IntlProvider locale={currentLang} messages={messages}>
       <M800ThemeProvider bem={bem}>
+        <InlineSVG src={symbol} />
         <ReduxProvider store={store}>
           {props.children}
         </ReduxProvider>

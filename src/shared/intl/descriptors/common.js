@@ -41,4 +41,8 @@ export default defineMessages({
     id: 'resetPasswordSuccess',
     defaultMessage: 'Password changed successfully.',
   },
+  emailNotFound: {
+    id: 'emailNotFound',
+    defaultMessage: 'Email address not found.',
+  },
 });

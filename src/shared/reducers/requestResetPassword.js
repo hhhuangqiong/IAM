@@ -17,6 +17,7 @@ function getStatus(status, action) {
 
 export default function requestResetPassword(state = {}, action) {
   return {
-    requestStatus: getStatus(state.requestResetPasswordStatus, action),
+    requestStatus: getStatus(state.requestStatus, action),
+    requestError: action.type === REQUEST_RESET_PASSWORD_FAILURE ? action.error : null,
   };
 }

@@ -125,13 +125,28 @@ export function openIdController(getProvider, userService) {
   }
 
   function resetPasswordPage(req, res) {
+    const { clientId, redirectURL } = req.query;
     res.render('App', {
       page: 'resetPassword',
+      appMeta: {
+        clientId,
+        redirectURL,
+      },
     });
   }
 
   function setPasswordPage(req, res) {
-    res.render('setPassword');
+    const { clientId, event, id, redirectURL, token } = req.query;
+    res.render('App', {
+      page: 'setPassword',
+      appMeta: {
+        clientId,
+        event,
+        id,
+        redirectURL,
+        token,
+      },
+    });
   }
 
   router.post('/login', jsonParser, urlencodedParser, wrap(login));

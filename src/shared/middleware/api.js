@@ -1,4 +1,5 @@
-import 'isomorphic-fetch';
+import _ from 'lodash';
+import request from 'superagent';
 import { REQUSET, SUCCESS, FAILURE } from '../../constants/actionStatus';
 
 // Action key that carries API call info interpreted by this Redux middleware.
@@ -6,18 +7,27 @@ export const CALL_API = 'CALL_API';
 
 const API_ROOT = '/';
 
-function callApi(endpoint, init) {
+function callApi(endpoint, options) {
   const url = API_ROOT + endpoint;
+  const method = options.method || 'GET';
 
-  return fetch(url, init)
-    .then(response =>
-      response.json().then(json => ({ json, response }))
-    ).then(({ json, response }) => {
-      if (!response.ok) {
-        return Promise.reject(json);
-      }
-      return json;
-    });
+  let result = request(method, url);
+  if (options.body) {
+    result = result.send(options.body);
+  }
+
+  // return fetch(url, init)
+  return result.then(response => {
+    if (response.type === 'application/json') {
+      return response.json().then(json => ({ response, json }));
+    }
+    return Promise.resolve({ response });
+  }).then(({ response, json }) => {
+    if (!response.ok) {
+      return Promise.reject(json);
+    }
+    return json;
+  });
 }
 
 // A Redux middleware that interprets actions with CALL_API info specified.
@@ -29,7 +39,7 @@ export default store => next => action => {
   }
 
   let { endpoint } = callAPI;
-  const { types, init } = callAPI;
+  const { types, options } = callAPI;
 
   if (typeof endpoint === 'function') {
     endpoint = endpoint(store.getState());
@@ -57,7 +67,7 @@ export default store => next => action => {
     status: REQUSET,
   }));
 
-  return callApi(endpoint, init).then(
+  return callApi(endpoint, options).then(
     response => next(actionWith({
       response,
       type: successType,
@@ -66,7 +76,7 @@ export default store => next => action => {
     error => next(actionWith({
       type: failureType,
       status: FAILURE,
-      error: error.message || 'Call API failed',
+      error: _.get(error, 'response.body.error'),
     }))
   );
 };

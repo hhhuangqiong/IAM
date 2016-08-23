@@ -12,6 +12,7 @@ module.exports = {
   entry: {
     login: ['babel-polyfill', './src/clients/login'],
     resetPassword: ['babel-polyfill', './src/clients/resetPassword'],
+    setPassword: ['babel-polyfill', './src/clients/setPassword'],
   },
   output: {
     path: path.resolve(__dirname, './public/assets/app'),
@@ -33,6 +34,10 @@ module.exports = {
       },
       { test: /\.json$/, loader: 'json' },
       { test: /(\.css|\.scss)$/, loaders: ['style', 'css?sourceMap', `sass?sourceMap&${scssModulePaths}`] },
+      {
+        test: /\.svg$/,
+        loader: 'svg-inline',
+      },
     ],
   },
   plugins: [

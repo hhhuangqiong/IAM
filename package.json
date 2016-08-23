@@ -47,7 +47,6 @@
     "express-validator": "^2.20.8",
     "fast-json-patch": "^1.0.0",
     "gridfs-stream": "^1.1.1",
-    "isomorphic-fetch": "^2.2.1",
     "joi": "^9.0.4",
     "joi-browser": "^9.0.4",
     "json-loader": "^0.5.4",
@@ -72,7 +71,6 @@
     "react-redux": "^4.4.5",
     "redux": "^3.5.2",
     "superagent": "^2.2.0",
-    "superagent-promise-plugin": "^3.2.0",
     "svg-url-loader": "^1.1.0",
     "tv4": "^1.2.7",
     "winston": "^2.2.0"
@@ -110,6 +108,8 @@
     "style-loader": "^0.13.1",
     "supertest": "^1.2.0",
     "supertest-as-promised": "^4.0.0",
+    "svg-inline-loader": "^0.6.1",
+    "svg-inline-react": "^1.0.2",
     "webpack": "^1.13.1",
     "webpack-dev-middleware": "^1.6.1",
     "webpack-dev-server": "^1.14.1"

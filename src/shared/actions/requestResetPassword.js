@@ -12,10 +12,9 @@ function callRequestResetPassword(payload) {
     [CALL_API]: {
       types: [REQUEST_RESET_PASSWORD_REQUEST, REQUEST_RESET_PASSWORD_SUCCESS, REQUEST_RESET_PASSWORD_FAILURE],
       endpoint: 'openid/resetPassword',
-      init: {
+      options: {
         method: 'POST',
         body: payload,
-        headers: new Headers({ 'Content-Type': 'application/json; charset=utf-8' }),
       },
     },
   };

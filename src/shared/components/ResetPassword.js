@@ -33,7 +33,12 @@ class ResetPassword extends Component {
         // do not submit if there's still validation error
         return;
       }
-      this.props.requestResetPassword(JSON.stringify({ id: this.state.email }));
+      const { clientId, redirectURL } = this.props.appMeta;
+      this.props.requestResetPassword({
+        id: this.state.email,
+        clientId,
+        redirectURL,
+      });
     });
   }
 
@@ -66,7 +71,7 @@ class ResetPassword extends Component {
     if (requestStatus === FAILURE) {
       return (
         <p className="error-message text-alert">
-          <FormattedMessage {...COMMON_MESSAGES.operationFail} />
+          <FormattedMessage {...COMMON_MESSAGES.emailNotFound} />
         </p>
       );
     }
@@ -128,8 +133,10 @@ class ResetPassword extends Component {
 }
 
 ResetPassword.propTypes = {
+  appMeta: PropTypes.object.isRequired,
   intl: intlShape.isRequired,
   requestStatus: PropTypes.string,
+  requestError: PropTypes.object,
   requestResetPassword: PropTypes.func.isRequired,
   // react-validation-mixin proptypes
   errors: PropTypes.object,
@@ -141,6 +148,6 @@ ResetPassword.propTypes = {
 };
 
 export default connect(
-  (state) => ({ requestStatus: state.requestResetPassword.requestStatus }),
+  (state) => state.requestResetPassword,
   { requestResetPassword }
 )(injectIntl(injectJoiValidation(ResetPassword)));
