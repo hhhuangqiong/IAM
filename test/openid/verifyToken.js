@@ -38,7 +38,7 @@ describe('POST /openid/setPassword', () => {
     it('reset passwords sucessfully', done => {
       const updatePWBody = {
         id: userInfo.id,
-        password: '13@aAn',
+        password: '1345678@aAn',
         token,
         event: 'resetPassword',
       };
@@ -155,7 +155,7 @@ describe('POST /openid/setPassword', () => {
     it('set passwords sucessfully', done => {
       const updatePWBody = {
         id: userInfo.id,
-        password: '13@aAn',
+        password: '1345678@aAn',
         token,
         event: 'setPassword',
       };
