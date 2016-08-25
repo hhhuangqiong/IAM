@@ -310,7 +310,11 @@ export function userService(validator, { User, Company }, mailService) {
   const setPasswordCommandSchema = Joi.object({
     id: Joi.string().email().required(),
     token: Joi.string().required(),
-    password: Joi.string().required(),
+    password: Joi.string().required().min(8)
+      // both upper and lower
+      .regex(/(?=.*[a-z])(?=.*[A-Z]).{2,}/)
+      // number and symbol
+      .regex(/[0-9!@#\$%\^&*\(\)]+/),
     event: Joi.string().valid(RESET_PW_TOKEN, SET_PW_TOKEN).required(),
   });
 
