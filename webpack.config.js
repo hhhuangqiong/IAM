@@ -20,7 +20,7 @@ module.exports = {
     publicPath: '/assets/app/',
   },
   resolve: {
-    extensions: ['', '.js', '.jsx'],
+    extensions: ['', '.js', '.jsx', '.json'],
   },
   module: {
     loaders: [

@@ -88,6 +88,7 @@ export function openIdController(getProvider, userService) {
     }
     const grantData = JSON.parse(grant);
     const appMeta = {
+      locale: req.locale,
       grant: req.params.grant,
       clientId: grantData.params.client_id,
       redirectURL: grantData.params.redirect_uri,
@@ -129,6 +130,7 @@ export function openIdController(getProvider, userService) {
     res.render('App', {
       page: 'resetPassword',
       appMeta: {
+        locale: req.locale,
         clientId,
         redirectURL,
       },
@@ -140,6 +142,7 @@ export function openIdController(getProvider, userService) {
     res.render('App', {
       page: 'setPassword',
       appMeta: {
+        locale: req.locale,
         clientId,
         event,
         id,

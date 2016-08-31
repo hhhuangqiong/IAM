@@ -6,7 +6,7 @@ import ResetPassword from '../shared/components/ResetPassword';
 const appMeta = window.$APP_META || {};
 
 render((
-  <Application>
+  <Application currentLang={appMeta.locale}>
     <ResetPassword appMeta={appMeta} />
   </Application>
   ),

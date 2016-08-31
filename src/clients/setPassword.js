@@ -6,7 +6,7 @@ import SetPassword from '../shared/components/SetPassword';
 const appMeta = window.$APP_META || {};
 
 render((
-  <Application>
+  <Application currentLang={appMeta.locale}>
     <SetPassword appMeta={appMeta} />
   </Application>
   ),

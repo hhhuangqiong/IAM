@@ -6,7 +6,7 @@ import Login from '../shared/components/Login';
 const appMeta = window.$APP_META || {};
 
 render((
-  <Application>
+  <Application currentLang={appMeta.locale}>
     <Login appMeta={appMeta} />
   </Application>
   ),

@@ -2,7 +2,7 @@ import React, { PropTypes } from 'react';
 const bundlePath = '/assets/app/';
 
 const App = ({ page, appMeta }) => (
-  <html>
+  <html lang={appMeta.locale}>
     <head>
     </head>
     <body>
