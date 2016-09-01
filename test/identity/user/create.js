@@ -74,7 +74,6 @@ describe('POST /identity/users', () => {
 
     it('successfully creates user with all attribute', (done) => {
       const userInfo = {
-        isRoot: true,
         id: 'user@test.abc',
         name: {
           formatted: 'Johnny M. Richmond',

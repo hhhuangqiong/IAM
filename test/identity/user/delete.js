@@ -17,7 +17,6 @@ describe('DELETE /identity/users/:id', () => {
     // insert the data first
     before((done) => {
       const userInfo = {
-        isRoot: true,
         id: 'user@test.abc',
         name: {
           formatted: 'Johnny M. Richmond',

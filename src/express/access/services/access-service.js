@@ -45,7 +45,19 @@ export function accessService(validator, { Role, Company, User }) {
 
   function* getRoles(query) {
     const sanitizedQuery = validator.sanitize(query, getRolesQuerySchema);
-    const filters = _.pickBy(sanitizedQuery, x => _.isString(x) && x.length > 0);
+    let filters = _.pickBy(sanitizedQuery, x => _.isString(x) && x.length > 0);
+    // isRoot handling
+    if (filters.users) {
+      // determine whether user is root and return all the roles
+      const user = yield User.findById(filters.users).select('isRoot');
+      if (!user) {
+        throw new NotFoundError('User');
+      }
+      if (user.isRoot) {
+        // get all the roles based on the service or company
+        filters = _.omit(filters, 'users');
+      }
+    }
     const roles = yield Role.find(filters).lean().select('-users');
     return roles.map(x => rename(x, { _id: 'id' }));
   }
@@ -88,11 +100,23 @@ export function accessService(validator, { Role, Company, User }) {
 
   function* getUserPermissions(query) {
     const sanitizedQuery = validator.sanitize(query, getUserPermissionsQuerySchema);
+    // root handling
+    // determine whether user is root and return all the permission
+    const user = yield User.findById(sanitizedQuery.username).select('isRoot');
+    if (!user) {
+      throw new NotFoundError('User');
+    }
     const filters = _(sanitizedQuery)
       .omit('username')
       .pickBy(x => _.isString(x) && x.length > 0)
       .value();
-    const mongoQuery = _.extend({ users: sanitizedQuery.username }, filters);
+    let mongoQuery;
+    // root user will exclude the user name in query
+    if (user.isRoot) {
+      mongoQuery = filters;
+    } else {
+      mongoQuery = _.extend({ users: sanitizedQuery.username }, filters);
+    }
     const roles = yield Role.find(mongoQuery).lean().select('permissions');
     const permissions = combinePermissions(roles.map(x => x.permissions));
     return permissions;
