@@ -17,6 +17,8 @@ function removeDynamicAttribute(user) {
   delete myUser.updatedBy;
   delete myUser.isVerified;
   delete myUser._id;
+  // expect all the user are isRoot false
+  delete myUser.isRoot;
   return myUser;
 }
 
@@ -37,7 +39,6 @@ describe('GET /identity/users', () => {
       while (count < 45) {
         userArray.push({
           id: `user${count}@test.com`,
-          isRoot: count === 0,
           name: {
             familyName: 'bigFamily',
             givenName: `No${count}`,

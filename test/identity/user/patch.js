@@ -20,7 +20,6 @@ describe('PATCH /identity/users', () => {
 
   describe('patch existing user', () => {
     const userInfo = {
-      isRoot: true,
       id: 'user@test.abc',
       name: {
         formatted: 'Johnny M. Richmond',

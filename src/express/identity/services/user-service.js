@@ -102,7 +102,6 @@ export function userService(validator, { User, Company }, mailService) {
 
   const createUserCommandSchema = baseInfoSchema.keys({
     id: Joi.string().email().required(),
-    isRoot: Joi.boolean().default(false),
     active: Joi.boolean().default(false),
     clientId: Joi.string(),
     redirectURL: Joi.string(),
@@ -141,7 +140,6 @@ export function userService(validator, { User, Company }, mailService) {
 
   const getUsersCommandSchema = baseInfoSchema.keys({
     id: Joi.string().email(),
-    isRoot: Joi.boolean(),
     active: Joi.boolean(),
     affiliatedCompany: Joi.string().regex(objectIdRegExp),
     page: Joi.number().positive().default(DEFAULT_PAGE_NO),
@@ -219,7 +217,6 @@ export function userService(validator, { User, Company }, mailService) {
 
   const updateUserCommandSchema = baseInfoSchema.keys({
     id: Joi.string().email().required(),
-    isRoot: Joi.boolean(),
     active: Joi.boolean(),
   });
 
@@ -264,7 +261,7 @@ export function userService(validator, { User, Company }, mailService) {
       // ignore internal properties
       currentUser = _.omit(user.toJSON(),
        ['createdAt', 'updatedAt', 'createdBy', 'updatedBy',
-        'password', 'hashedPassword', 'salt', 'displayName', 'tokens', 'isVerified']);
+        'password', 'hashedPassword', 'salt', 'displayName', 'tokens', 'isVerified', 'isRoot']);
       // always set password to be empty string
       currentUser.password = '';
     }
