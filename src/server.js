@@ -7,6 +7,7 @@ import injectKoa from './koa';
 import ioc from './utils/ioc';
 import database from './initializers/database';
 import { errorHandler } from './initializers/errorHandler';
+import devInitialize from './initializers/dev';
 
 let app;
 export function createServer() {
@@ -26,11 +27,18 @@ export function createServer() {
   // wait until both services are ready
   return Q.all([injectExpress(app), injectKoa(app)])
     .then(() => {
-        // set up express error handler
+      // set up express error handler
       errorHandler({
         app,
         logger,
       });
+
+      // set up dev config
+      const env = config.get('NODE_ENV');
+      if (env === 'development') {
+        devInitialize(app);
+      }
+
       return app;
     });
 }

@@ -7,5 +7,10 @@
       "messagesDir": "./build/messages/",
       "enforceDescriptions": false
     }]
-  ]
+  ],
+  "env": {
+    "development": {
+      "presets": ["react-hmre"]
+    }
+  }
 }
