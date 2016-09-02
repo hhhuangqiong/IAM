@@ -1,5 +1,5 @@
 import logger from 'winston';
-import { checkArgument as check, ioc } from '../utils';
+import { checkArgument as check } from '../utils';
 import {
   ArgumentNullError,
   ArgumentError,
@@ -30,13 +30,12 @@ export function errorHandler(imports) {
     'app',
     'logger',
   ]);
-  const { config } = ioc.getContainer();
-  const env = config.get('NODE_ENV');
+  const env = process.env.NODE_ENV || 'development';
 
   const server = imports.app;
   function handleErrors(err, req, res, next) {
-    // show the error log when development
-    if (env === 'development') {
+    // show the error log when development or test
+    if (env === 'development' || env === 'test') {
       logger.error(err);
     }
     switch (err.name) {

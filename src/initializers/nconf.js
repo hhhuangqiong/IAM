@@ -22,10 +22,11 @@ export default function initialize() {
     search: true,
   });
 
-  // set up default values
-  nconf.defaults({
-    NODE_ENV: 'development',
-    PORT: 3000,
+  // default config
+  nconf.file('default', {
+    file: 'default.json',
+    dir: configDir,
+    search: true,
   });
 
   logger.debug('loading configuration files %j under "%s"', fileName, configDir);

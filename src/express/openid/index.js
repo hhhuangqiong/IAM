@@ -16,6 +16,6 @@ export function injectOpenIdRoutes(server) {
   // set the view engine
   server.set('views', path.resolve(__dirname, '../../views'));
   server.set('view engine', 'js');
-  server.engine('js', createEngine());
+  server.engine('js', createEngine({ transformViews: false }));
   server.use('/openid', cookies.express(SIGN_COOKIES_KEY), openIdController);
 }
