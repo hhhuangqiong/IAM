@@ -1,12 +1,13 @@
 {
   "name": "maaii-identity-access-mgmt",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Identity Access Management",
   "main": "index.js",
   "scripts": {
     "clean": "rm -rf build && mkdir build",
     "dev": "nodemon -e js,json,scss -i public/assets -i build --exec \"webpack --config webpack.config.js && babel-node -- src\"",
     "doc": "apidoc -i src/ -f \".*\\.js$\"",
+    "docs": "gitbook install && gitbook build",
     "lint": "eslint src",
     "test": "mocha",
     "test:coverage": "nyc --reporter=html --reporter=lcov --reporter=text mocha",
@@ -14,7 +15,7 @@
     "jenkins:commit": "npm run jenkins && npm run lint && npm run test:coverage",
     "jenkins:merge": "npm run jenkins && gulp intl:upload && npm run doc",
     "build-src": "babel -d ./build ./src -s --copy-files && webpack --config webpack.config.js",
-    "build": "npm run clean && npm run build-src",
+    "build": "npm run clean && npm run build-src && npm run docs",
     "server": "node ./build/index.js"
   },
   "repository": {

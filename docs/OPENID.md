@@ -43,5 +43,5 @@ export openid__clients__myClient__post_logout_redirect_uris=http://192.168.3.106
 ```
 
 ### Using the client
-
-@TODO
+You can reference the WLP integration with IAM as reference
+http://deploy.dev.maaii.com:9080/m800-white-label-portal/
