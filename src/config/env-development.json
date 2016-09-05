@@ -1,7 +1,7 @@
 {
    "APP_URL": "http://localhost:3001",
    "mongodb":{
-      "uri":"mongodb://localhost/maaii-identity-access-mgmt",
+      "uri":"mongodb://deploy.dev.maaii.com:27018/maaii-identity-access-mgmt",
       "options":{
          "mongos":false,
          "user":"",
@@ -14,7 +14,6 @@
    "openid":{
      "clients": {
        "wlp": {
-         "client_id": "wlp",
          "client_secret": "7GnoS1vf5HqM1b8B4ZKDJQA6BvXa38ltUoFFVQ4cloR4GICEuWQk50S60pIVK16b",
          "grant_types": ["authorization_code"],
          "redirect_uris": ["http://127.0.0.1:3000/callback"],

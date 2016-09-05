@@ -33,8 +33,10 @@ export function setUp(config, openIdConfig, certificates) {
   });
 
   return Q.all(certificates.map(cert => provider.addKey(cert)))
-    .then(() => Q.all(_.map(config.get('openid:clients'), client => {
+    .then(() => Q.all(_.map(config.get('openid:clients'), (client, key) => {
       const mClient = client;
+      // set back the client id
+      mClient.client_id = key;
       // if import from env variable, it will be string only
       // convert back into arrays
       if (typeof client.grant_types === 'string') {
