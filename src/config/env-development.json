@@ -1,19 +1,17 @@
 {
-  "NODE_ENV": "development",
-  "PORT": 3000,
-  "APP_URL": "http://localhost:3000",
-  "mongodb":{
-    "uri":"mongodb://deploy.dev.maaii.com:27018/maaii-identity-access-mgmt",
-    "options":{
-       "mongos":false,
-       "user":"",
-       "pass":"",
-       "server":{
-          "auto_reconnect":true
-       }
-    }
-  },
-  "openid":{
+   "APP_URL": "http://localhost:3001",
+   "mongodb":{
+      "uri":"mongodb://deploy.dev.maaii.com:27018/maaii-identity-access-mgmt",
+      "options":{
+         "mongos":false,
+         "user":"",
+         "pass":"",
+         "server":{
+            "auto_reconnect":true
+         }
+      }
+   },
+   "openid":{
      "clients": {
        "wlp": {
          "client_secret": "7GnoS1vf5HqM1b8B4ZKDJQA6BvXa38ltUoFFVQ4cloR4GICEuWQk50S60pIVK16b",
