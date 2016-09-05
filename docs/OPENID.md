@@ -1,6 +1,6 @@
 # OPEN CONNECT ID
 
-## Objective
+### Objective
 
 [Open Connect ID](http://openid.net/connect/) is a (Single Sign On) SSO solution and identity layer to allow client verify the end user identity based on based on the authentication performed by an Authorization Server.
 
@@ -74,3 +74,10 @@ It will make use of different end points to authenticate.
 
 You can reference the WLP integration with IAM as reference
 http://deploy.dev.maaii.com:9080/m800-white-label-portal/
+
+
+### Reference
+[Open Connect ID Standard](http://openid.net/connect/)
+[Node Provider used in IAM](https://github.com/panva/node-oidc-provider)
+[NODE OPENID Client applied in WLP](https://github.com/panva/node-openid-client)
+[IAM Design Guide](https://issuetracking.maaii.com:9443/display/WLP/Identity+Access+Management%28IAM%29+Service)
