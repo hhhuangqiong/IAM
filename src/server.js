@@ -34,7 +34,7 @@ export function createServer() {
       });
 
       // set up dev config
-      const env = config.get('NODE_ENV');
+      const env = process.env.NODE_ENV || 'development';
       if (env === 'development') {
         devInitialize(app);
       }
