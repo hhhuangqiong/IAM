@@ -1,10 +1,21 @@
 import _ from 'lodash';
 import Joi from 'joi';
-import { NotFoundError, ValidationError } from 'common-errors';
+import { NotFoundError, ValidationError, NotPermittedError } from 'common-errors';
 
 import { combinePermissions } from './combine-permissions';
 import { rename } from './../../../utils';
 
+// In general on IAM, there are 3 general permissions, which are company, user and role
+// only reseller company can have company permission
+// throw exception when assign company resource on non reseller company
+function validateCompanyPermission(company, permissions) {
+  if (!permissions || !permissions.company || !permissions.company.length) {
+    return;
+  }
+  if (!company.reseller) {
+    throw new NotPermittedError('only reseller company can have permission on company resources');
+  }
+}
 
 export function accessService(validator, { Role, Company, User }) {
   const permissionsSchema = Joi.object().pattern(/.+/, Joi.array().items(Joi.string()));
@@ -25,6 +36,7 @@ export function accessService(validator, { Role, Company, User }) {
     if (!company) {
       throw new NotFoundError('Company');
     }
+    validateCompanyPermission(company, sanitizedCommand.permissions);
     try {
       const role = yield Role.create(sanitizedCommand);
       const json = _.omit(role.toJSON(), 'users');
@@ -81,6 +93,7 @@ export function accessService(validator, { Role, Company, User }) {
     if (!company) {
       throw new NotFoundError('Company');
     }
+    validateCompanyPermission(company, sanitizedCommand.permissions);
     const role = yield Role.findOneAndUpdate(
       { _id: sanitizedCommand.id },
       { $set: _.omit(sanitizedCommand, 'id') },
