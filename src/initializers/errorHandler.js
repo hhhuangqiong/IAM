@@ -34,8 +34,8 @@ export function errorHandler(imports) {
 
   const server = imports.app;
   function handleErrors(err, req, res, next) {
-    // show the error log when development or test
-    if (env === 'development' || env === 'test') {
+    // show the error log when development
+    if (env === 'development') {
       logger.error(err);
     }
     switch (err.name) {

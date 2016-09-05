@@ -8,7 +8,7 @@ const scssModulePaths = [
 ].map(scssModulePath => `includePaths[]=${path.resolve(__dirname, scssModulePath)}`).join(',');
 
 module.exports = {
-  devtool: 'source-map',
+  devtool: 'cheap-module-eval-source-map',
   entry: {
     login: ['babel-polyfill', './src/clients/login'],
     resetPassword: ['babel-polyfill', './src/clients/resetPassword'],
