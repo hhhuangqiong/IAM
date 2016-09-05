@@ -29,7 +29,12 @@ class Application extends Component {
   constructor(props) {
     super(props);
     const { currentLang } = props;
-    this.messages = require(`../intl/messages/${currentLang}.json`); // eslint-disable-line global-require
+    try {
+      this.messages = require(`../intl/messages/${currentLang}.json`); // eslint-disable-line global-require
+    } catch (e) {
+      // prevent error thorwn when the message json is empty
+      this.messages = {};
+    }
   }
 
   render() {
