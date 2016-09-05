@@ -14,7 +14,7 @@
     "jenkins": "npm prune && npm i --verbose && gulp intl:download && npm run build",
     "jenkins:commit": "npm run jenkins && npm run lint && npm run test:coverage",
     "jenkins:merge": "npm run jenkins && gulp intl:upload && npm run doc",
-    "build-src": "babel -d ./build ./src -s --copy-files && NODE_ENV=production webpack --config webpack.config.js",
+    "build-src": "NODE_ENV=production babel -d ./build ./src -s --copy-files && webpack --config webpack.config.js",
     "build": "npm run clean && npm run build-src && npm run docs",
     "server": "node ./build/index.js"
   },
