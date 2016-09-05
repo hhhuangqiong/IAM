@@ -1,9 +1,11 @@
 import React, { PropTypes } from 'react';
+import { PolyfillIntl } from '../utils/intl';
 const bundlePath = '/assets/app/';
 
 const App = ({ page, appMeta }) => (
   <html lang={appMeta.locale}>
     <head>
+      <PolyfillIntl />
     </head>
     <body>
       <div id="app">
