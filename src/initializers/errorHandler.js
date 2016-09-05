@@ -6,6 +6,7 @@ import {
   ValidationError,
   AlreadyInUseError,
   NotFoundError,
+  NotPermittedError,
 } from 'common-errors';
 
 /**
@@ -69,6 +70,11 @@ export function errorHandler(imports) {
         // Not found
         res.status(404)
            .json(errorJSON(20001, err.message));
+        break;
+      case NotPermittedError.name:
+        // Not permit, throw forbidden error
+        res.status(403)
+           .json(errorJSON(20004, err.message));
         break;
       default:
         res.status(400)
