@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { NotFoundError, ValidationError, Error } from 'common-errors';
+import { NotFoundError, ValidationError, Error, InvalidOperationError } from 'common-errors';
 import Joi from 'joi';
 import moment from 'moment';
 
@@ -211,6 +211,10 @@ export function userService(validator, { User, Company }, mailService) {
     const user = yield User.findOne({ _id: sanitizedCommand.id });
     if (!user) {
       throw new NotFoundError('user');
+    }
+    // Not allow to delete the root user
+    if (user.isRoot) {
+      throw new InvalidOperationError('root user cannot be deleted');
     }
     yield user.remove();
   }

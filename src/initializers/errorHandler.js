@@ -7,6 +7,7 @@ import {
   AlreadyInUseError,
   NotFoundError,
   NotPermittedError,
+  InvalidOperationError,
 } from 'common-errors';
 
 /**
@@ -71,9 +72,16 @@ export function errorHandler(imports) {
            .json(errorJSON(20001, err.message));
         break;
       case NotPermittedError.name:
-        // Not permit, throw forbidden error
-        res.status(403)
+        // 401 Not permit, throw unauthorized error
+        // The request requires user authentication
+        res.status(401)
            .json(errorJSON(20004, err.message));
+        break;
+      case InvalidOperationError.name:
+        // 403 server understood the request, but is refusing to fulfill it.
+        // Authorization will not help and the request SHOULD NOT be repeated
+        res.status(403)
+           .json(errorJSON(20005, err.message));
         break;
       default:
         res.status(400)

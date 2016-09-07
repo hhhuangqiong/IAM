@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import Joi from 'joi';
-import { NotFoundError, ValidationError, NotPermittedError } from 'common-errors';
+import { NotFoundError, ValidationError, InvalidOperationError } from 'common-errors';
 
 import { combinePermissions } from './combine-permissions';
 import { rename } from './../../../utils';
@@ -13,11 +13,28 @@ function validateCompanyPermission(company, permissions) {
     return;
   }
   if (!company.reseller) {
-    throw new NotPermittedError('only reseller company can have permission on company resources');
+    throw new InvalidOperationError('only reseller company can have permission on company resources');
   }
 }
+const objectIdRegExp = /^[0-9a-fA-F]{24}$/;
 
 export function accessService(validator, { Role, Company, User }) {
+  // root role is the first role created on the company and service.
+  // check if there is any root role (first role) related to the company and service
+  function* hasRootRole(command) {
+    const roles = yield Role.find(_.pick(command, 'company', 'service'));
+    return !!roles.length;
+  }
+
+  // Not allow to change the root role.
+  // check if the role is root role, throw exception
+  function* validateRootRole(roleId) {
+    const role = yield Role.findById(roleId);
+    if (role && role.isRoot) {
+      throw new InvalidOperationError('Edit or delete admin role');
+    }
+  }
+
   const permissionsSchema = Joi.object().pattern(/.+/, Joi.array().items(Joi.string()));
 
   const createRoleCommandSchema = Joi.object().keys({
@@ -32,11 +49,16 @@ export function accessService(validator, { Role, Company, User }) {
   function* createRole(command) {
     const sanitizedCommand = validator.sanitize(command, createRoleCommandSchema);
     const companyId = sanitizedCommand.company;
-    const company = yield Company.findById(companyId).select('_id');
+    const company = yield Company.findById(companyId).select('_id reseller');
     if (!company) {
       throw new NotFoundError('Company');
     }
     validateCompanyPermission(company, sanitizedCommand.permissions);
+    const rootRole = yield hasRootRole(sanitizedCommand);
+    // set the first role of company, service as isRoot to be true
+    if (!rootRole) {
+      sanitizedCommand.isRoot = true;
+    }
     try {
       const role = yield Role.create(sanitizedCommand);
       const json = _.omit(role.toJSON(), 'users');
@@ -75,16 +97,17 @@ export function accessService(validator, { Role, Company, User }) {
   }
 
   const deleteRoleCommandSchema = Joi.object({
-    roleId: Joi.string().required(),
+    roleId: Joi.string().regex(objectIdRegExp).required(),
   });
 
   function* deleteRole(command) {
     const sanitizedCommand = validator.sanitize(command, deleteRoleCommandSchema);
+    yield validateRootRole(sanitizedCommand.roleId);
     yield Role.remove({ _id: sanitizedCommand.roleId });
   }
 
   const updateRoleCommandSchema = createRoleCommandSchema
-    .keys({ id: Joi.string().required() })
+    .keys({ id: Joi.string().regex(objectIdRegExp).required() })
     .rename('roleId', 'id', { override: true });
 
   function* updateRole(command) {
@@ -94,6 +117,8 @@ export function accessService(validator, { Role, Company, User }) {
       throw new NotFoundError('Company');
     }
     validateCompanyPermission(company, sanitizedCommand.permissions);
+    yield validateRootRole(sanitizedCommand.id);
+
     const role = yield Role.findOneAndUpdate(
       { _id: sanitizedCommand.id },
       { $set: _.omit(sanitizedCommand, 'id') },

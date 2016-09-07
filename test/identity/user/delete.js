@@ -13,7 +13,7 @@ describe('DELETE /identity/users/:id', () => {
     });
   });
 
-  describe('delete the company', () => {
+  describe('delete the user', () => {
     // insert the data first
     before((done) => {
       const userInfo = {
@@ -45,9 +45,29 @@ describe('DELETE /identity/users/:id', () => {
            });
     });
 
-    it('successfully deletes the non-existing company record', (done) => {
+    it('successfully deletes the non-existing user record', (done) => {
       agent.delete('/identity/users/notExist@sample.org')
            .expect(404)
+           .end(done);
+    });
+  });
+
+  describe('delete the root user', () => {
+    // insert the data first
+    before((done) => {
+      const userInfo = {
+        isRoot: true,
+        id: 'root@abc.com',
+      };
+      User.create(userInfo, done);
+    });
+
+    // remove all the data
+    after((done) => User.remove({}, done));
+
+    it('fail to delete the root user record', (done) => {
+      agent.delete('/identity/users/root@abc.com')
+           .expect(403)
            .end(done);
     });
   });
