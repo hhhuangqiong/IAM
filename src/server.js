@@ -26,11 +26,17 @@ export function createServer() {
   // wait until both services are ready
   return Q.all([injectExpress(app), injectKoa(app)])
     .then(() => {
-        // set up express error handler
+      // set up express error handler
       errorHandler({
         app,
         logger,
       });
+
+      // set up dev config
+      if (process.env.ENABLE_WEBPACK_HOTLOADER === 'true') {
+        require('./initializers/devHotloader')(app); // eslint-disable-line global-require
+      }
+
       return app;
     });
 }
