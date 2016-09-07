@@ -69,6 +69,7 @@
     "moment": "^2.14.1",
     "mongoose": "^4.5.3",
     "mongoose-timestamp": "^0.6.0",
+    "morgan": "^1.7.0",
     "multer": "^1.1.0",
     "nconf": "^0.8.4",
     "oidc-provider": "^0.7.2",

@@ -1,6 +1,7 @@
 import express from 'express';
 import logger from 'winston';
 import Q from 'q';
+import morgan from 'morgan';
 
 import injectExpress from './express';
 import injectKoa from './koa';
@@ -22,6 +23,8 @@ export function createServer() {
   logger.info(`Connect to the mongoose ${connection.readyState}`);
 
   app = express();
+  // apply the development logger middleware
+  app.use(morgan('dev'));
 
   // wait until both services are ready
   return Q.all([injectExpress(app), injectKoa(app)])
