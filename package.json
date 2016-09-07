@@ -6,16 +6,17 @@
   "scripts": {
     "clean": "rm -rf build && mkdir build",
     "dev": "ENABLE_WEBPACK_HOTLOADER=true babel-node -- src",
-    "doc": "apidoc -i src/ -f \".*\\.js$\"",
-    "docs": "gitbook install && gitbook build",
+    "dev:api": "nodemon --exec \"babel-node -- src\"",
+    "docs:api": "apidoc -i src/ -f \".*\\.js$\"",
+    "docs": "gitbook install && gitbook build && npm run docs:api",
     "lint": "eslint src",
     "test": "mocha",
     "test:coverage": "nyc --reporter=html --reporter=lcov --reporter=text mocha",
     "jenkins": "npm prune && npm i --verbose && gulp intl:download && npm run build",
     "jenkins:commit": "npm run jenkins && npm run lint && npm run test:coverage",
-    "jenkins:merge": "npm run jenkins && gulp intl:upload && npm run doc",
-    "build-src": "babel -d ./build ./src -s --copy-files && webpack --config webpack.config.js",
-    "build": "npm run clean && npm run build-src && npm run docs",
+    "jenkins:merge": "npm run jenkins && gulp intl:upload && npm run docs",
+    "build:src": "babel -d ./build ./src -s --copy-files && webpack --config webpack.config.js",
+    "build": "npm run clean && npm run build:src",
     "server": "node ./build/index.js"
   },
   "repository": {
