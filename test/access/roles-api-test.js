@@ -40,7 +40,7 @@ describe('POST /access/roles', () => {
           .expect(201)
           .expect(res => {
             expect(res.body.id).to.be.a('string');
-            expect(_.omit(res.body, ['id', 'createdAt', 'updatedAt'])).to.eql(role);
+            expect(_.omit(res.body, ['id', 'createdAt', 'updatedAt', 'isRoot'])).to.eql(role);
           })
           .end(done);
       })
@@ -68,6 +68,120 @@ describe('POST /access/roles', () => {
           .post('/access/roles')
           .send(role)
           .expect(403)
+          .end(done);
+      })
+      .done();
+  });
+
+  it('responds with 204 and create the root Role with isRoot true', (done) => {
+    const company = {
+      _id: new ObjectId(),
+      country: 'US',
+    };
+
+    const role = {
+      name: 'Sales Manager',
+      company: company._id.toString(),
+      service: 'iam',
+      permissions: {
+        user: ['read', 'write'],
+      },
+    };
+
+    context.state.set({ Company: company })
+      .then(() => {
+        context.server
+          .post('/access/roles')
+          .send(role)
+          .expect(res => {
+            const data = res.body;
+            const expected = toPlainObject(role);
+            const actual = _.omit(data, 'id', 'createdAt', 'updatedAt', 'isRoot');
+            expect(expected).to.eql(actual);
+            expect(data.isRoot).to.eql(true);
+          })
+          .end(done);
+      })
+      .done();
+  });
+
+  it('responds with 204 and create the root Role with isRoot false', (done) => {
+    const company = {
+      _id: new ObjectId(),
+      country: 'US',
+    };
+
+    const role = {
+      name: 'Sales Manager',
+      company: company._id.toString(),
+      service: 'iam',
+      permissions: {
+        user: ['read', 'write'],
+      },
+    };
+
+    const newRole = {
+      name: 'Sales Staff',
+      company: company._id.toString(),
+      service: 'iam',
+      permissions: {
+        user: ['read'],
+      },
+    };
+
+    context.state.set({ Company: company, Role: role })
+      .then(() => {
+        context.server
+          .post('/access/roles')
+          .send(newRole)
+          .expect(res => {
+            const data = res.body;
+            const expected = toPlainObject(newRole);
+            const actual = _.omit(data, 'id', 'createdAt', 'updatedAt', 'isRoot');
+            expect(expected).to.eql(actual);
+            expect(data.isRoot).to.eql(false);
+          })
+          .end(done);
+      })
+      .done();
+  });
+
+  it('responds with 204 and create the root Role in another sevice with isRoot true', (done) => {
+    const company = {
+      _id: new ObjectId(),
+      country: 'US',
+    };
+
+    const role = {
+      name: 'Sales Manager',
+      company: company._id.toString(),
+      service: 'iam',
+      permissions: {
+        user: ['read', 'write'],
+      },
+    };
+
+    const newRole = {
+      name: 'Sales Staff',
+      company: company._id.toString(),
+      service: 'wlp',
+      permissions: {
+        user: ['read'],
+      },
+    };
+
+    context.state.set({ Company: company, Role: role })
+      .then(() => {
+        context.server
+          .post('/access/roles')
+          .send(newRole)
+          .expect(res => {
+            const data = res.body;
+            const expected = toPlainObject(newRole);
+            const actual = _.omit(data, 'id', 'createdAt', 'updatedAt', 'isRoot');
+            expect(expected).to.eql(actual);
+            expect(data.isRoot).to.eql(true);
+          })
           .end(done);
       })
       .done();
@@ -169,8 +283,10 @@ describe('GET /access/roles', () => {
               .value();
             const actual = _(res.body)
               .sortBy(x => x.name)
-              .map(x => _.omit(x, ['createdAt', 'updatedAt']))
+              // not set via createRole, ignore the checking on isRoot
+              .map(x => _.omit(x, ['createdAt', 'updatedAt', 'isRoot']))
               .value();
+              console.log(actual);
             expect(expected).to.eql(actual);
           })
           .end(done);
@@ -202,6 +318,25 @@ describe('DELETE /access/roles/:roleId', () => {
               .catch(done)
               .done();
           });
+      })
+      .done();
+  });
+
+  it('responds with 403 and fail to delete root role from database', (done) => {
+    const role = {
+      _id: new ObjectId(),
+      name: 'CEO',
+      company: new ObjectId(),
+      service: 'iam',
+      isRoot: true,
+    };
+
+    context.state.set({ Role: role })
+      .then(() => {
+        context.server
+          .delete(`/access/roles/${role._id}`)
+          .expect(403)
+          .end(done);
       })
       .done();
   });
@@ -242,10 +377,47 @@ describe('PUT /access/roles/:id', () => {
           .expect(res => {
             const data = res.body;
             const expected = toPlainObject(updatedRole);
-            const actual = _.omit(data, 'createdAt', 'updatedAt');
+            const actual = _.omit(data, 'createdAt', 'updatedAt', 'isRoot');
             expect(expected).to.eql(actual);
             expect(data.updatedAt).to.be.greaterThan(data.createdAt);
           })
+          .end(done);
+      })
+      .done();
+  });
+
+  it('responds with 403 and fail to update root role', (done) => {
+    const company = {
+      _id: new ObjectId(),
+      country: 'US',
+    };
+    const role = {
+      _id: new ObjectId(),
+      name: 'CEO',
+      company: company._id,
+      service: 'wlp',
+      permissions: {
+        sms: ['read'],
+        calls: ['create', 'read', 'update', 'delete'],
+      },
+      isRoot: true,
+    };
+
+    const updatedRole = _.extend({}, _.omit(role, 'isRoot'), {
+      id: role._id.toString(),
+      name: 'CTO',
+      permissions: {
+        calls: ['read'],
+      },
+    });
+    delete updatedRole._id;
+
+    context.state.set({ Company: company, Role: role })
+      .then(() => {
+        context.server
+          .put(`/access/roles/${role._id}`)
+          .send(updatedRole)
+          .expect(403)
           .end(done);
       })
       .done();
@@ -334,7 +506,7 @@ describe('PUT /access/roles/:id', () => {
           .expect(res => {
             const data = res.body;
             const expected = toPlainObject(updatedRole);
-            const actual = _.omit(data, 'createdAt', 'updatedAt');
+            const actual = _.omit(data, 'createdAt', 'updatedAt', 'isRoot');
             expect(expected).to.eql(actual);
             expect(data.updatedAt).to.be.greaterThan(data.createdAt);
           })
@@ -342,7 +514,6 @@ describe('PUT /access/roles/:id', () => {
       }).done();
   });
 });
-
 
 describe('PUT /access/users/:username/roles', () => {
   it('responds with 200 and all roles with respect to company and service filter', () => {

@@ -9,6 +9,7 @@ const schema = new mongoose.Schema({
   service: { type: String, required: true },
   permissions: { type: Types.Mixed },
   users: [{ type: Types.String, ref: 'User' }],
+  isRoot: { type: Boolean, default: false },
 }, {
   collection: 'Role',
   versionKey: false,
