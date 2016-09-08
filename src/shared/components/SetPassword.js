@@ -1,9 +1,15 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
+import bem from 'bem-cn';
 import Joi from 'joi';
 import { injectIntl, intlShape, FormattedMessage } from 'react-intl';
 import { injectJoiValidation } from 'm800-user-locale/joi-validation';
+import Button from 'm800-web-styleguide/lib/Button';
+import Field from 'm800-web-styleguide/lib/Form/Field';
 import Icon from 'm800-web-styleguide/lib/Icon';
+import PointerBox from 'm800-web-styleguide/lib/Box/PointerBox';
+import TextInput from 'm800-web-styleguide/lib/Form/TextInput';
+import AppLogo from './AppLogo';
 import setPassword from '../actions/setPassword';
 import { SUCCESS, FAILURE } from '../../constants/actionStatus';
 import COMMON_MESSAGES from '../intl/descriptors/common';
@@ -21,15 +27,18 @@ class SetPassword extends Component {
       },
       showValidator: false,
     };
+    this.assignRef = this.assignRef.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
     this.validateForm = this.validateForm.bind(this);
     this.handleFocus = this.handleFocus.bind(this);
     this.handleBlur = this.handleBlur.bind(this);
     this.successRedirect = this.successRedirect.bind(this);
+
+    this.refNodes = {};
   }
 
   componentDidMount() {
-    this.refs.email.focus();
+    this.refNodes.email.focus();
 
     if (this.props.requestStatus === SUCCESS) {
       this.successRedirect();
@@ -51,7 +60,7 @@ class SetPassword extends Component {
       }
       const { clientId, event, id, token } = this.props.appMeta;
       this.props.setPassword({
-        password: this.refs.password.value,
+        password: this.refNodes.password.value,
         clientId,
         event,
         id,
@@ -63,10 +72,10 @@ class SetPassword extends Component {
   // use virtual fields for matching different validation rules
   getValidatorData() {
     return {
-      passwordCharacter: this.refs.password.value,
-      passwordNumber: this.refs.password.value,
-      passwordLength: this.refs.password.value,
-      confirmPassword: this.refs.confirmPassword.value,
+      passwordCharacter: this.refNodes.password.value,
+      passwordNumber: this.refNodes.password.value,
+      passwordLength: this.refNodes.password.value,
+      confirmPassword: this.refNodes.confirmPassword.value,
     };
   }
 
@@ -105,6 +114,16 @@ class SetPassword extends Component {
     });
   }
 
+  assignRef(refName, innerRefName) {
+    return (ref) => {
+      if (!ref) {
+        this.refNodes[refName] = null;
+        return;
+      }
+      this.refNodes[refName] = innerRefName ? ref[innerRefName] : ref;
+    };
+  }
+
   handleFocus() {
     this.setState({
       showValidator: true,
@@ -126,17 +145,17 @@ class SetPassword extends Component {
 
     if (requestStatus === FAILURE) {
       return (
-        <p className="error-message text-alert">
+        <div className="row error-message error-text text-center">
           <FormattedMessage {...COMMON_MESSAGES.operationFail} />
-        </p>
+        </div>
       );
     }
 
     if (requestStatus === SUCCESS) {
       return (
-        <p className="text-alt">
+        <div className="row color-success text-center">
           <FormattedMessage {...COMMON_MESSAGES.resetPasswordSuccess} />
-        </p>
+        </div>
       );
     }
 
@@ -145,8 +164,8 @@ class SetPassword extends Component {
 
   renderValidatorIcon(isValid) {
     return isValid ?
-      <Icon symbolName="tick" color="success" /> :
-      <Icon symbolName="info-circle-o" color="alert" />;
+      <Icon symbolName="tick" className="u-mr-" color="success" /> :
+      <Icon symbolName="dash" className="u-mr- invalid-icon" />;
   }
 
   renderValidator() {
@@ -157,93 +176,91 @@ class SetPassword extends Component {
     if (!showValidator) {
       return null;
     }
+
+    const classSets = bem('password-validator');
     return (
-      <div className="reset-password-page__validator">
-        <div className="reset-password-page__arrow"></div>
-        <div className="reset-password-page__validator__container">
-          <div className="reset-password-page__validator__container__title">
-            <FormattedMessage id="passwordValidatorTitle" defaultMessage="Your password needs to" />:
-          </div>
-          <div className="reset-password-page__validator__container__row">
-            {this.renderValidatorIcon(passwordCharacter)}
-            <FormattedMessage id="passwordValidatorCharacter" defaultMessage="Include both upper and lower case characters" />
-          </div>
-          <div className="reset-password-page__validator__container__row">
-            {this.renderValidatorIcon(passwordNumber)}
-            <FormattedMessage id="passwordValidatorNumber" defaultMessage="Include at least one number or symbol" />
-          </div>
-          <div className="reset-password-page__validator__container__row">
-            {this.renderValidatorIcon(passwordLength)}
-            <FormattedMessage id="passwordValidatorLength" defaultMessage="Be at least 8 characters" />
-          </div>
+      <PointerBox className={classSets}>
+        <div className={classSets('title').mix('row')}>
+          <FormattedMessage id="passwordValidatorTitle" defaultMessage="Your password needs to:" />
         </div>
-      </div>
+        <div className="row align-middle">
+          {this.renderValidatorIcon(passwordCharacter)}
+          <FormattedMessage id="passwordValidatorCharacter" defaultMessage="Include both upper and lower case characters" />
+        </div>
+        <div className="row align-middle">
+          {this.renderValidatorIcon(passwordNumber)}
+          <FormattedMessage id="passwordValidatorNumber" defaultMessage="Include at least one number or symbol" />
+        </div>
+        <div className="row align-middle">
+          {this.renderValidatorIcon(passwordLength)}
+          <FormattedMessage id="passwordValidatorLength" defaultMessage="Be at least 8 characters" />
+        </div>
+      </PointerBox>
     );
   }
 
   render() {
-    const { formatMessage } = this.props.intl;
+    const { intl: { formatMessage } } = this.props;
+    const classSets = bem('auth-section');
 
     return (
-      <div className="reset-password-page text-center">
-        <div className="large-text">
-          <FormattedMessage id="changePassword" defaultMessage="Change Password" />
+      <div className={classSets}>
+        <AppLogo />
+        <div className={classSets('main-block').mix('callout callout--white')}>
+          <h3 className={classSets('title')}>
+            <FormattedMessage id="setNewPassword" defaultMessage="Set New Password" />
+          </h3>
+          <form onSubmit={this.onSubmit} >
+            <div className="row field-row">
+              <Field className="column" isUnderlined>
+                <TextInput
+                  isUnderlined
+                  placeholder={formatMessage(COMMON_MESSAGES.email)}
+                  ref={this.assignRef('email', 'inputRef')}
+                  defaultValue={this.props.appMeta.id}
+                  readOnly
+                />
+              </Field>
+            </div>
+            <div className="row field-row">
+              {this.renderValidator()}
+              <Field className="column" isUnderlined>
+                <TextInput
+                  isUnderlined
+                  isPassword
+                  placeholder={formatMessage(COMMON_MESSAGES.password)}
+                  ref={this.assignRef('password', 'inputRef')}
+                  defaultValue={this.state.password}
+                  onChange={this.validateForm}
+                  onFocus={this.handleFocus}
+                  onBlur={this.handleBlur}
+                />
+              </Field>
+            </div>
+            <div className="row field-row">
+              <Field className="column" isUnderlined>
+                <TextInput
+                  isUnderlined
+                  isPassword
+                  placeholder={formatMessage(COMMON_MESSAGES.confirmPassword)}
+                  ref={this.assignRef('confirmPassword', 'inputRef')}
+                  defaultValue={this.state.confirmPassword}
+                  onChange={this.validateForm}
+                />
+              </Field>
+            </div>
+            {this.renderMessage()}
+            <div className="row">
+              <Button
+                isExpanded
+                type="submit"
+                disabled={this.props.requestStatus === SUCCESS || !this.state.submitStatus}
+              >
+                <FormattedMessage id="confirm" defaultMessage="Confirm" />
+              </Button>
+            </div>
+          </form>
         </div>
-
-        <div className="server-error-wrapper">
-          {this.renderMessage()}
-        </div>
-
-        <form onSubmit={this.onSubmit} >
-          <div className="panel text-left">
-            <div className="input-wrapper">
-              <input
-                type="text"
-                placeholder={formatMessage(COMMON_MESSAGES.email)}
-                ref="email"
-                value={this.props.appMeta.id}
-                disabled
-              />
-            </div>
-
-            {this.renderValidator()}
-
-            <div className="inline-error-wrapper"></div>
-            <div className="input-wrapper">
-              <input
-                type="password"
-                placeholder={formatMessage(COMMON_MESSAGES.password)}
-                ref="password"
-                defaultValue={this.state.password}
-                onChange={this.validateForm}
-                onFocus={this.handleFocus}
-                onBlur={this.handleBlur}
-              />
-            </div>
-
-            <div className="inline-error-wrapper"></div>
-            <div className="input-wrapper">
-              <input
-                type="password"
-                placeholder={formatMessage(COMMON_MESSAGES.confirmPassword)}
-                ref="confirmPassword"
-                defaultValue={this.state.confirmPassword}
-                onChange={this.validateForm}
-              />
-            </div>
-            <div className="inline-error-wrapper"></div>
-          </div>
-
-          <div className="submit-wrapper">
-            <button
-              className="button primary radius expand reset-password-page__submit"
-              disabled={this.props.requestStatus === SUCCESS || !this.state.submitStatus}
-            >
-              <FormattedMessage id="changePassword" defaultMessage="Change Password" />
-            </button>
-          </div>
-        </form>
-
       </div>
     );
   }

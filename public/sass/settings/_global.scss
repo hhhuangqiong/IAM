@@ -16,17 +16,18 @@ $body-alt-text-color: #9B9B9B;
 $dum-color: $secondary-color;
 $body-alt-text-color: #9B9B9B;
 $title-alt-text-color: #33485F;
-$outline-color: #E5E5E5;
+$outline-color: #E0E0E0;
 $outline-alt-color: #CFCFCF;
 $placeholder-color: $primary-color;
 
 $font-size-xspecial: rem-calc(48);
 $font-size-special: rem-calc(32);
-$font-size-big-title: rem-calc(28);
-$font-size-title: rem-calc(24);
-$font-size-big: rem-calc(18);
+$font-size-big-title: rem-calc(24);
+$font-size-title: rem-calc(18);
+$font-size-big: rem-calc(16);
 $font-size-normal: rem-calc(14);
-$font-size-small: rem-calc(12);
+$font-size-xnormal: rem-calc(12);
+$font-size-small: rem-calc(10);
 
 $font-weight-bold: bold;
 $font-weight-normal: normal;

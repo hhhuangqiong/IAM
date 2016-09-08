@@ -1,0 +1,57 @@
+.auth-section {
+  margin: rem-calc(150) auto;
+  max-width: rem-calc(450);
+
+  a {
+    color: $grey-500;
+    &:hover,
+    &:focus {
+      color: $primary-color;
+    }
+  }
+
+  .button {
+    font-size: $font-size-title;
+    padding: 0.75em;
+  }
+
+  .row {
+    margin-bottom: $global-spacing;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .field-row {
+    position: relative;
+    font-size: $font-size-big;
+  }
+
+  .password-validator {
+    position: absolute;
+    right: -105%;
+    top: -100%;
+    font-size: $font-size-normal;
+
+    .invalid-icon {
+      color: $grey-500;
+    }
+
+    &__title {
+      font-size: $font-size-xnormal;
+      font-weight: $font-weight-normal;
+    }
+  }
+
+  &__main-block {
+    margin-top: rem-calc(40);
+    padding: rem-calc(40);
+    font-size: $font-size-normal;
+  }
+
+  &__title {
+    font-weight: $global-weight-bold;
+    margin-bottom: $global-spacing;
+  }
+}

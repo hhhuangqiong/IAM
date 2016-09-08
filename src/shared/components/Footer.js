@@ -1,5 +1,7 @@
 import React, { PropTypes, Component } from 'react';
+import bem from 'bem-cn';
 import localeUtil from 'm800-user-locale/util';
+import Icon from 'm800-web-styleguide/lib/Icon';
 import Version from './Version';
 
 class Footer extends Component {
@@ -9,10 +11,16 @@ class Footer extends Component {
   }
 
   render() {
+    const classSets = bem('footer');
+
     return (
-      <footer className="footer clearfix">
-        <div className="right">
+      <footer className={classSets}>
+        <div className={classSets('left-block')}>
+          <a target="_blank" href="http://www.m800.com">M800</a>
+        </div>
+        <div className={classSets('right-block')}>
           <Version />
+          <Icon symbolName="earth" />
           <select
             className="locale-select"
             defaultValue={this.props.currentLang}

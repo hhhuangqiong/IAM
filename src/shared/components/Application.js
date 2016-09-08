@@ -18,7 +18,7 @@ const locales = config.LOCALES;
 const store = configureStore();
 
 // config class namesapce and BEM syntax
-const bem = require('bem-cn').setup({ ns: 'iam-', el: '__', mod: '--' });
+const bem = require('bem-cn').setup({ el: '__', mod: '--' });
 
 locales.forEach(locale => {
   const lang = locale.split('-')[0];

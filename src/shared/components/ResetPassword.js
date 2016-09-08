@@ -1,8 +1,13 @@
 import React, { Component, PropTypes } from 'react';
 import { injectIntl, intlShape, FormattedMessage, FormattedHTMLMessage } from 'react-intl';
 import { connect } from 'react-redux';
+import bem from 'bem-cn';
 import Joi from 'joi';
 import { injectJoiValidation } from 'm800-user-locale/joi-validation';
+import Button from 'm800-web-styleguide/lib/Button';
+import Field from 'm800-web-styleguide/lib/Form/Field';
+import TextInput from 'm800-web-styleguide/lib/Form/TextInput';
+import AppLogo from './AppLogo';
 import requestResetPassword from '../actions/requestResetPassword';
 import { SUCCESS, FAILURE } from '../../constants/actionStatus';
 import COMMON_MESSAGES from '../intl/descriptors/common';
@@ -12,12 +17,15 @@ class ResetPassword extends Component {
   constructor(props) {
     super(props);
 
+    this.assignRef = this.assignRef.bind(this);
     this.onInputChange = this.onInputChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
 
     this.state = {
       email: '',
     };
+
+    this.refNodes = {};
   }
 
   onInputChange(key) {
@@ -44,7 +52,7 @@ class ResetPassword extends Component {
 
   getValidatorData() {
     return {
-      email: this.refs.email.value.trim() || undefined,
+      email: this.refNodes.email.value.trim() || undefined,
     };
   }
 
@@ -59,6 +67,16 @@ class ResetPassword extends Component {
     });
   }
 
+  assignRef(refName, innerRefName) {
+    return (ref) => {
+      if (!ref) {
+        this.refNodes[refName] = null;
+        return;
+      }
+      this.refNodes[refName] = innerRefName ? ref[innerRefName] : ref;
+    };
+  }
+
   renderHelpText(message, index) {
     return (
       <div key={index} className="text-alert text-small">{message}</div>
@@ -70,17 +88,17 @@ class ResetPassword extends Component {
 
     if (requestStatus === FAILURE) {
       return (
-        <p className="error-message text-alert">
+        <div className="row error-message error-text text-center">
           <FormattedMessage {...COMMON_MESSAGES.emailNotFound} />
-        </p>
+        </div>
       );
     }
 
     if (requestStatus === SUCCESS) {
       return (
-        <p className="text-alt">
+        <div className="row color-success text-center">
           <FormattedMessage {...COMMON_MESSAGES.requestResetPasswordSuccess} />
-        </p>
+        </div>
       );
     }
 
@@ -89,44 +107,43 @@ class ResetPassword extends Component {
 
   render() {
     const { getValidationMessages, intl: { formatMessage } } = this.props;
+    const classSets = bem('auth-section');
 
     return (
-      <div className="account-password-section text-center">
-        <div className="large-text">
-          <FormattedMessage id="forgetPassword" defaultMessage="Forget password?" />
-        </div>
-        <div className="text-dum">
-          <FormattedHTMLMessage
-            id="loginInstructions"
-            defaultMessage="No worries!<br>Enter your email and we''ll send you login instructions"
-          />
-        </div>
-        <div className="server-error-wrapper">
-          {this.renderMessage()}
-        </div>
-        <form onSubmit={this.onSubmit} ref="form">
-          <div className="panel text-left clearfix">
-            <div className="input-wrapper">
-              <input
-                name="id"
-                type="text"
-                placeholder={formatMessage(COMMON_MESSAGES.email)}
-                ref="email"
-                value={this.state.email}
-                onChange={this.onInputChange('email')}
-                onBlur={this.props.handleValidation('email')}
+      <div className={classSets}>
+        <AppLogo />
+        <div className={classSets('main-block').mix('callout callout--white')}>
+          <h3 className={classSets('title')}>
+            <FormattedMessage id="forgetPassword" defaultMessage="Forget password" />
+          </h3>
+          <form onSubmit={this.onSubmit} ref="form">
+            <div className="row">
+              <FormattedHTMLMessage
+                id="loginInstructions"
+                defaultMessage="No worries! Enter your email and we''ll send you login instructions"
               />
-              <div className="inline-error-wrapper">
-                {getValidationMessages('email').map(this.renderHelpText)}
-              </div>
             </div>
-          </div>
-          <div className="submit-wrapper">
-            <button className="button primary radius expand" type="sumbit">
-              <FormattedMessage id="sendMeInstructions" defaultMessage="Send me instructions" />
-            </button>
-          </div>
-        </form>
+            <div className="row field-row">
+              <Field className="column" isUnderlined errors={getValidationMessages('email')}>
+                <TextInput
+                  isUnderlined
+                  name="id"
+                  placeholder={formatMessage(COMMON_MESSAGES.email)}
+                  ref={this.assignRef('email', 'inputRef')}
+                  value={this.state.email}
+                  onChange={this.onInputChange('email')}
+                  onBlur={this.props.handleValidation('email')}
+                />
+              </Field>
+            </div>
+            {this.renderMessage()}
+            <div className="row">
+              <Button isExpanded type="submit">
+                <FormattedMessage id="sendMeInstructions" defaultMessage="Send me instructions" />
+              </Button>
+            </div>
+          </form>
+        </div>
       </div>
     );
   }

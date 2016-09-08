@@ -21,6 +21,10 @@ const config = {
     publicPath: '/assets/app/',
   },
   resolve: {
+    alias: {
+      react: path.resolve(__dirname, './node_modules/react'),
+      'react/addons': path.resolve(__dirname, './node_modules/react/addons'),
+    },
     extensions: ['', '.js', '.jsx', '.json'],
   },
   module: {

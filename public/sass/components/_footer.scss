@@ -1,18 +1,37 @@
 .footer {
   position: fixed;
   bottom: 0;
+  display: flex;
+  justify-content: space-between;
   border-top: 1px solid $outline-color;
   width: 100%;
-  padding: 14px 20px;
-  background-color: $secondary-theme-bg-color;
+  padding: rem-calc(14 20);
   z-index: $overlay-z-index;
 
+  a {
+    color: inherit;
+    &:hover,
+    &:focus {
+      color: $primary-color;
+    }
+  }
+
+  &__right-block {
+    @include flex-center;
+
+    .icon {
+      margin-left: rem-calc(15);
+      font-size: $font-size-big-title;
+      color: $grey-500;
+    }
+  }
+
   .locale-select {
-    font-size: $small-font-size;
-    width: 80px;
+    font-size: $font-size-xnormal;
+    width: rem-calc(115);
     padding: 2px 10px;
     margin: 0 0 0 13px;
-    height: auto;
+    height: rem-calc(24);
     border-radius: 4px;
     background-color: transparent;
   }
