@@ -12,15 +12,19 @@ const env = process.env.NODE_ENV || 'development';
 export const initialize = _.memoize(() =>
   Q.resolve(env === 'test-local' ? mongoose : mockgoose(mongoose))
     .then(() => createServer(env))
-    .then(app => {
-      const server = request.agent(app);
-      const state = new StateManager(mongoose);
-      return {
-        server,
-        db: mongoose,
-        state,
-      };
-    })
+    .then(app =>
+      /* eslint new-cap: ["error", { "capIsNewExceptions": ["Q.Promise"] }]*/
+      // wait for the mongoose to be connected before test, which insert, update data
+      Q.Promise((resolve) => {
+        mongoose.connection.on('connected', () => {
+          resolve({
+            server: request.agent(app),
+            db: mongoose,
+            state: new StateManager(mongoose),
+          });
+        });
+      })
+    )
 );
 
 export default initialize;
