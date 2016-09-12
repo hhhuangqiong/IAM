@@ -103,7 +103,7 @@ export default class MongoAdapter {
     return getCollection(this.name)
       .then(collection => collection.findOneAndDelete({ _id: id }))
       .then(found => {
-        if (found.lastErrorObject.n && found.value.grantId) {
+        if (found.value && found.value.grantId) {
           const promises = _.map(collections, collection =>
             collection.findOneAndDelete({ grantId: found.value.grantId }));
           return Promise.all(promises);
