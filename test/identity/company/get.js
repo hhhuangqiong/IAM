@@ -211,7 +211,7 @@ describe('GET /identity/companies', () => {
     }
     // prepare the tree
     // each first node will have two children and 3 levels now
-    before(() => {
+    before(() =>
       Company.create({
         name: 'Company0',
         country: 'Hong Kong',
@@ -220,8 +220,8 @@ describe('GET /identity/companies', () => {
         return company;
       }).then(company => Q.all([addChildCompany(company._id, 1), addChildCompany(company._id, 2)]))
       .then(result => Q.all([addChildCompany(result[0]._id, 3), addChildCompany(result[0]._id, 4)]))
-      .then(result => Q.all([addChildCompany(result[0]._id, 5), addChildCompany(result[0]._id, 6)]));
-    });
+      .then(result => Q.all([addChildCompany(result[0]._id, 5), addChildCompany(result[0]._id, 6)]))
+    );
     // remove all the data
     after((done) => Company.remove({}, done));
 
