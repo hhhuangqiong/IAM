@@ -144,24 +144,6 @@ describe('POST /identity/users', () => {
            });
     });
 
-    it('successfully creates user and generate a token for set password', (done) => {
-      const userInfo = {
-        id: 'companyB@test.com',
-      };
-      agent.post('/identity/users')
-           .set('Content-Type', 'application/json')
-           .send(userInfo)
-           .expect(201)
-           .end(() => {
-             User.findOne({ _id: userInfo.id }).then((user) => {
-               expect(user.tokens).to.have.lengthOf(1);
-               expect(user.tokens[0].event).to.equal('setPassword');
-               expect(user.tokens[0].value).to.equal('dummyToken');
-             })
-             .done(done);
-           });
-    });
-
     it('unsuccessfully creates user with invalid data format', (done) => {
       const userInfo = {
         id: 'testUser@abc.com',
@@ -172,6 +154,52 @@ describe('POST /identity/users', () => {
            .send(userInfo)
            .expect(422)
            .end(done);
+    });
+  });
+
+  describe('request the user sign up/password', () => {
+    const userInfo = {
+      id: 'Johnny@gmail.com',
+      name: {
+        formatted: 'Johnny M. Richmond',
+        familyName: 'Richmond',
+        givenName: 'Johnny',
+        middleName: 'M',
+      },
+      nickName: 'Johnny R',
+    };
+    const dummyToken = 'asd#@#@';
+    let emailServiceStub;
+    // insert the data first
+    before((done) => {
+      const { emailService } = getContainer();
+      emailServiceStub = sinon.stub(emailService, 'sendSignUpEmail')
+        .returns(Q.resolve(dummyToken));
+      User.create(userInfo, done);
+    });
+    // remove all the data
+    after((done) => {
+      emailServiceStub.restore();
+      User.remove({}, done);
+    });
+
+    it('201 request for signup email and generate token', done => {
+      agent.post(`/identity/users/${userInfo.id}/requestSetPassword`)
+       .set('Content-Type', 'application/json')
+       .send()
+       .expect(204)
+       .end(err => {
+         if (err) {
+           done(err);
+           return;
+         }
+         // also ensure the model has such record
+         User.findOne({ _id: userInfo.id }).then((user) => {
+           expect(user.tokens).to.have.lengthOf(1);
+           expect(user.tokens[0].event).to.equal('setPassword');
+           expect(user.tokens[0].value).to.equal(dummyToken);
+         }).done(done);
+       });
     });
   });
 });

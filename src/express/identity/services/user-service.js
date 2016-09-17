@@ -1,5 +1,6 @@
 import _ from 'lodash';
-import { NotFoundError, ValidationError, Error, InvalidOperationError } from 'common-errors';
+import { NotFoundError, ValidationError, InvalidOperationError,
+  NotPermittedError, NotSupportedError } from 'common-errors';
 import Joi from 'joi';
 import moment from 'moment';
 
@@ -103,8 +104,6 @@ export function userService(validator, { User, Company }, mailService) {
   const createUserCommandSchema = baseInfoSchema.keys({
     id: Joi.string().email().required(),
     active: Joi.boolean().default(false),
-    clientId: Joi.string(),
-    redirectURL: Joi.string(),
   });
 
   function* createUser(command) {
@@ -113,29 +112,12 @@ export function userService(validator, { User, Company }, mailService) {
     yield validateCompanies(sanitizedCommand);
 
     let user;
-    let token;
     try {
       user = yield User.create(sanitizedCommand);
     } catch (e) {
       throw mongooseUtil.errorHandler(e);
     }
-    try {
-      // create sign up tokens
-      token = yield mailService.sendSignUpEmail(user._id, {
-        clientId: sanitizedCommand.clientId,
-        redirectURL: sanitizedCommand.redirectURL,
-      });
-    } catch (e) {
-      throw new Error(`Failed to deliver email to ${user._id}`);
-    }
-
-    try {
-      user.tokens.push(User.makeToken(SET_PW_TOKEN, token));
-      yield user.save();
-      return user.toJSON();
-    } catch (e) {
-      throw mongooseUtil.errorHandler(e);
-    }
+    return user.toJSON();
   }
 
   const getUsersCommandSchema = baseInfoSchema.keys({
@@ -371,11 +353,48 @@ export function userService(validator, { User, Company }, mailService) {
         redirectURL: sanitizedCommand.redirectURL,
       });
     } catch (e) {
-      throw new Error(`Failed to deliver email to ${sanitizedCommand.id}`);
+      throw new NotSupportedError(`Failed to deliver email to ${sanitizedCommand.id}`);
     }
 
     const tokenSet = User.makeToken(RESET_PW_TOKEN, token);
     user.tokens.push(tokenSet);
+    yield user.save();
+  }
+
+  const requestSetPasswordCommandSchema = baseInfoSchema.keys({
+    id: Joi.string().email().required(),
+    clientId: Joi.string(),
+    redirectURL: Joi.string(),
+  });
+
+  function* requestSetPassword(command) {
+    const sanitizedCommand = validator.sanitize(command, requestSetPasswordCommandSchema);
+    const user = yield User.findOne({ _id: sanitizedCommand.id });
+    if (!user) {
+      throw new NotFoundError('user');
+    }
+
+    if (user.isVerified) {
+      throw new NotPermittedError('user has already verified and set password');
+    }
+
+    // remove previous set pw token and create set pw token
+    user.tokens = _.reject(user.tokens, token => token.event === SET_PW_TOKEN);
+
+    let token;
+    try {
+      // create sign up tokens
+      token = yield mailService.sendSignUpEmail(user._id, {
+        clientId: sanitizedCommand.clientId,
+        redirectURL: sanitizedCommand.redirectURL,
+      });
+    } catch (e) {
+      // all the failure from mail service are conditions that not supported by application
+      // other than target mail domain
+      throw new NotSupportedError(`Failed to deliver email to ${user._id}`);
+    }
+
+    user.tokens.push(User.makeToken(SET_PW_TOKEN, token));
     yield user.save();
   }
 
@@ -389,5 +408,6 @@ export function userService(validator, { User, Company }, mailService) {
     verifyPassword,
     setPassword,
     requestResetPassword,
+    requestSetPassword,
   };
 }

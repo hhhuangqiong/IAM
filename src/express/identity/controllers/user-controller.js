@@ -96,7 +96,18 @@ export function userController(userService) {
     }
   }
 
+  function* requestSetPassword(req, res, next) {
+    try {
+      const query = _.extend({}, req.params, req.body);
+      yield userService.requestSetPassword(query);
+      res.sendStatus(204);
+    } catch (e) {
+      next(e);
+    }
+  }
+
   router.post('/users', wrap(postUser));
+  router.post('/users/:id/requestSetPassword', wrap(requestSetPassword));
   router.get('/users', wrap(getUsers));
   router.get('/users/:id', wrap(getUser));
   router.delete('/users/:id', wrap(deleteUser));
