@@ -180,12 +180,6 @@ export function companyService(validator, { Company }, logoService) {
     if (sanitizedCommand.parent) {
       yield validateParent(sanitizedCommand.parent);
     }
-    // pull the internal and required properties
-    const companyInfo = _.difference(_.keys(company.toJSON()),
-      ['createdAt', 'updatedAt', 'createdBy', 'updatedBy', 'reseller']);
-    const additional = _.difference(companyInfo, _.keys(sanitizedCommand));
-    // remove extra keys that aren't set
-    _(additional).each(key => _.set(company, key, undefined));
     // update the data
     _(sanitizedCommand).omit('id').each((value, key) => _.set(company, key, value));
     yield company.save();

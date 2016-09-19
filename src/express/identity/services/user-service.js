@@ -234,13 +234,6 @@ export function userService(validator, { User, Company }, mailService) {
     // update the user info
     yield validateCompanies(sanitizedCommand);
 
-    // pull the internal properties
-    const userInfo = _.difference(_.keys(user.toJSON()),
-      ['createdAt', 'updatedAt', 'createdBy', 'updatedBy',
-      'password', 'hashedPassword', 'salt', 'displayName', 'tokens', 'isVerified']);
-    const additional = _.difference(userInfo, _.keys(sanitizedCommand));
-    // remove extra keys that aren't set
-    _(additional).each(key => _.set(user, key, undefined));
     // update the data
     _(sanitizedCommand).omit('id').each((value, key) => _.set(user, key, value));
     yield user.save();

@@ -56,7 +56,6 @@ describe('PUT /identity/users/:id', () => {
             const localUser = user.toJSON();
             expect(localUser.timezone).to.equal(newUserInfo.timezone);
             expect(localUser.emails[0]).to.deep.equal(newUserInfo.emails[0]);
-            expect(localUser.name).to.equal(undefined);
           }).done(done);
         });
     });
