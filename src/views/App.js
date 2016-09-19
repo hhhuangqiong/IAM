@@ -1,10 +1,12 @@
 import React, { PropTypes } from 'react';
 import { PolyfillIntl } from '../utils/intl';
+const enableHotloader = process.env.ENABLE_WEBPACK_HOTLOADER === 'true';
 const bundlePath = '/assets/app/';
 
 const App = ({ page, appMeta }) => (
   <html lang={appMeta.locale}>
     <head>
+      {enableHotloader ? null : <link rel="stylesheet" href={`${bundlePath}style.css`} />}
       <PolyfillIntl />
     </head>
     <body>
