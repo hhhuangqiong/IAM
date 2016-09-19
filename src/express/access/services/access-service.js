@@ -16,6 +16,26 @@ function validateCompanyPermission(company, permissions) {
     throw new InvalidOperationError('only reseller company can have permission on company resources');
   }
 }
+
+// ensure all the actions with create, update, delete have read permission.
+function updateReadPermission(permissions) {
+  const mPermission = _.cloneDeep(permissions);
+  _.forEach(mPermission, (actions) => {
+    // create update delete should have read
+    if (_.intersection(actions, ['create', 'update', 'delete']).length > 0
+     && !_.includes(actions, 'read')) {
+      actions.push('read');
+    }
+
+    // create, delete should have update
+    if (_.intersection(actions, ['create', 'delete']).length > 0
+     && !_.includes(actions, 'update')) {
+      actions.push('update');
+    }
+  });
+  return mPermission;
+}
+
 const objectIdRegExp = /^[0-9a-fA-F]{24}$/;
 
 export function accessService(validator, { Role, Company, User }) {
@@ -35,7 +55,9 @@ export function accessService(validator, { Role, Company, User }) {
     }
   }
 
-  const permissionsSchema = Joi.object().pattern(/.+/, Joi.array().items(Joi.string()));
+  // permission values must be array with single value that with four possible values
+  const permissionsSchema = Joi.object().pattern(/.+/,
+    Joi.array().items(Joi.string().valid('read', 'update', 'create', 'delete')).unique());
 
   const createRoleCommandSchema = Joi.object().keys({
     name: Joi.string(),
@@ -54,6 +76,8 @@ export function accessService(validator, { Role, Company, User }) {
       throw new NotFoundError('Company');
     }
     validateCompanyPermission(company, sanitizedCommand.permissions);
+    // to ensure and update the permission that only has write, delete, update to be with read permission
+    sanitizedCommand.permissions = updateReadPermission(sanitizedCommand.permissions);
     const rootRole = yield hasRootRole(sanitizedCommand);
     // set the first role of company, service as isRoot to be true
     if (!rootRole) {
@@ -117,6 +141,7 @@ export function accessService(validator, { Role, Company, User }) {
       throw new NotFoundError('Company');
     }
     validateCompanyPermission(company, sanitizedCommand.permissions);
+    sanitizedCommand.permissions = updateReadPermission(sanitizedCommand.permissions);
     yield validateRootRole(sanitizedCommand.id);
 
     const role = yield Role.findOneAndUpdate(

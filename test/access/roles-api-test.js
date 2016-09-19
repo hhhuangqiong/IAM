@@ -47,6 +47,73 @@ describe('POST /access/roles', () => {
       .done();
   });
 
+  it('responds with 201 and role resource and automatically added read, update when necessary', (done) => {
+    const company = {
+      _id: new ObjectId(),
+      country: 'US',
+    };
+
+    const role = {
+      name: 'Sales Manager',
+      company: company._id.toString(),
+      service: 'iam',
+      permissions: {
+        resource1: ['update'],
+        resource2: ['delete', 'update'],
+        resource3: ['read', 'update'],
+        resource4: ['create'],
+        resource5: ['delete'],
+        resource6: ['create', 'update'],
+      },
+    };
+
+    context.state.set({ Company: company })
+      .then(() => {
+        context.server
+          .post('/access/roles')
+          .send(role)
+          .expect(201)
+          .expect(res => {
+            expect(res.body.id).to.be.a('string');
+            // expect the server will append read on top of role sent.
+            role.permissions.resource1.push('read');
+            role.permissions.resource2.push('read');
+            role.permissions.resource4.push('read', 'update');
+            role.permissions.resource5.push('read', 'update');
+            role.permissions.resource6.push('read');
+            expect(_.omit(res.body, ['id', 'createdAt', 'updatedAt', 'isRoot'])).to.eql(role);
+          })
+          .end(done);
+      })
+      .done();
+  });
+
+  it('responds with 422 and wrong role resource action', (done) => {
+    const company = {
+      _id: new ObjectId(),
+      country: 'US',
+    };
+
+    const role = {
+      name: 'Sales Manager',
+      company: company._id.toString(),
+      service: 'iam',
+      permissions: {
+        resource1: ['edit'],
+      },
+    };
+
+    context.state.set({ Company: company })
+      .then(() => {
+        context.server
+          .post('/access/roles')
+          .send(role)
+          .expect(422)
+          .end(done);
+      })
+      .done();
+  });
+
   it('responds with 403 and no permission to manage company resource', (done) => {
     const company = {
       _id: new ObjectId(),
@@ -58,7 +125,7 @@ describe('POST /access/roles', () => {
       company: company._id.toString(),
       service: 'iam',
       permissions: {
-        company: ['read', 'write'],
+        company: ['read', 'create'],
       },
     };
 
@@ -84,7 +151,7 @@ describe('POST /access/roles', () => {
       company: company._id.toString(),
       service: 'iam',
       permissions: {
-        user: ['read', 'write'],
+        user: ['read', 'create', 'update'],
       },
     };
 
@@ -116,7 +183,7 @@ describe('POST /access/roles', () => {
       company: company._id.toString(),
       service: 'iam',
       permissions: {
-        user: ['read', 'write'],
+        user: ['read', 'create'],
       },
     };
 
@@ -157,7 +224,7 @@ describe('POST /access/roles', () => {
       company: company._id.toString(),
       service: 'iam',
       permissions: {
-        user: ['read', 'write'],
+        user: ['read', 'create'],
       },
     };
 
@@ -418,6 +485,55 @@ describe('PUT /access/roles/:id', () => {
           .put(`/access/roles/${role._id}`)
           .send(updatedRole)
           .expect(403)
+          .end(done);
+      })
+      .done();
+  });
+
+  it('responds with 200 and update the permission with read, update when necessary', (done) => {
+    const company = {
+      _id: new ObjectId(),
+      country: 'US',
+    };
+    const role = {
+      _id: new ObjectId(),
+      name: 'CEO',
+      company: company._id,
+      service: 'wlp',
+      permissions: {
+        calls: ['create', 'update', 'delete'],
+      },
+    };
+
+    const updatedRole = _.extend({}, _.omit(role, 'isRoot'), {
+      id: role._id.toString(),
+      name: 'CTO',
+      permissions: {
+        calls: ['create', 'update', 'delete', 'read'],
+        sms: ['create'],
+        users: ['update'],
+        roles: ['read', 'delete'],
+      },
+    });
+    delete updatedRole._id;
+
+    context.state.set({ Company: company, Role: role })
+      .then(() => {
+        context.server
+          .put(`/access/roles/${role._id}`)
+          .send(updatedRole)
+          .expect(200)
+          .expect(res => {
+            const data = res.body;
+            // update data with read and update, so it can compare with the res.body
+            updatedRole.permissions.sms.push('read', 'update');
+            updatedRole.permissions.users.push('read');
+            updatedRole.permissions.roles.push('update');
+            const expected = toPlainObject(updatedRole);
+            const actual = _.omit(data, 'createdAt', 'updatedAt', 'isRoot');
+            expect(expected).to.eql(actual);
+            expect(data.updatedAt).to.be.greaterThan(data.createdAt);
+          })
           .end(done);
       })
       .done();
