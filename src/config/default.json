@@ -16,6 +16,8 @@
      "clients": {
        "wlp": {
          "client_secret": "7GnoS1vf5HqM1b8B4ZKDJQA6BvXa38ltUoFFVQ4cloR4GICEuWQk50S60pIVK16b",
+         "token_endpoint_auth_method": "client_secret_jwt",
+         "token_endpoint_auth_signing_alg": "HS512",
          "grant_types": ["authorization_code"],
          "redirect_uris": ["http://127.0.0.1:3000/callback"],
          "post_logout_redirect_uris": ["http://127.0.0.1:3000"]
