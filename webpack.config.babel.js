@@ -1,7 +1,8 @@
-const path = require('path');
-const webpack = require('webpack');
-const cssnext = require('postcss-cssnext');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+import path from 'path';
+import webpack from 'webpack';
+import cssnext from 'postcss-cssnext';
+import ExtractTextPlugin from 'extract-text-webpack-plugin';
+import { getSupportedLangs } from './src/utils/intl';
 const nodeEnv = process.env.NODE_ENV;
 const enableHotloader = process.env.ENABLE_WEBPACK_HOTLOADER === 'true';
 
@@ -10,6 +11,9 @@ const scssModulePaths = [
   './node_modules',
   './node_modules/m800-web-styleguide/scss',
 ].map(scssModulePath => `includePaths[]=${path.resolve(__dirname, scssModulePath)}`).join(',');
+
+// For remove unused locale data
+const langStrRegex = new RegExp(getSupportedLangs().join('|', 'i'));
 
 const config = {
   entry: {
@@ -47,8 +51,12 @@ const config = {
     ],
   },
   plugins: [
+    // only load supported locale data in moment and react-intl
+    new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, langStrRegex),
+    new webpack.ContextReplacementPlugin(/react-intl[\/\\]locale-data$/, langStrRegex),
     // resolve to use joi-browser for client-side joi
     new webpack.NormalModuleReplacementPlugin(/^joi$/, path.resolve(__dirname, './node_modules/joi-browser')),
+    new webpack.optimize.CommonsChunkPlugin('common.bundle.js'),
   ],
   postcss: () => [
     cssnext({ browsers: ['last 2 versions'] }),
@@ -56,11 +64,16 @@ const config = {
 };
 
 if (nodeEnv === 'production') {
-  config.plugins.push(new webpack.DefinePlugin({
-    'process.env': { NODE_ENV: '"production"' },
-  }));
+  config.plugins.push(
+    new webpack.DefinePlugin({
+      'process.env': { NODE_ENV: '"production"' },
+    }),
+    new webpack.optimize.OccurrenceOrderPlugin(),
+    new webpack.optimize.DedupePlugin(),
+    new webpack.optimize.UglifyJsPlugin()
+  );
 } else {
-  config.devtool = 'source-map';
+  config.devtool = 'eval-source-map';
   config.plugins.push(new webpack.NoErrorsPlugin());
 }
 

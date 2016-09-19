@@ -4,7 +4,7 @@
   "description": "Identity Access Management",
   "main": "index.js",
   "scripts": {
-    "clean": "rm -rf build && mkdir build",
+    "clean": "rm -rf build && mkdir build && rm -rf public/assets/app",
     "dev": "ENABLE_WEBPACK_HOTLOADER=true babel-node -- src",
     "dev:api": "nodemon --exec \"babel-node -- src\"",
     "docs:api": "apidoc -i src/ -f \".*\\.js$\"",
@@ -15,7 +15,7 @@
     "jenkins": "npm prune && npm i --verbose && gulp intl:download && npm run build",
     "jenkins:commit": "npm run jenkins && npm run lint && npm run test:coverage",
     "jenkins:merge": "npm run jenkins && gulp intl:upload && npm run docs",
-    "build:src": "babel -d ./build ./src -s --copy-files && webpack --config webpack.config.js",
+    "build:src": "babel -d ./build ./src -s --copy-files && webpack --config webpack.config.babel.js",
     "build": "npm run clean && npm run build:src",
     "server": "node ./build/index.js"
   },
