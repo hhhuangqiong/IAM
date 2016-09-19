@@ -9,6 +9,8 @@ import ioc from './utils/ioc';
 import database from './initializers/database';
 import { errorHandler } from './initializers/errorHandler';
 
+const env = process.env.NODE_ENV || 'development';
+
 let app;
 export function createServer() {
   if (app) {
@@ -36,8 +38,8 @@ export function createServer() {
       });
 
       // set up dev config
-      if (process.env.ENABLE_WEBPACK_HOTLOADER === 'true') {
-        require('./initializers/devHotloader')(app); // eslint-disable-line global-require
+      if (env === 'development') {
+        require('./initializers/dev')(app); // eslint-disable-line global-require
       }
 
       return app;
