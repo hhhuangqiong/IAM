@@ -5,17 +5,17 @@
   "main": "index.js",
   "scripts": {
     "clean": "rm -rf build && mkdir build && rm -rf public/assets/app",
-    "dev": "ENABLE_WEBPACK_HOTLOADER=true babel-node -- src",
+    "dev": "babel-node -- src",
     "dev:api": "nodemon --exec \"babel-node -- src\"",
     "docs:api": "apidoc -i src/ -f \".*\\.js$\"",
     "docs": "gitbook install && gitbook build && npm run docs:api",
     "lint": "eslint src",
-    "test": "mocha",
-    "test:coverage": "nyc --reporter=html --reporter=lcov --reporter=text mocha",
+    "test": "NODE_ENV=test mocha",
+    "test:coverage": "NODE_ENV=test nyc --reporter=html --reporter=lcov --reporter=text mocha",
     "jenkins": "npm prune && npm i --verbose && gulp intl:download && npm run build",
     "jenkins:commit": "npm run jenkins && npm run lint && npm run test:coverage",
     "jenkins:merge": "npm run jenkins && gulp intl:upload && npm run docs",
-    "build:src": "babel -d ./build ./src -s --copy-files && webpack --config webpack.config.babel.js",
+    "build:src": "babel -d ./build ./src -s --copy-files && webpack --config webpack/webpack.config.prod.babel.js",
     "build": "npm run clean && npm run build:src",
     "server": "node ./build/index.js"
   },
@@ -128,6 +128,7 @@
     "svg-inline-react": "^1.0.2",
     "webpack": "^1.13.1",
     "webpack-dev-middleware": "^1.6.1",
-    "webpack-hot-middleware": "^2.9.1"
+    "webpack-hot-middleware": "^2.9.1",
+    "webpack-merge": "^0.14.1"
   }
 }

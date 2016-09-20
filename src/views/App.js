@@ -1,6 +1,6 @@
 import React, { PropTypes } from 'react';
 import { polyfillIntl } from '../utils/intl';
-const enableHotloader = process.env.ENABLE_WEBPACK_HOTLOADER === 'true';
+const env = process.env.NODE_ENV || 'development';
 const bundlePath = '/assets/app/';
 
 const App = ({ page, appMeta }) => (
@@ -8,7 +8,7 @@ const App = ({ page, appMeta }) => (
     <head>
       <meta charSet="utf-8" />
       <title>M800</title>
-      {enableHotloader ? null : <link rel="stylesheet" href={`${bundlePath}style.css`} />}
+      {env === 'development' ? null : <link rel="stylesheet" href={`${bundlePath}style.css`} />}
       {polyfillIntl(appMeta.locale)}
     </head>
     <body>
