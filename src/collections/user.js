@@ -177,7 +177,7 @@ schema.virtual('displayName')
 // which was sent when creating user and removed when consumed.
 schema.virtual('isVerified')
   .get(function isVerified() {
-    return !find(this.tokens, token => token.event === 'setPassword');
+    return this.hashedPassword && !find(this.tokens, token => token.event === 'setPassword');
   });
 
 schema.pre('save', function preSave(next) {

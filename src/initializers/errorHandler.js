@@ -8,6 +8,7 @@ import {
   NotFoundError,
   NotPermittedError,
   InvalidOperationError,
+  NotSupportedError,
 } from 'common-errors';
 
 /**
@@ -82,6 +83,10 @@ export function errorHandler(imports) {
         // Authorization will not help and the request SHOULD NOT be repeated
         res.status(403)
            .json(errorJSON(20005, err.message));
+        break;
+      case NotSupportedError.name:
+        res.status(403)
+           .json(errorJSON(20006, err.message));
         break;
       default:
         res.status(400)
