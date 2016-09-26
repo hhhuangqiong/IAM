@@ -11,7 +11,7 @@
   }
 
   .button {
-    font-size: $font-size-title;
+    font-size: $font-size-huge;
     padding: 0.75em;
   }
 
@@ -25,7 +25,7 @@
 
   .field-row {
     position: relative;
-    font-size: $font-size-big;
+    font-size: $font-size-large;
   }
 
   .password-validator {
@@ -39,7 +39,7 @@
     }
 
     &__title {
-      font-size: $font-size-xnormal;
+      font-size: $font-size-tiny;
       font-weight: $font-weight-normal;
     }
   }

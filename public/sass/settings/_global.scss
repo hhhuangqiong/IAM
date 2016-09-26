@@ -20,25 +20,19 @@ $outline-color: #E0E0E0;
 $outline-alt-color: #CFCFCF;
 $placeholder-color: $primary-color;
 
-$font-size-xspecial: rem-calc(48);
-$font-size-special: rem-calc(32);
-$font-size-big-title: rem-calc(24);
-$font-size-title: rem-calc(18);
-$font-size-big: rem-calc(16);
+$font-size-special: rem-calc(24);
+$font-size-huge: rem-calc(18);
+$font-size-large: rem-calc(16);
 $font-size-normal: rem-calc(14);
-$font-size-xnormal: rem-calc(12);
-$font-size-small: rem-calc(10);
-
-$font-weight-bold: bold;
-$font-weight-normal: normal;
-$font-weight-light: 300;
+$font-size-small: rem-calc(13);
+$font-size-tiny: rem-calc(12);
 
 $row-width: $global-width;
 
 $global-shadow: 0px 2px 2px #C7C7C7;
 
 $body-font-size: $font-size-normal;
-$title-font-size: $font-size-big;
+$title-font-size: $font-size-large;
 $table-hover-bg-color: #EFFBFF;
 $list-hover-bg-color: #EFFBFF;
 $input-placeholder-font-color: #A7A5A5;

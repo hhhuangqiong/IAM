@@ -21,13 +21,13 @@
 
     .icon {
       margin-left: rem-calc(15);
-      font-size: $font-size-big-title;
+      font-size: $font-size-special;
       color: $grey-500;
     }
   }
 
   .locale-select {
-    font-size: $font-size-xnormal;
+    font-size: $font-size-tiny;
     width: rem-calc(115);
     padding: 2px 10px;
     margin: 0 0 0 13px;

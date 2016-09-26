@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { addLocaleData, IntlProvider } from 'react-intl';
 import { Provider as ReduxProvider } from 'react-redux';
 import InlineSVG from 'svg-inline-react';
-import M800ThemeProvider from 'm800-web-styleguide/lib/common/M800ThemeProvider';
+import M800ThemeProvider from 'm800-web-styleguide/lib/M800ThemeProvider';
 import configureStore from '../store/configureStore';
 import Footer from './Footer';
 

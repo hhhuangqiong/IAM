@@ -7,7 +7,6 @@ import commonConfig from './webpack.common.js'; // the settings that are common 
 // The path to find when @import is used in the scss file
 const scssModulePaths = [
   '../node_modules',
-  '../node_modules/m800-web-styleguide/scss',
 ].map(scssModulePath => `includePaths[]=${path.resolve(__dirname, scssModulePath)}`).join(',');
 
 _(commonConfig.entry).forEach((entry) => {
