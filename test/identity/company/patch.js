@@ -17,7 +17,7 @@ describe('PATCH /identity/companies', () => {
   describe('patch existing user', () => {
     let companyId;
     const companyInfo = {
-      country: 'Hong Kong',
+      country: 'HK',
       reseller: true,
       name: 'Another name',
       themeType: 'awesome',
@@ -83,7 +83,7 @@ describe('PATCH /identity/companies', () => {
       const patches = [{
         op: 'add',
         path: '/country',
-        value: 'USA',
+        value: 'US',
       }, {
         op: 'add',
         path: '/address',

@@ -62,7 +62,7 @@ export function companyService(validator, { Company }, logoService) {
   }
 
   const createCompanyCommandSchema = baseCompany.keys({
-    country: Joi.string().required(),
+    country: Joi.string().length(2).required(),
   });
 
   function* createCompany(command) {
@@ -160,7 +160,7 @@ export function companyService(validator, { Company }, logoService) {
 
   const updateCompanyCommandSchema = baseCompany.keys({
     id: Joi.string().regex(idRegExp).required(),
-    country: Joi.string(),
+    country: Joi.string().length(2),
   });
 
   function* setCompanyInfo(command) {

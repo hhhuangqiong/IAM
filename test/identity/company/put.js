@@ -16,7 +16,7 @@ describe('PUT /identity/companies/:companyId', () => {
   describe('replace the data', () => {
     let companyId;
     const companyInfo = {
-      country: 'Hong Kong',
+      country: 'HK',
       themeType: 'blue',
     };
     // insert the data first
@@ -29,7 +29,7 @@ describe('PUT /identity/companies/:companyId', () => {
 
     it('put successfully and replace the data', (done) => {
       const newCompanyInfo = {
-        country: 'USA',
+        country: 'US',
         themeType: 'red',
         address: {
           formatted: 'USA',
@@ -51,7 +51,7 @@ describe('PUT /identity/companies/:companyId', () => {
     it('put successfully and create the data with new id', (done) => {
       const id = '57a047f8281063f8149af641';
       const newCompanyInfo = {
-        country: 'USA',
+        country: 'US',
         themeType: 'red',
         address: {
           formatted: 'USA',
@@ -79,7 +79,7 @@ describe('PUT /identity/companies/:companyId', () => {
     it('unsuccessfully put company with invalid data format', (done) => {
       const unknowId = 'unknownRandomIdNewPut';
       const myCompanyInfo = {
-        country: 'Hong Kong',
+        country: 'HK',
         address: 'Hong Kong',
       };
       agent.put(`/identity/companies/${unknowId}`)

@@ -57,7 +57,7 @@
 /**
 * @apiDefine inputParam
 * @apiParam {String} id Company unique id
-* @apiParam {String} country country
+* @apiParam {String} country country 2 letter country code
 * @apiParam {String} [parent] the parent company id
 * @apiParam {Boolean} [reseller=false] whether company is reseller or not
 * @apiParam {String} [name] name
@@ -99,7 +99,7 @@
 * @apiParamExample {json} Request-Example:
 * {
 *     "id": "companyTest",
-*     "country": "Hong Kong",
+*     "country": "HK",
 *     "reseller": true,
 *     "name": "Another name",
 *     "themeType": "awesome",
@@ -200,7 +200,7 @@
 *              },
 *              "logo": "http://localhost:3000/identity/companies/logo/578b235999de20be8cf68b26",
 *              "id": "companyTest",
-*              "country": "Hong Kong",
+*              "country": "HK",
 *              "reseller": true,
 *              "name": "Another name",
 *              "themeType": "awesome",
@@ -251,7 +251,7 @@
 *       },
 *       "logo": "http://localhost:3000/identity/companies/logo/578b235999de20be8cf68b26",
 *       "id": "companyTest",
-*       "country": "Hong Kong",
+*       "country": "HK",
 *       "reseller": true,
 *       "name": "Another name",
 *       "themeType": "awesome",

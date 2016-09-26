@@ -37,7 +37,7 @@ describe('POST /identity/companies', () => {
     it('successfully creates company', (done) => {
       const companyInfo = {
         name: 'companyB',
-        country: 'Hong Kong',
+        country: 'HK',
       };
       agent.post('/identity/companies')
            .set('Content-Type', 'application/json')
@@ -63,7 +63,7 @@ describe('POST /identity/companies', () => {
 
     it('successfully creates company with more details', (done) => {
       const companyInfo = {
-        country: 'Hong Kong',
+        country: 'HK',
         reseller: true,
         name: 'Another name',
         themeType: 'awesome',
@@ -119,7 +119,7 @@ describe('POST /identity/companies', () => {
     it('unsuccessfully creates company with invalid data format', (done) => {
       const companyInfo = {
         id: 'companyB',
-        country: 'Hong Kong',
+        country: 'HK',
         address: 'Hong Kong',
       };
       agent.post('/identity/companies')
