@@ -46,8 +46,6 @@ For each client, the following attributes are required to fill in.
 |`grant_types`|the grant type that client want to request for. Only support authorization_code now|`authorization_code`|
 |`redirect_uris`|the redirect url that redirect after authorization request|`http://deploy.dev.maaii.com:4002/callback`|
 |`post_logout_redirect_uris`|the redirect url after logout|`http://deploy.dev.maaii.com:4002`|
-|`token_endpoint_auth_method`|the authorization method when access the endpoints, `client_secret_jwt` will send by signed JWT with the algorithm, `client_secret_basic` will send via Authorization Header with base64 encoded  |`client_secret_jwt`|
-|`token_endpoint_auth_signing_alg`|the authorization signing algorithm applied on `client_secret_jwt`(current only tested with HS512)|`HS512`|
 Each client configuration should have prefix `openid__clients` and then with client_id.
 
 Here is the sample of a client setting in the docker env file, where wlp is the client_id
@@ -56,8 +54,6 @@ openid__clients__wlp__client_secret=9GnoS1vf5HqM1b8B4ZKDJQA6BvXa35ltUoFFVQ4cloR4
 openid__clients__wlp__grant_types=authorization_code
 openid__clients__wlp__redirect_uris=http://deploy.dev.maaii.com:4002/callback
 openid__clients__wlp__post_logout_redirect_uris=http://deploy.dev.maaii.com:4002
-openid__clients__wlp__token_endpoint_auth_method=client_secret_jwt
-openid__clients__wlp__token_endpoint_auth_signing_alg=HS512
 ```
 
 Note: Generate the client_secret  

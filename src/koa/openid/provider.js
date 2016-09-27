@@ -48,6 +48,11 @@ export function setUp(config, openIdConfig, certificates) {
       if (typeof client.post_logout_redirect_uris === 'string') {
         mClient.post_logout_redirect_uris = client.post_logout_redirect_uris.split(',');
       }
+
+      // force to use the secret jwt and HS512 signing alg
+      mClient.token_endpoint_auth_method = 'client_secret_jwt';
+      mClient.token_endpoint_auth_signing_alg = 'HS512';
+
       return provider.addClient(mClient);
     })))
     .then(() => provider);
