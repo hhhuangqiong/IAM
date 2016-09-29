@@ -15,24 +15,28 @@
     padding: 0.75em;
   }
 
-  .row {
-    margin-bottom: $global-spacing;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-
   .field-row {
     position: relative;
     font-size: $font-size-large;
   }
 
+  .action-row {
+    margin: rem-calc(25 0 20);
+  }
+
   .password-validator {
     position: absolute;
-    right: -105%;
-    top: -100%;
+    right: -110%;
+    top: -30%;
     font-size: $font-size-normal;
+
+    .row {
+      margin-bottom: rem-calc(10);
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
 
     .invalid-icon {
       color: $grey-500;
@@ -51,7 +55,7 @@
   }
 
   &__title {
-    font-weight: $global-weight-bold;
+    font-weight: $font-weight-bold;
     margin-bottom: $global-spacing;
   }
 }

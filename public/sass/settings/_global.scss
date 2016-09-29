@@ -20,6 +20,12 @@ $outline-color: #E0E0E0;
 $outline-alt-color: #CFCFCF;
 $placeholder-color: $primary-color;
 
+@import url(https://fonts.googleapis.com/css?family=Ubuntu:400,300);
+$font-family-ubuntu: "Ubuntu", Helvetica, Roboto, Arial, sans-serif !default;
+$font-weight-bold: 400;
+$font-weight-normal: 300;
+$font-weight-light: 300;
+
 $font-size-special: rem-calc(24);
 $font-size-huge: rem-calc(18);
 $font-size-large: rem-calc(16);

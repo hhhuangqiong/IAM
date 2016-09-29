@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+import _ from 'lodash';
 import { defineMessages, injectIntl, intlShape, FormattedMessage, FormattedHTMLMessage } from 'react-intl';
 import bem from 'bem-cn';
 import Joi from 'joi';
@@ -6,8 +7,7 @@ import COMMON_MESSAGES from '../intl/descriptors/common';
 import { injectJoiValidation } from 'm800-user-locale/joi-validation';
 import Button from 'm800-web-styleguide/lib/Button';
 import Checkbox from 'm800-web-styleguide/lib/Form/Checkbox';
-import Field from 'm800-web-styleguide/lib/Form/Field';
-import TextInput from 'm800-web-styleguide/lib/Form/TextInput';
+import FloatingLabelField from 'm800-web-styleguide/lib/Form/FloatingLabelField';
 import AppLogo from './AppLogo';
 
 const LOGIN_ACTION_URL = '/openid/login';
@@ -44,10 +44,6 @@ class Login extends Component {
     };
 
     this.refNodes = {};
-  }
-
-  componentDidMount() {
-    this.refNodes.email.focus();
   }
 
   onSubmit(e) {
@@ -88,13 +84,13 @@ class Login extends Component {
     });
   }
 
-  assignRef(refName, innerRefName) {
+  assignRef(refName, innerRefPath) {
     return (ref) => {
       if (!ref) {
         this.refNodes[refName] = null;
         return;
       }
-      this.refNodes[refName] = innerRefName ? ref[innerRefName] : ref;
+      this.refNodes[refName] = innerRefPath ? _.get(ref, innerRefPath) : ref;
     };
   }
 
@@ -136,32 +132,34 @@ class Login extends Component {
           >
             <input type="hidden" name="grant" value={appMeta.grant} />
             <div className="row field-row">
-              <Field className="column" isUnderlined errors={getValidationMessages('email')}>
-                <TextInput
-                  isUnderlined
-                  name="id"
-                  placeholder={formatMessage(COMMON_MESSAGES.email)}
-                  ref={this.assignRef('email', 'inputRef')}
-                  value={this.state.email}
-                  onChange={this.onInputChange('email')}
-                />
-              </Field>
+              <FloatingLabelField
+                className="column"
+                errors={getValidationMessages('email')}
+                labelText={formatMessage(COMMON_MESSAGES.email)}
+                ref={this.assignRef('email', 'textInputRef.inputRef')}
+                inputProps={{
+                  name: 'id',
+                  value: this.state.email,
+                  onChange: this.onInputChange('email'),
+                }}
+              />
             </div>
             <div className="row field-row">
-              <Field className="column" isUnderlined errors={getValidationMessages('password')}>
-                <TextInput
-                  isUnderlined
-                  isPassword
-                  name="password"
-                  placeholder={formatMessage(COMMON_MESSAGES.password)}
-                  ref={this.assignRef('password', 'inputRef')}
-                  value={this.state.password}
-                  onChange={this.onInputChange('password')}
-                />
-              </Field>
+              <FloatingLabelField
+                className="column"
+                errors={getValidationMessages('password')}
+                labelText={formatMessage(COMMON_MESSAGES.password)}
+                ref={this.assignRef('password', 'textInputRef.inputRef')}
+                inputProps={{
+                  isPassword: true,
+                  name: 'password',
+                  value: this.state.password,
+                  onChange: this.onInputChange('password'),
+                }}
+              />
             </div>
             {this.renderErrorMessage()}
-            <div className="row">
+            <div className="row action-row">
               <Button isExpanded type="submit">
                 <FormattedMessage id="login" defaultMessage="Login" />
               </Button>

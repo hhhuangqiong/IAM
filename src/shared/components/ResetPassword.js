@@ -1,12 +1,12 @@
 import React, { Component, PropTypes } from 'react';
+import _ from 'lodash';
 import { injectIntl, intlShape, FormattedMessage, FormattedHTMLMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import bem from 'bem-cn';
 import Joi from 'joi';
 import { injectJoiValidation } from 'm800-user-locale/joi-validation';
 import Button from 'm800-web-styleguide/lib/Button';
-import Field from 'm800-web-styleguide/lib/Form/Field';
-import TextInput from 'm800-web-styleguide/lib/Form/TextInput';
+import FloatingLabelField from 'm800-web-styleguide/lib/Form/FloatingLabelField';
 import AppLogo from './AppLogo';
 import requestResetPassword from '../actions/requestResetPassword';
 import { SUCCESS, FAILURE } from '../../constants/actionStatus';
@@ -67,13 +67,13 @@ class ResetPassword extends Component {
     });
   }
 
-  assignRef(refName, innerRefName) {
+  assignRef(refName, innerRefPath) {
     return (ref) => {
       if (!ref) {
         this.refNodes[refName] = null;
         return;
       }
-      this.refNodes[refName] = innerRefName ? ref[innerRefName] : ref;
+      this.refNodes[refName] = innerRefPath ? _.get(ref, innerRefPath) : ref;
     };
   }
 
@@ -124,20 +124,21 @@ class ResetPassword extends Component {
               />
             </div>
             <div className="row field-row">
-              <Field className="column" isUnderlined errors={getValidationMessages('email')}>
-                <TextInput
-                  isUnderlined
-                  name="id"
-                  placeholder={formatMessage(COMMON_MESSAGES.email)}
-                  ref={this.assignRef('email', 'inputRef')}
-                  value={this.state.email}
-                  onChange={this.onInputChange('email')}
-                  onBlur={this.props.handleValidation('email')}
-                />
-              </Field>
+              <FloatingLabelField
+                className="column"
+                errors={getValidationMessages('email')}
+                labelText={formatMessage(COMMON_MESSAGES.email)}
+                ref={this.assignRef('email', 'textInputRef.inputRef')}
+                inputProps={{
+                  name: 'id',
+                  value: this.state.email,
+                  onChange: this.onInputChange('email'),
+                  onBlur: this.props.handleValidation('email'),
+                }}
+              />
             </div>
             {this.renderMessage()}
-            <div className="row">
+            <div className="row action-row">
               <Button isExpanded type="submit">
                 <FormattedMessage id="sendMeInstructions" defaultMessage="Send me instructions" />
               </Button>

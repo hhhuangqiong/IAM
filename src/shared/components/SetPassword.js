@@ -1,14 +1,14 @@
 import React, { Component, PropTypes } from 'react';
+import _ from 'lodash';
 import { connect } from 'react-redux';
 import bem from 'bem-cn';
 import Joi from 'joi';
 import { injectIntl, intlShape, FormattedMessage } from 'react-intl';
 import { injectJoiValidation } from 'm800-user-locale/joi-validation';
 import Button from 'm800-web-styleguide/lib/Button';
-import Field from 'm800-web-styleguide/lib/Form/Field';
+import FloatingLabelField from 'm800-web-styleguide/lib/Form/FloatingLabelField';
 import Icon from 'm800-web-styleguide/lib/Icon';
 import PointerBox from 'm800-web-styleguide/lib/Box/PointerBox';
-import TextInput from 'm800-web-styleguide/lib/Form/TextInput';
 import AppLogo from './AppLogo';
 import setPassword from '../actions/setPassword';
 import { SUCCESS, FAILURE } from '../../constants/actionStatus';
@@ -114,13 +114,13 @@ class SetPassword extends Component {
     });
   }
 
-  assignRef(refName, innerRefName) {
+  assignRef(refName, innerRefPath) {
     return (ref) => {
       if (!ref) {
         this.refNodes[refName] = null;
         return;
       }
-      this.refNodes[refName] = innerRefName ? ref[innerRefName] : ref;
+      this.refNodes[refName] = innerRefPath ? _.get(ref, innerRefPath) : ref;
     };
   }
 
@@ -212,45 +212,43 @@ class SetPassword extends Component {
           </h3>
           <form onSubmit={this.onSubmit} >
             <div className="row field-row">
-              <Field className="column" isUnderlined>
-                <TextInput
-                  isUnderlined
-                  placeholder={formatMessage(COMMON_MESSAGES.email)}
-                  ref={this.assignRef('email', 'inputRef')}
-                  defaultValue={this.props.appMeta.id}
-                  readOnly
-                />
-              </Field>
+              <FloatingLabelField
+                className="column"
+                labelText={formatMessage(COMMON_MESSAGES.email)}
+                ref={this.assignRef('email', 'textInputRef.inputRef')}
+                inputProps={{
+                  readOnly: true,
+                  defaultValue: this.props.appMeta.id,
+                }}
+              />
             </div>
             <div className="row field-row">
               {this.renderValidator()}
-              <Field className="column" isUnderlined>
-                <TextInput
-                  isUnderlined
-                  isPassword
-                  placeholder={formatMessage(COMMON_MESSAGES.password)}
-                  ref={this.assignRef('password', 'inputRef')}
-                  defaultValue={this.state.password}
-                  onChange={this.validateForm}
-                  onFocus={this.handleFocus}
-                  onBlur={this.handleBlur}
-                />
-              </Field>
+              <FloatingLabelField
+                className="column"
+                labelText={formatMessage(COMMON_MESSAGES.password)}
+                ref={this.assignRef('password', 'textInputRef.inputRef')}
+                inputProps={{
+                  isPassword: true,
+                  onChange: this.validateForm,
+                  onFocus: this.handleFocus,
+                  onBlur: this.handleBlur,
+                }}
+              />
             </div>
             <div className="row field-row">
-              <Field className="column" isUnderlined>
-                <TextInput
-                  isUnderlined
-                  isPassword
-                  placeholder={formatMessage(COMMON_MESSAGES.confirmPassword)}
-                  ref={this.assignRef('confirmPassword', 'inputRef')}
-                  defaultValue={this.state.confirmPassword}
-                  onChange={this.validateForm}
-                />
-              </Field>
+              <FloatingLabelField
+                className="column"
+                labelText={formatMessage(COMMON_MESSAGES.confirmPassword)}
+                ref={this.assignRef('confirmPassword', 'textInputRef.inputRef')}
+                inputProps={{
+                  isPassword: true,
+                  onChange: this.validateForm,
+                }}
+              />
             </div>
             {this.renderMessage()}
-            <div className="row">
+            <div className="row action-row">
               <Button
                 isExpanded
                 type="submit"
