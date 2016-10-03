@@ -34,6 +34,8 @@ The application can be configured using docker container environment variables. 
 |`openid__clients__{$clientId}__grant_types`|the grant type|`authorization_code`|
 |`openid__clients__{$clientId}__redirect_uris`|the redirect url|`http://deploy.dev.maaii.com:4002/callback`|
 |`openid__clients__{$clientId}__post_logout_redirect_uris`|the logout redirect uri|`http://deploy.dev.maaii.com:4002`|
+|`openid__clients__{$clientId}__token_endpoint_auth_method`|the authentication method|`client_secret_basic`|
+|`openid__clients__{$clientId}__token_endpoint_auth_signing_alg`|algorithms applied on the authentication method when using `client_secret_jwt` |`HS512`|
 
 Note: Detail setting for openid(with prefix `openid__clients`), please refer [openid section](docs/OPENID.md), where `{$clientId}` above is the serivce clientId. (e.g `openid__clients__wlp`)
 
