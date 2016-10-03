@@ -28,7 +28,7 @@ export function setUp(config, openIdConfig, certificates) {
 
   _.each(errorType, type => {
     provider.on(type, error => {
-      logger.error(`[OPENID]${type}:`, error);
+      logger.error(`[OPENID]${type}: %%`, error);
     });
   });
 
