@@ -13,6 +13,8 @@ const schema = new mongoose.Schema({
 }, {
   collection: 'Role',
   versionKey: false,
+  // if minimize to be true, it will remove the empty object like permissions.
+  minimize: false,
 });
 
 schema.index({ name: 1, company: 1, service: 1 }, { unique: true });
