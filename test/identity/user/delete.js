@@ -34,7 +34,7 @@ describe('DELETE /identity/users/:id', () => {
 
     it('successfully deletes the user record', (done) => {
       const id = 'user@test.abc';
-      agent.delete(`/identity/users/${id}`)
+      agent.delete(`/identity/users/${encodeURIComponent(id)}`)
            .expect(204)
            .end(() => {
              // check the mongo and expect no more record
@@ -46,7 +46,7 @@ describe('DELETE /identity/users/:id', () => {
     });
 
     it('successfully deletes the non-existing user record', (done) => {
-      agent.delete('/identity/users/notExist@sample.org')
+      agent.delete(`/identity/users/${encodeURIComponent('notExist@sample.org')}`)
            .expect(404)
            .end(done);
     });
@@ -66,7 +66,7 @@ describe('DELETE /identity/users/:id', () => {
     after((done) => User.remove({}, done));
 
     it('fail to delete the root user record', (done) => {
-      agent.delete('/identity/users/root@abc.com')
+      agent.delete(`/identity/users/${encodeURIComponent('root@abc.com')}`)
            .expect(403)
            .end(done);
     });

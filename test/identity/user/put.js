@@ -47,7 +47,7 @@ describe('PUT /identity/users/:id', () => {
           type: 'home',
         }],
       };
-      agent.put(`/identity/users/${userInfo.id}`)
+      agent.put(`/identity/users/${encodeURIComponent(userInfo.id)}`)
         .set('Content-Type', 'application/json')
         .send(newUserInfo)
         .expect(204)
@@ -70,14 +70,14 @@ describe('PUT /identity/users/:id', () => {
           type: 'urgent',
         }],
       };
-      agent.put(`/identity/users/${id}`)
+      agent.put(`/identity/users/${encodeURIComponent(id)}`)
         .set('Content-Type', 'application/json')
         .send(newUserInfo)
         .expect(201, {
           id,
         })
         .end((err, res) => {
-          const expectedHeader = `/identity/users/${id}`;
+          const expectedHeader = `/identity/users/${encodeURIComponent(id)}`;
           expect(res.header).to.have.property('location');
           expect(res.header.location).to.include(expectedHeader);
           User.findOne({ _id: id }).then((user) => {
@@ -95,7 +95,7 @@ describe('PUT /identity/users/:id', () => {
         country: 'Hong Kong',
         address: 'Hong Kong',
       };
-      agent.put(`/identity/users/${unknowId}`)
+      agent.put(`/identity/users/${encodeURIComponent(unknowId)}`)
           .set('Content-Type', 'application/json')
           .send(myUserInfo)
           .expect(422)

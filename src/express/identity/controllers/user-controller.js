@@ -6,7 +6,7 @@ export function userController(userService) {
   const router = new Router();
 
   function getUserUrl(id, req) {
-    return `${req.protocol}://${req.get('host')}/identity/users/${id}`;
+    return `${req.protocol}://${req.get('host')}/identity/users/${encodeURIComponent(id)}`;
   }
 
   function* postUser(req, res, next) {

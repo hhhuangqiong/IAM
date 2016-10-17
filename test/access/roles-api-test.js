@@ -703,7 +703,7 @@ describe('PUT /access/users/:username/roles', () => {
       User: user,
       Role: roles,
     }).then(() => context.server
-        .put(`/access/users/${user._id}/roles`)
+        .put(`/access/users/${encodeURIComponent(user._id)}/roles`)
         .query(reqQuery)
         .send(reqBody)
     ).then((res) => {
