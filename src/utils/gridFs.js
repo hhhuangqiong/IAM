@@ -52,7 +52,7 @@ export function getFile(id) {
     return Q.reject(new ArgumentNullError(id));
   }
   // check the file if exist
-  return Q.ninvoke(gridFs, 'exist', { _id: id }).then((data) => {
+  return Q.ninvoke(gridFs, 'findOne', { _id: id }).then((data) => {
     // return error if no data
     if (!data) {
       throw new NotFoundError(id);
@@ -69,7 +69,10 @@ export function getFile(id) {
     readstream.on('end', () => {
       // convert to base64
       const fbuf = Buffer.concat(bufs);
-      deferred.resolve(fbuf);
+      deferred.resolve({
+        buffer: fbuf,
+        meta: data,
+      });
     });
     readstream.on('error', deferred.reject);
     return deferred.promise;

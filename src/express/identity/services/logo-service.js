@@ -18,8 +18,8 @@ export function logoService(validator, { Company }, storage) {
 
   function* getLogo(command) {
     const sanitizedCommand = validator.sanitize(command, getLogoCommandSchema);
-    const imageBuffer = yield storage.getFile(sanitizedCommand.id);
-    return imageBuffer;
+    const imageObject = yield storage.getFile(sanitizedCommand.id);
+    return imageObject;
   }
 
   const deleteLogoCommandSchema = Joi.object({

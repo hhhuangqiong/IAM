@@ -146,8 +146,12 @@ export function companyController(companyService, logoService) {
 
   function* getLogo(req, res, next) {
     try {
-      const buffer = yield logoService.getLogo(req.params);
-      res.end(buffer);
+      const imageObject = yield logoService.getLogo(req.params);
+      const contentType = _.get(imageObject, 'meta.contentType');
+      if (contentType) {
+        res.set('Content-Type', contentType);
+      }
+      res.end(imageObject.buffer);
     } catch (e) {
       next(e);
     }
