@@ -58,7 +58,7 @@ describe('POST /identity/users', () => {
            .send(userInfo)
            .expect(201)
            .end((err, res) => {
-             const expectedHeader = `/identity/users/${userInfo.id}`;
+             const expectedHeader = `/identity/users/${encodeURIComponent(userInfo.id)}`;
              expect(res.header).to.have.property('location');
              expect(res.header.location).to.include(expectedHeader);
 
@@ -130,7 +130,7 @@ describe('POST /identity/users', () => {
            .send(userInfo)
            .expect(201)
            .end((err, res) => {
-             const expectedHeader = `/identity/users/${userInfo.id}`;
+             const expectedHeader = `/identity/users/${encodeURIComponent(userInfo.id)}`;
              expect(res.header).to.have.property('location');
              expect(res.header.location).to.include(expectedHeader);
              User.findOne({ _id: userInfo.id }).then((user) => {
@@ -184,7 +184,7 @@ describe('POST /identity/users', () => {
     });
 
     it('201 request for signup email and generate token', done => {
-      agent.post(`/identity/users/${userInfo.id}/requestSetPassword`)
+      agent.post(`/identity/users/${encodeURIComponent(userInfo.id)}/requestSetPassword`)
        .set('Content-Type', 'application/json')
        .send()
        .expect(204)

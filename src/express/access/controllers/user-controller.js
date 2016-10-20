@@ -17,7 +17,8 @@ export function userController(access) {
 
   function* setUserRoles(req, res, next) {
     try {
-      const command = _.extend({}, req.params, req.query, { roles: req.body });
+      const command = _.extend({}, req.params, req.query,
+        { roles: req.body });
       const roles = yield access.updateUserRoles(command);
       res.json(roles);
     } catch (e) {

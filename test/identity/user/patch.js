@@ -89,7 +89,7 @@ describe('PATCH /identity/users', () => {
       const wrongFormat = {
         wrong: 'format',
       };
-      agent.patch(`/identity/users/${userInfo.id}`)
+      agent.patch(`/identity/users/${encodeURIComponent(userInfo.id)}`)
            .set('Content-Type', 'application/json')
            .send(wrongFormat)
            .expect(422)
@@ -102,7 +102,7 @@ describe('PATCH /identity/users', () => {
         path: '/password',
         value: 'th1omas',
       }];
-      agent.patch('/identity/users/notExistedUsername@test.com')
+      agent.patch(`/identity/users/${encodeURIComponent('notExistedUsername@test.com')}`)
            .set('Content-Type', 'application/json')
            .send(patches)
            .expect(422)
@@ -122,12 +122,12 @@ describe('PATCH /identity/users', () => {
           familyName: 'May',
         },
       }];
-      agent.patch(`/identity/users/${newName}`)
+      agent.patch(`/identity/users/${encodeURIComponent(newName)}`)
            .set('Content-Type', 'application/json')
            .send(patches)
            .expect(201)
            .end((err, res) => {
-             const expectedHeader = `/identity/users/${newName}`;
+             const expectedHeader = `/identity/users/${encodeURIComponent(newName)}`;
              expect(res.header).to.have.property('location');
              expect(res.header.location).to.include(expectedHeader);
              User.findOne({ _id: newName }).then((user) => {
@@ -143,7 +143,7 @@ describe('PATCH /identity/users', () => {
       const observer = jsonpatch.observe(userInfo);
       userInfo.active = false;
       const patches = jsonpatch.generate(observer);
-      agent.patch(`/identity/users/${userInfo.id}`)
+      agent.patch(`/identity/users/${encodeURIComponent(userInfo.id)}`)
            .set('Content-Type', 'application/json')
            .send(patches)
            .expect(204)
@@ -167,7 +167,7 @@ describe('PATCH /identity/users', () => {
         value: 'home@abc.com',
       });
       const patches = jsonpatch.generate(observer);
-      agent.patch(`/identity/users/${userInfo.id}`)
+      agent.patch(`/identity/users/${encodeURIComponent(userInfo.id)}`)
            .set('Content-Type', 'application/json')
            .send(patches)
            .expect(204)
@@ -189,7 +189,7 @@ describe('PATCH /identity/users', () => {
         path: '/pasjsword',
         value: 'th1omas',
       }];
-      agent.patch(`/identity/users/${userInfo.id}`)
+      agent.patch(`/identity/users/${encodeURIComponent(userInfo.id)}`)
            .set('Content-Type', 'application/json')
            .send(patches)
            .expect(422)
@@ -202,7 +202,7 @@ describe('PATCH /identity/users', () => {
         path: '/active',
         value: 'string',
       }];
-      agent.patch(`/identity/users/${userInfo.id}`)
+      agent.patch(`/identity/users/${encodeURIComponent(userInfo.id)}`)
            .set('Content-Type', 'application/json')
            .send(patches)
            .expect(422)
@@ -215,7 +215,7 @@ describe('PATCH /identity/users', () => {
         path: '/nonExisting',
         value: 'dummy',
       }];
-      agent.patch(`/identity/users/${userInfo.id}`)
+      agent.patch(`/identity/users/${encodeURIComponent(userInfo.id)}`)
            .set('Content-Type', 'application/json')
            .send(patches)
            .expect(422)

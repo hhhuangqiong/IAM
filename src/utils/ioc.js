@@ -17,6 +17,7 @@ import { userController as roleUserController } from '../express/access/controll
 import { userController } from '../express/identity/controllers/user-controller';
 import { companyController } from '../express/identity/controllers/company-controller';
 import { openIdController } from '../express/openid/openid-controller';
+import { decodeParamsMiddleware } from '../express/middleware/decodeParams';
 import { setUp } from '../koa/openid/provider';
 import { config as openIdConfig, certificates as openIdCert } from '../koa/openid/settings';
 import { collections } from '../collections';
@@ -43,6 +44,9 @@ export function initialize() {
     const mongoDriver = container.mongoose.mongo;
     return new Grid(db, mongoDriver);
   });
+
+  // decode params middleware
+  iocBottle.constant('decodeParamsMiddleware', decodeParamsMiddleware);
 
   // config
   iocBottle.service('config', nconf);

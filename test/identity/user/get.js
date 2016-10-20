@@ -209,7 +209,7 @@ describe('GET /identity/users', () => {
 
     it('successfully get the exact user data', (done) => {
       const targetUser = userArray[0];
-      agent.get(`/identity/users/${targetUser.id}`)
+      agent.get(`/identity/users/${encodeURIComponent(targetUser.id)}`)
            .expect('Content-Type', /json/)
            .expect(200)
            .end((err, res) => {
@@ -220,7 +220,7 @@ describe('GET /identity/users', () => {
     });
 
     it('fails get the non-existing user data', (done) => {
-      agent.get('/identity/users/nonExistingUser@abc.com')
+      agent.get(`/identity/users/${encodeURIComponent('nonExistingUser@abc.com')}`)
            .expect(404)
            .end(done);
     });
