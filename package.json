@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rm -rf build && mkdir build && rm -rf public/assets/app",
     "dev": "babel-node -- src",
-    "dev:api": "nodemon --exec \"babel-node -- src\"",
+    "dev:api": "nodemon --exec \"babel-node -- src \" --ignore build",
     "docs:api": "apidoc -i src/ -f \".*\\.js$\"",
     "docs": "gitbook install && gitbook build && npm run docs:api",
     "lint": "eslint src",
