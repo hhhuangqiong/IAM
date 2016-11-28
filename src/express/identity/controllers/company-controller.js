@@ -99,27 +99,6 @@ export function companyController(companyService, logoService) {
     }
   }
 
-  function* patchCompany(req, res, next) {
-    try {
-      const command = {
-        id: req.params.id,
-        patches: req.body,
-      };
-      const company = yield companyService.patchCompanyInfo(command);
-      // update information will return 204
-      if (!company) {
-        res.sendStatus(204);
-        return;
-      }
-      // create a new company
-      res.status(201);
-      res.set('Location', getCompanyUrl(company.id, req));
-      res.json({ id: company.id });
-    } catch (e) {
-      next(e);
-    }
-  }
-
   function* postLogo(req, res, next) {
     try {
       const command = {
@@ -163,7 +142,6 @@ export function companyController(companyService, logoService) {
   router.get('/companies/:id/descendants', wrap(getDescendantCompanies));
   router.delete('/companies/:id', wrap(deleteCompany));
   router.put('/companies/:id', wrap(putCompany));
-  router.patch('/companies/:id', wrap(patchCompany));
   router.post('/companies/:id/logo', _.bind(uploadFile, null, 'logo'), wrap(postLogo));
   router.get('/companies/logo/:id', wrap(getLogo));
   router.delete('/companies/:id/logo', wrap(deleteLogo));

@@ -410,66 +410,6 @@
      *     }
      */
 
-     /**
-      * @api {patch} /identity/users/:id
-      * @apiName PatchCompany
-      * @apiGroup company
-      * @apiDescription update the user, it will only update the data.
-      * If the company doesn't exist, it will create a new company.
-      * @apiParam {String} id the target user
-      * @apiHeader {String} Content-Type application/json
-      * @apiHeaderExample {json} Header-Example:
-      * { "Content-Type": "application/json" }
-      * @apiParam {Array}  op Array of operation following RFC 6902(https://tools.ietf.org/html/rfc6902)
-      * @apiSuccessExample {json} Updated Data success-Response:
-      *     HTTP/1.1 204 No Content
-      * @apiSuccessExample {json} New created Success-Response:
-      *     // Header: access link to the company entity
-      *     Location: /identity/users/newUser
-      *     HTTP/1.1 201 Created
-      *     {
-      *       "id": "newUser"
-      *     }
-      * @apiUse errorObject
-      * @apiErrorExample Error-Response:
-      *     HTTP/1.1 422 Unprocessable Entity
-      *     {
-      *       "result": {
-      *          "code": 20003,
-      *          "status": 422,
-      *          "message": "/timezone with Invalid type: number (expected string)"
-      *        }
-      *     }
-      * @apiErrorExample Invalid operation Error-Response:
-      *     HTTP/1.1 422 Unprocessable Entity
-      *     {
-      *       "result": {
-      *          "code": 20003,
-      *          "status": 422,
-      *          "message": 'Invalid operation number 0: Operation `op` property ' +
-      *                       'is not one of operations defined in RFC-6902',
-      *        }
-      *     }
-      * @apiErrorExample Invalid format Error-Response:
-      *     HTTP/1.1 422 Unprocessable Entity
-      *     {
-      *       "result": {
-      *          "code": 20003,
-      *          "status": 422,
-      *          "message": 'Patch requests a set of changes in an array'
-      *        }
-      *     }
-      * @apiErrorExample Invalid schema Error-Response:
-      *     HTTP/1.1 422 Unprocessable Entity
-      *     {
-      *       "result": {
-      *          "code": 20003,
-      *          "status": 422,
-      *          "message": '/nonExisting with Unknown property (not in schema)'
-      *        }
-      *     }
-      */
-
       /**
        * @api {put} /identity/users/:id Put user
        * @apiName PutUser

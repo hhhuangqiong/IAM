@@ -4,7 +4,7 @@ import { NotFoundError, ValidationError, InvalidOperationError,
 import Joi from 'joi';
 import moment from 'moment';
 
-import { rename, mongoose as mongooseUtil, jsonPatch } from '../../../utils';
+import { rename, mongoose as mongooseUtil } from '../../../utils';
 import {
   DEFAULT_PAGE_SIZE,
   DEFAULT_PAGE_NO,
@@ -222,49 +222,6 @@ export function userService(validator, { User, Company }, mailService) {
     return null;
   }
 
-  const patchUserCommandSchema = Joi.object({
-    id: Joi.string().email().required(),
-    patches: Joi.array().items(),
-  });
-
-  function* patchUserInfo(command) {
-    let sanitizedCommand = validator.sanitize(command, patchUserCommandSchema);
-    const user = yield User.findOne({ _id: sanitizedCommand.id });
-    let currentUser;
-    // default company will contain id
-    if (!user) {
-      currentUser = {
-        id: sanitizedCommand.id,
-      };
-    } else {
-      // ignore internal properties
-      currentUser = _.omit(user.toJSON(),
-       ['createdAt', 'updatedAt', 'createdBy', 'updatedBy',
-        'password', 'hashedPassword', 'salt', 'displayName', 'tokens', 'isVerified', 'isRoot']);
-      // always set password to be empty string
-      currentUser.password = '';
-    }
-
-    // apply patches to the company
-    jsonPatch(currentUser, sanitizedCommand.patches);
-    // create a new user when fail to find existing one
-    if (!user) {
-      return yield createUser(currentUser);
-    }
-
-    // if password still empty, no need to update
-    if (currentUser.password === '') {
-      currentUser = _.omit(currentUser, 'password');
-    }
-    // validate the change after the json patches
-    sanitizedCommand = validator.sanitize(currentUser, updateUserCommandSchema);
-    // update the values when patch successfully
-    _(sanitizedCommand).omit('id')
-      .each((value, key) => _.set(user, key, value));
-    yield user.save();
-    return null;
-  }
-
   const verifyPasswordCommandSchema = Joi.object({
     id: Joi.string().email().required(),
     password: Joi.string().required(),
@@ -397,7 +354,6 @@ export function userService(validator, { User, Company }, mailService) {
     getUser,
     deleteUser,
     setUserInfo,
-    patchUserInfo,
     verifyPassword,
     setPassword,
     requestResetPassword,

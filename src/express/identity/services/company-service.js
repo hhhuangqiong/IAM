@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { NotFoundError, ValidationError } from 'common-errors';
 import Joi from 'joi';
 
-import { jsonPatch, mongoose as mongooseUtil, rename } from '../../../utils';
+import { mongoose as mongooseUtil, rename } from '../../../utils';
 import {
   DEFAULT_PAGE_SIZE,
   DEFAULT_PAGE_NO,
@@ -186,40 +186,6 @@ export function companyService(validator, { Company }, logoService) {
     return null;
   }
 
-  const patchCompanyCommandSchema = Joi.object({
-    id: Joi.string().regex(idRegExp).required(),
-    patches: Joi.array().items(),
-  });
-
-  function* patchCompanyInfo(command) {
-    let sanitizedCommand = validator.sanitize(command, patchCompanyCommandSchema);
-    let company;
-    try {
-      company = yield findOneCompany(sanitizedCommand.id);
-    } catch (ex) {
-      // create a new company when fail to find existing one
-      if (ex instanceof NotFoundError) {
-        const currentCompany = {};
-        // apply patches to the company
-        jsonPatch(currentCompany, sanitizedCommand.patches);
-        const newCompany = yield createCompany(currentCompany);
-        return newCompany;
-      }
-      throw ex;
-    }
-    const currentCompany = _.omit(company.toJSON(),
-     ['createdAt', 'updatedAt', 'createdBy', 'updatedBy']);
-    // apply patches to the company
-    jsonPatch(currentCompany, sanitizedCommand.patches);
-    // validate the change after the json patches
-    sanitizedCommand = validator.sanitize(currentCompany, updateCompanyCommandSchema);
-    // update the values when patch successfully
-    _(sanitizedCommand).omit('id')
-      .each((value, key) => _.set(company, key, value));
-    yield company.save();
-    return null;
-  }
-
   const getDescendantsCommandSchema = Joi.object({
     id: Joi.string().regex(idRegExp).required(),
   });
@@ -246,6 +212,5 @@ export function companyService(validator, { Company }, logoService) {
     getDescendantCompanies,
     deleteCompany,
     setCompanyInfo,
-    patchCompanyInfo,
   };
 }

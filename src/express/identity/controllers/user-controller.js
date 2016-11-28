@@ -75,27 +75,6 @@ export function userController(userService) {
     }
   }
 
-  function* patchUser(req, res, next) {
-    try {
-      const command = {
-        id: req.params.id,
-        patches: req.body,
-      };
-      const user = yield userService.patchUserInfo(command);
-      // update information will return 204
-      if (!user) {
-        res.sendStatus(204);
-        return;
-      }
-      // create a new user
-      res.status(201);
-      res.set('Location', getUserUrl(user.id, req));
-      res.json({ id: user.id });
-    } catch (e) {
-      next(e);
-    }
-  }
-
   function* requestSetPassword(req, res, next) {
     try {
       const query = _.extend({}, req.params, req.body);
@@ -111,7 +90,6 @@ export function userController(userService) {
   router.get('/users', wrap(getUsers));
   router.get('/users/:id', wrap(getUser));
   router.delete('/users/:id', wrap(deleteUser));
-  router.patch('/users/:id', wrap(patchUser));
   router.put('/users/:id', wrap(putUser));
 
   return router;
