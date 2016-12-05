@@ -17,7 +17,8 @@
     "jenkins:merge": "npm run jenkins && gulp intl:upload && npm run docs",
     "build:src": "babel -d ./build ./src -s --copy-files && webpack --config webpack/webpack.config.prod.babel.js",
     "build": "npm run clean && npm run build:src",
-    "server": "node ./build/index.js"
+    "server": "node ./build/index.js",
+    "migrate": "cd migrations && migrate-mongo up && cd .."
   },
   "repository": {
     "type": "git",
@@ -109,6 +110,8 @@
     "eslint-plugin-react": "^5.2.2",
     "extract-text-webpack-plugin": "^1.0.1",
     "gulp": "^3.9.1",
+    "m800-util": "^0.7.0-snapshot.102",
+    "migrate-mongo": "^1.1.0",
     "mocha": "^2.5.3",
     "mockgoose": "^6.0.3",
     "node-sass": "^3.8.0",

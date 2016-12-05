@@ -24,4 +24,4 @@ EXPOSE 3000 5858
 
 USER nobody
 
-CMD ["node", "./build/index.js"]
+CMD ["npm", "run", "server"]
