@@ -1,4 +1,4 @@
-const defineMigration = require('m800-util').defineMigration;
+import { defineMigration } from 'm800-util';
 
 module.exports = defineMigration(async(db) => {
   const filter = { isRoot: true };

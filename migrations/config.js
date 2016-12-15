@@ -1,6 +1,4 @@
-require('babel-register');
-
-const nconf = require('../src/initializers/nconf');
+import nconf from '../src/initializers/nconf';
 
 const config = nconf();
 
