@@ -119,11 +119,6 @@ const schema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Company',
   },
-  assignedCompanies: [{
-    _id: false,
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Company',
-  }],
   tokens: [{
     _id: false,
     event: String,
