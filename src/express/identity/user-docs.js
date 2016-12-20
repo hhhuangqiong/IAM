@@ -58,12 +58,8 @@
  * @apiParam {String} [gender] gender
  * @apiParam {String} [birthdate] birth date
  * @apiParam {Object[]} [website] website
- * @apiParam {String} [affiliatedCompany.company] affiliated companyid
- * @apiParam {String} [affiliatedCompany.department] affiliated company department
- * @apiParam {Object[]} [assignedCompanies] assigned companies
- * @apiParam {String} [assignedCompanies.company] assigned company id
- * @apiParam {String} [assignedCompanies.department] assigned company department
- */
+ * @apiParam {String} [affiliatedCompany] affiliated company object id
+*/
 
  /**
   * @apiDefine userData
@@ -129,11 +125,7 @@
   * @apiSuccess (User) {String} [gender] gender
   * @apiSuccess (User) {String} [birthdate] birth date
   * @apiSuccess (User) {Object[]} [website] website
-  * @apiSuccess (User) {String} [affiliatedCompany.company] affiliated companyid
-  * @apiSuccess (User) {String} [affiliatedCompany.department] affiliated company department
-  * @apiSuccess (User) {Object[]} [assignedCompanies] assigned companies
-  * @apiSuccess (User) {String} [assignedCompanies.company] assigned company id
-  * @apiSuccess (User) {String} [assignedCompanies.department] assigned company department
+  * @apiSuccess (User) {String} [affiliatedCompany] affiliated company object id
   */
 
  /**

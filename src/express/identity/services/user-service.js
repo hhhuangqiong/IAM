@@ -80,7 +80,6 @@ export function userService(validator, { User, Company }, mailService) {
     birthdate: Joi.string(),
     website: Joi.string(),
     affiliatedCompany: Joi.string().regex(objectIdRegExp),
-    assignedCompanies: Joi.array().items(Joi.string().regex(objectIdRegExp)),
   });
 
   function* validateCompany(companyId) {
@@ -95,10 +94,6 @@ export function userService(validator, { User, Company }, mailService) {
     if (sanitizedCommand.affiliatedCompany) {
       yield validateCompany(sanitizedCommand.affiliatedCompany);
     }
-
-    _.map(sanitizedCommand.assignedCompanies, function* validateEachCompany(company) {
-      yield validateCompany(company);
-    });
   }
 
   const createUserCommandSchema = baseInfoSchema.keys({
