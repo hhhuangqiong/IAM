@@ -51,9 +51,16 @@ export function accessService(validator, { Role, Company, User }) {
   function* validateRootRole(roleId) {
     const role = yield Role.findById(roleId);
     if (role && role.isRoot) {
-      throw new InvalidOperationError('Edit or delete admin role');
+      throw new InvalidOperationError('It is not allowed to edit or delete admin role');
     }
   }
+
+  const formatRole = _.flow([
+    // eslint-disable-next-line no-confusing-arrow
+    o => _.isFunction(o.toJSON) ? o.toJSON() : o,
+    o => rename(o, { _id: 'id' }),
+    o => _.omit(o, ['__v', 'kind', 'users']),
+  ]);
 
   // permission values must be array with single value that with four possible values
   const permissionsSchema = Joi.object().pattern(/.+/,
@@ -85,8 +92,7 @@ export function accessService(validator, { Role, Company, User }) {
     }
     try {
       const role = yield Role.create(sanitizedCommand);
-      const json = _.omit(role.toJSON(), 'users');
-      return rename(json, { _id: 'id' });
+      return formatRole(role);
     } catch (e) {
       if (e.code === 11000) {
         throw new ValidationError('Combination of service, company and role name should be unique');
@@ -117,7 +123,7 @@ export function accessService(validator, { Role, Company, User }) {
       }
     }
     const roles = yield Role.find(filters).lean().select('-users');
-    return roles.map(x => rename(x, { _id: 'id' }));
+    return roles.map(formatRole);
   }
 
   const deleteRoleCommandSchema = Joi.object({
@@ -152,7 +158,7 @@ export function accessService(validator, { Role, Company, User }) {
     if (!role) {
       throw new NotFoundError('Role');
     }
-    return rename(role.toJSON(), { _id: 'id' });
+    return formatRole(role);
   }
 
   const getUserPermissionsQuerySchema = Joi.object({

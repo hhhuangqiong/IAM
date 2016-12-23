@@ -1,8 +1,16 @@
 import { getContainer } from '../../utils/ioc';
 
-export function injectIdentityRoutes(server, { jsonParser, urlencodedParser, overrideMethod }) {
-  const { identityUserController, identityCompanyController } = getContainer();
+export function injectIdentityRoutes(server, { jsonParser }) {
+  const {
+    identityUserController,
+    identityCompanyController,
+    identityGroupController,
+  } = getContainer();
 
-  server.use('/identity', jsonParser, urlencodedParser, overrideMethod,
-    identityUserController, identityCompanyController);
+  server.use('/identity',
+    jsonParser,
+    identityUserController,
+    identityCompanyController,
+    identityGroupController,
+  );
 }

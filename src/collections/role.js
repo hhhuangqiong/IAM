@@ -1,24 +1,14 @@
-import mongoose from 'mongoose';
-import timestamp from 'mongoose-timestamp';
+import { Schema } from 'mongoose';
 
-const Types = mongoose.Schema.Types;
+import Group from './group';
 
-const schema = new mongoose.Schema({
-  name: { type: String, required: true },
-  company: { type: Types.ObjectId, ref: 'Company', required: true },
-  service: { type: String, required: true },
-  permissions: { type: Types.Mixed },
-  users: [{ type: Types.String, ref: 'User' }],
+const { Types } = Schema;
+
+const schema = new Schema({
+  permissions: { type: Types.Mixed, default: {} },
   isRoot: { type: Boolean, default: false },
-}, {
-  collection: 'Role',
-  versionKey: false,
-  // if minimize to be true, it will remove the empty object like permissions.
-  minimize: false,
 });
 
-schema.index({ name: 1, company: 1, service: 1 }, { unique: true });
-schema.plugin(timestamp);
+export const Role = Group.discriminator('Role', schema);
 
-export const Role = mongoose.model('Role', schema);
 export default Role;

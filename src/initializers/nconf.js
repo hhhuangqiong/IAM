@@ -1,34 +1,15 @@
-import logger from 'winston';
 import nconf from 'nconf';
 import path from 'path';
 
-const CONFIG_PREFIX = 'env-';
+const CONFIG_DIR = path.resolve(__dirname, '../config');
 
-/**
- * Initialize nconf settings
- * @return {Object} nconf
- */
 export default function initialize() {
   const env = process.env.NODE_ENV || 'development';
-  const configDir = path.resolve(__dirname, '../config');
-  const fileName = `${CONFIG_PREFIX}${env}.json`;
-
-  nconf.argv();
-  nconf.env('__');
-
-  nconf.file(env, {
-    file: fileName,
-    dir: configDir,
-    search: true,
-  });
-
-  // default config
-  nconf.file('default', {
-    file: 'default.json',
-    dir: configDir,
-    search: true,
-  });
-
-  logger.debug('loading configuration files %j under "%s"', fileName, configDir);
+  nconf
+    .argv()
+    .env('__')
+    .file('user-env-specific', path.join(CONFIG_DIR, `server-${env}.personal.config.json`))
+    .file('env-specific', path.join(CONFIG_DIR, `server-${env}.config.json`))
+    .file('default', path.join(CONFIG_DIR, 'server-default.config.json'));
   return nconf;
 }

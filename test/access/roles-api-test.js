@@ -353,8 +353,7 @@ describe('GET /access/roles', () => {
               // not set via createRole, ignore the checking on isRoot
               .map(x => _.omit(x, ['createdAt', 'updatedAt', 'isRoot']))
               .value();
-              console.log(actual);
-            expect(expected).to.eql(actual);
+            expect(actual).to.eql(expected);
           })
           .end(done);
       })

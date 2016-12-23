@@ -10,11 +10,13 @@ import gridFs from './gridFs';
 import { companyService } from '../express/identity/services/company-service';
 import { logoService } from '../express/identity/services/logo-service';
 import { userService } from '../express/identity/services/user-service';
+import { groupService } from '../express/identity/services/group-service';
 import { emailService } from '../express/identity/services/email-service';
 import { accessService } from '../express/access/services/access-service';
 import { roleController } from '../express/access/controllers/role-controller';
 import { userController as roleUserController } from '../express/access/controllers/user-controller';
 import { userController } from '../express/identity/controllers/user-controller';
+import { groupController } from '../express/identity/controllers/group-controller';
 import { companyController } from '../express/identity/controllers/company-controller';
 import { openIdController } from '../express/openid/openid-controller';
 import { decodeParamsMiddleware } from '../express/middleware/decodeParams';
@@ -23,92 +25,68 @@ import { config as openIdConfig, certificates as openIdCert } from '../koa/openi
 import { collections } from '../collections';
 import { validator } from './validator';
 
-let iocBottle;
+let bottle;
 
 export function initialize() {
-  if (iocBottle) {
-    return iocBottle;
+  if (bottle) {
+    return bottle;
   }
 
-  iocBottle = new Bottle();
+  bottle = new Bottle();
 
-  iocBottle.factory('mongoose', () => {
+  bottle.factory('mongoose', () => {
     // set up the mongoose Promise to use q.
     mongoose.Promise = Q.Promise;
     return mongoose;
   });
 
-  // gridfs to store file in mongo
-  iocBottle.factory('gridFs', (container) => {
+  bottle.factory('gridFs', (container) => {
     const db = container.mongoose.connection.db;
     const mongoDriver = container.mongoose.mongo;
     return new Grid(db, mongoDriver);
   });
 
-  // decode params middleware
-  iocBottle.constant('decodeParamsMiddleware', decodeParamsMiddleware);
+  bottle.constant('decodeParamsMiddleware', decodeParamsMiddleware);
 
-  // config
-  iocBottle.service('config', nconf);
+  bottle.service('config', nconf);
+  bottle.factory('storage', () => gridFs);
 
-  // storage
-  iocBottle.factory('storage', () => gridFs);
+  bottle.factory('models', () => collections);
+  bottle.service('validator', validator);
 
-  // all the collection models
-  iocBottle.factory('models', () => collections);
-
-  // validate the command schema
-  iocBottle.service('validator', validator);
-
-  // company logo service
-  iocBottle.service('logoService', logoService, 'validator', 'models', 'storage');
-
-  // company service
-  iocBottle.service('companyService', companyService, 'validator', 'models', 'logoService');
-
-  iocBottle.factory('emailClient', ({ config }) =>
+  bottle.service('logoService', logoService, 'validator', 'models', 'storage');
+  bottle.service('companyService', companyService, 'validator', 'models', 'logoService');
+  bottle.factory('emailClient', ({ config }) =>
     new M800MailClient({ baseUrl: config.get('MAIL_SERVICE_URL') })
   );
 
-  // email service
-  iocBottle.service('emailService', emailService, 'emailClient', 'config');
-  // user service
-  iocBottle.service('userService', userService, 'validator', 'models', 'emailService');
+  bottle.service('emailService', emailService, 'emailClient', 'config');
+  bottle.service('userService', userService, 'validator', 'models', 'emailService');
+  bottle.service('groupService', groupService, 'validator', 'models');
+  bottle.service('accessService', accessService, 'validator', 'models');
 
-  // access service
-  iocBottle.service('accessService', accessService, 'validator', 'models');
+  bottle.service('accessRoleController', roleController, 'accessService');
+  bottle.service('accessUserController', roleUserController, 'accessService');
+  bottle.service('identityCompanyController', companyController, 'companyService', 'logoService');
+  bottle.service('identityGroupController', groupController, 'groupService');
+  bottle.service('identityUserController', userController, 'userService');
 
-  // access role controller
-  iocBottle.service('accessRoleController', roleController, 'accessService');
+  bottle.constant('openIdSetting', openIdConfig);
+  bottle.constant('openIdCertificates', openIdCert);
+  bottle.factory('openIdProvider', ({ config, openIdSetting, openIdCertificates }) =>
+    setUp(config, openIdSetting, openIdCertificates)
+  );
+  bottle.service('openIdController', openIdController, 'openIdProvider', 'userService');
 
-  // acces role user controller
-  iocBottle.service('accessUserController', roleUserController, 'accessService');
-
-  // identity company controller
-  iocBottle.service('identityCompanyController', companyController, 'companyService', 'logoService');
-
-  // identity user controller
-  iocBottle.service('identityUserController', userController, 'userService');
-
-  // open id setting
-  iocBottle.constant('openIdSetting', openIdConfig);
-  iocBottle.constant('openIdCertificates', openIdCert);
-
-  iocBottle.factory('openIdProvider', ({ config, openIdSetting, openIdCertificates }) =>
-    setUp(config, openIdSetting, openIdCertificates));
-
-  iocBottle.service('openIdController', openIdController, 'openIdProvider', 'userService');
-
-  return iocBottle;
+  return bottle;
 }
 
 export function get() {
-  return iocBottle;
+  return bottle;
 }
 
-
 export function getContainer() {
-  return iocBottle && iocBottle.container;
+  return bottle && bottle.container;
 }
 
 export const ioc = {

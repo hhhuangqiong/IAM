@@ -1,28 +1,24 @@
 import * as _ from 'lodash';
 import Q from 'q';
-import mockgoose from 'mockgoose';
 import mongoose from 'mongoose';
-import request from 'supertest-as-promised';
 
-import { createServer } from './../../src/server';
 import { StateManager } from './state-manager';
-
-const env = process.env.NODE_ENV || 'development';
+import getAgent from './../getAgent';
 
 export const initialize = _.memoize(() =>
-  Q.resolve(env === 'test-local' ? mongoose : mockgoose(mongoose))
-    .then(() => createServer(env))
-    .then(app =>
+    getAgent()
+    .then(agent =>
       /* eslint new-cap: ["error", { "capIsNewExceptions": ["Q.Promise"] }]*/
       // wait for the mongoose to be connected before test, which insert, update data
-      Q.Promise((resolve) => {
+      Q.Promise((resolve, reject) => {
         mongoose.connection.on('connected', () => {
           resolve({
-            server: request.agent(app),
+            server: agent,
             db: mongoose,
             state: new StateManager(mongoose),
           });
         });
+        mongoose.connection.on('error', reject);
       })
     )
 );

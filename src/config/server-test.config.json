@@ -1,0 +1,9 @@
+{
+  "mongodb":{
+    "uri":"mongodb://localhost/maaii-iam-test",
+    "options": null
+  },
+  "tests": {
+    "useMockgoose": true
+  }
+}

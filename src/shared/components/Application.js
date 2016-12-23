@@ -9,7 +9,7 @@ import Footer from './Footer';
 import config from '../../config/app.json';
 
 import symbol from 'm800-web-styleguide/assets/symbols/symbol-defs.svg';
-import '../../../public/sass/main.scss';
+import './../../../public/sass/main.scss';
 
 require('es6-promise').polyfill();
 

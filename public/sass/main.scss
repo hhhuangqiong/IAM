@@ -1,40 +1,40 @@
 // Import foundation util for unit and breakpoint
-@import "foundation-sites/scss/util/util";
+@import "~foundation-sites/scss/util/util";
 
 // Settings: Global variables, site-wide settings, config switches, etc.
 $global-spacing: 16px;
-@import "m800-web-styleguide/scss/settings/global";
+@import "~m800-web-styleguide/scss/settings/global";
 
 $inuit-base-line-height: $global-spacing;
-@import "inuit-defaults/settings.defaults";
+@import "~inuit-defaults/settings.defaults";
 
 $global-radius: 5px;
-@import "m800-web-styleguide/scss/settings/foundation";
+@import "~m800-web-styleguide/scss/settings/foundation";
 
 @import "./settings/global";
 @import "./settings/foundation";
 
 // Tools: Site-wide mixins and functions.
-@import "inuit-functions/tools.functions";
-@import "m800-web-styleguide/scss/tools/mixins";
-@import "m800-web-styleguide/scss/tools/animate";
-@import "m800-web-styleguide/scss/tools/flex";
-@import "m800-web-styleguide/scss/tools/text";
+@import "~inuit-functions/tools.functions";
+@import "~m800-web-styleguide/scss/tools/mixins";
+@import "~m800-web-styleguide/scss/tools/animate";
+@import "~m800-web-styleguide/scss/tools/flex";
+@import "~m800-web-styleguide/scss/tools/text";
 
 // Generic: Low-specificity, far-reaching rulesets (e.g. resets).
-@import "foundation-sites/scss/global";
+@import "~foundation-sites/scss/global";
 @include foundation-global-styles;
 
-@import 'foundation-sites/scss/grid/grid';
+@import '~foundation-sites/scss/grid/grid';
 @include foundation-flex-grid;
 
 // Base: Unclassed HTML elements (e.g. a {}, blockquote {}, address {}).
-@import "foundation-sites/scss/typography/base";
+@import "~foundation-sites/scss/typography/base";
 @include foundation-typography-base;
 
-@import "m800-web-styleguide/scss/elements/page";
-@import "m800-web-styleguide/scss/elements/type";
-@import "m800-web-styleguide/scss/elements/form";
+@import "~m800-web-styleguide/scss/elements/page";
+@import "~m800-web-styleguide/scss/elements/type";
+@import "~m800-web-styleguide/scss/elements/form";
 
 @import './utils/mixin';
 @import './utils/helper';
@@ -45,45 +45,45 @@ $global-radius: 5px;
 
 // Objects: Objects, abstractions, and design patterns (e.g. .media {}).
 $inuit-media-gutter: $global-padding;
-@import "inuit-media/objects.media";
+@import "~inuit-media/objects.media";
 
-@import "m800-web-styleguide/scss/objects/circle";
-@import "m800-web-styleguide/scss/objects/icon";
-@import "m800-web-styleguide/scss/objects/ellipsis";
-@import "m800-web-styleguide/scss/objects/flex-grid";
+@import "~m800-web-styleguide/scss/objects/circle";
+@import "~m800-web-styleguide/scss/objects/icon";
+@import "~m800-web-styleguide/scss/objects/ellipsis";
+@import "~m800-web-styleguide/scss/objects/flex-grid";
 
 $inuit-box-padding: $global-padding;
 $inuit-enable-box--flush: true;
 $inuit-enable-box--large: true;
 $inuit-enable-box--huge: true;
-@import "inuit-box/objects.box";
-@import "m800-web-styleguide/scss/objects/wrappers";
+@import "~inuit-box/objects.box";
+@import "~m800-web-styleguide/scss/objects/wrappers";
 
 
 // Components: Discrete, complete chunks of UI (e.g. .carousel {}). This is the one layer that inuitcss doesn’t get involved with.
-@import "foundation-sites/scss/components/button";
+@import "~foundation-sites/scss/components/button";
 @include foundation-button;
-@import "foundation-sites/scss/components/label";
+@import "~foundation-sites/scss/components/label";
 @include foundation-label;
 
-@import "m800-web-styleguide/scss/components/boxes";
-@import "m800-web-styleguide/scss/components/buttons";
-@import "m800-web-styleguide/scss/components/callout";
-@import "m800-web-styleguide/scss/components/error";
-@import "m800-web-styleguide/scss/components/forms";
+@import "~m800-web-styleguide/scss/components/boxes";
+@import "~m800-web-styleguide/scss/components/buttons";
+@import "~m800-web-styleguide/scss/components/callout";
+@import "~m800-web-styleguide/scss/components/error";
+@import "~m800-web-styleguide/scss/components/forms";
 
 // components
 @import './components/auth-section';
 @import './components/footer';
 
 
-// Trumps: High-specificity, very explicit selectors. Overrides and helper classes (e.g. .hidden {}).
-@import "inuit-clearfix/trumps.clearfix";
+// Donald Trumps: High-specificity, very explicit selectors. Overrides and helper classes (e.g. .hidden {}).
+@import "~inuit-clearfix/trumps.clearfix";
 $inuit-margin: 16px;
 $inuit-enable-margins: true;
 $inuit-enable-margins--tiny: true;
 $inuit-enable-margins--small: true;
-@import "inuit-spacing/trumps.spacing";
-@import "m800-web-styleguide/scss/utilities/float";
-@import "m800-web-styleguide/scss/utilities/colors";
-@import "m800-web-styleguide/scss/utilities/alignments";
+@import "~inuit-spacing/trumps.spacing";
+@import "~m800-web-styleguide/scss/utilities/float";
+@import "~m800-web-styleguide/scss/utilities/colors";
+@import "~m800-web-styleguide/scss/utilities/alignments";
