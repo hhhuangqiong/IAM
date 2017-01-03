@@ -1,5 +1,6 @@
 import logger from 'winston';
-import { checkArgument as check } from '../utils';
+import { check } from 'm800-util';
+
 import {
   ArgumentNullError,
   ArgumentError,

@@ -1,8 +1,7 @@
 import * as _ from 'lodash';
 import Joi from 'joi';
 import { ValidationError } from 'common-errors';
-
-import { checkArgument as check } from './checkArgument';
+import { check } from 'm800-util';
 
 export function validator() {
   function joiErrorToValidationError(joiError) {

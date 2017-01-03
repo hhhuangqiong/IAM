@@ -1,4 +1,3 @@
-export { checkArgument } from './checkArgument';
 export { rename } from './rename';
 export { mongoose } from './mongoose';
 export { gridFs } from './gridFs';
