@@ -17,6 +17,7 @@ export function emailService(emailClient, config) {
         clientId: client.clientId,
         redirectURL: encodeURIComponent(client.redirectURL),
         url: `${config.get('APP_URL')}/openid/setPassword?event=${event}&id=${email}`,
+        givenName: client.givenName,
       },
     };
   }

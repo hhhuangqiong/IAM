@@ -296,6 +296,7 @@ export function userService(validator, { User, Company }, mailService) {
       token = yield mailService.sendResetPasswordEmail(sanitizedCommand.id, {
         clientId: sanitizedCommand.clientId,
         redirectURL: sanitizedCommand.redirectURL,
+        givenName: user.name.givenName,
       });
     } catch (e) {
       throw new NotSupportedError(`Failed to deliver email to ${sanitizedCommand.id}`);
@@ -325,13 +326,13 @@ export function userService(validator, { User, Company }, mailService) {
 
     // remove previous set pw token and create set pw token
     user.tokens = _.reject(user.tokens, token => token.event === SET_PW_TOKEN);
-
     let token;
     try {
       // create sign up tokens
       token = yield mailService.sendSignUpEmail(user._id, {
         clientId: sanitizedCommand.clientId,
         redirectURL: sanitizedCommand.redirectURL,
+        givenName: user.name.givenName,
       });
     } catch (e) {
       // all the failure from mail service are conditions that not supported by application
