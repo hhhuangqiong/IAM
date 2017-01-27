@@ -28,8 +28,6 @@ The application can be configured using docker container environment variables. 
 |`mongodb__uri`| MongoDB URI in [Standard Connection String](https://docs.mongodb.com/manual/reference/connection-string/) format|`mongodb://testbed-usr:testbed-pw@192.168.119.71,192.168.119.73/m800-whitelabel-portal?connectTimeoutMS=300000`|
 |`MAIL_SERVICE_URL`| the maaii mail service url|`http://deploy.dev.maaii.com:4011`|
 |`email__from`|the email from|`noreply@m800.com`|
-|`email__templates__iam-signUp__subject`|Subject of sign up email|`Please confirm your email`|
-|`email__templates__iam-resetPassword__subject`|Subject of reset email|`Reset your password`|
 |`openid__clients__{$clientId}__client_secret`|the client secret|`7GnoS1vf5HqM1b8B4ZKDJQA6BvXa38ltUoFFVQ4cloR4GICEuWQk50S60pIVK16b`|
 |`openid__clients__{$clientId}__grant_types`|the grant type|`authorization_code`|
 |`openid__clients__{$clientId}__redirect_uris`|the redirect url|`http://deploy.dev.maaii.com:4002/callback`|
