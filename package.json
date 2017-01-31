@@ -4,10 +4,10 @@
   "description": "Identity Access Management",
   "main": "index.js",
   "scripts": {
-    "clean": "rimraf build public/assets/app",
+    "clean": "rimraf build public/assets/app doc",
     "dev": "babel-node -- src",
     "dev:api": "nodemon --exec \"babel-node -- src \" --ignore build",
-    "docs:api": "apidoc -i src/ -f \".*\\.js$\"",
+    "docs:api": "m800-swagger-docs-generator -i src/express/swagger.yaml -o doc",
     "docs": "gitbook install && gitbook build && npm run docs:api",
     "lint": "eslint src",
     "test": "cross-env NODE_ENV=test mocha",
@@ -93,7 +93,6 @@
     "winston": "^2.2.0"
   },
   "devDependencies": {
-    "apidoc": "^0.16.1",
     "babel-cli": "^6.10.1",
     "babel-core": "^6.10.4",
     "babel-eslint": "^6.1.2",
@@ -117,6 +116,7 @@
     "extract-text-webpack-plugin": "^1.0.1",
     "faker": "^3.1.0",
     "gulp": "^3.9.1",
+    "m800-swagger-docs-generator": "^0.1.0",
     "mocha": "^2.5.3",
     "mockgoose": "^6.0.8",
     "node-sass": "^4.1.1",
