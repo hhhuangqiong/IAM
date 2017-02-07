@@ -81,12 +81,19 @@ export function openIdController(getProvider, userService) {
   }
 
   function* loginInteraction(req, res) {
+    console.log('[openid-controller]start login interaction');
+    console.log('[openid-controller]receive the login interaction with cookies', req.cookies);
+    console.log('[openid-controller] grant cookies', req.cookies._grant);
     const grant = req.cookies.get('_grant', { signed: true });
+    console.log('[openid-controller]obtain the grant', grant);
     if (!grant) {
+      console.log('[openid-controller]return 500');
       res.status(500).end();
       return;
     }
+    console.log('[openid-controller]try to parse the data');
     const grantData = JSON.parse(grant);
+    console.log('[openid-controller]get the grant data', grantData);
     const appMeta = {
       locale: req.locale,
       grant: req.params.grant,
@@ -94,10 +101,13 @@ export function openIdController(getProvider, userService) {
       redirectURL: grantData.params.redirect_uri,
       details: grantData.details,
     };
+    console.log('[openid-controller]parse to appMeta', appMeta);
+    console.log('[openid-controller]check any error', req.query.error);
     // to read the error message if there is param and pass to render page
     if (req.query.error) {
       appMeta.error = req.query.error;
     }
+    console.log('[openid-controller]render the page', appMeta.error);
     res.render('App', {
       page: 'login',
       appMeta,
