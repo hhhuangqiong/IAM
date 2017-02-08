@@ -3,6 +3,7 @@ import wrap from 'co-express';
 import _ from 'lodash';
 import bodyParser from 'body-parser';
 import { NotFoundError, ValidationError, ArgumentNullError } from 'common-errors';
+import logger from 'winston';
 
 const jsonParser = bodyParser.json();
 const urlencodedParser = bodyParser.urlencoded({
@@ -81,19 +82,16 @@ export function openIdController(getProvider, userService) {
   }
 
   function* loginInteraction(req, res) {
-    console.log('[openid-controller]start login interaction');
-    console.log('[openid-controller]receive the login interaction with cookies', req.cookies);
-    console.log('[openid-controller] grant cookies', req.cookies._grant);
+    logger.info('load the login interaction');
     const grant = req.cookies.get('_grant', { signed: true });
-    console.log('[openid-controller]obtain the grant', grant);
+    logger.info('got the grant data string', grant);
     if (!grant) {
-      console.log('[openid-controller]return 500');
+      logger.info('no grant data from cookies and return 500');
       res.status(500).end();
       return;
     }
-    console.log('[openid-controller]try to parse the data');
     const grantData = JSON.parse(grant);
-    console.log('[openid-controller]get the grant data', grantData);
+    logger.info('parsed the grant data', grantData);
     const appMeta = {
       locale: req.locale,
       grant: req.params.grant,
@@ -101,13 +99,11 @@ export function openIdController(getProvider, userService) {
       redirectURL: grantData.params.redirect_uri,
       details: grantData.details,
     };
-    console.log('[openid-controller]parse to appMeta', appMeta);
-    console.log('[openid-controller]check any error', req.query.error);
     // to read the error message if there is param and pass to render page
     if (req.query.error) {
       appMeta.error = req.query.error;
     }
-    console.log('[openid-controller]render the page', appMeta.error);
+    logger.info('render the page with appMeta', appMeta);
     res.render('App', {
       page: 'login',
       appMeta,
