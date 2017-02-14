@@ -1,0 +1,1195 @@
+swagger: '2.0'
+host: 'deploy.dev.maaii.com:4004'
+info:
+  version: '1.1.0'
+  title: IAM (Identity & Access Management Service)
+  description: >
+    IAM stores user and company information, provides OpenID Connect authentication.
+paths:
+  /identity/users:
+    get:
+      summary: Find users
+      operationId: getUsers
+      tags:
+        - User
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          type: string
+          required: false
+          in: query
+          description: user id to filter by
+        - name: ids
+          required: false
+          in: query
+          description: user ids to filter by
+          type: array
+          items:
+            type: string
+          collectionFormat: csv
+        - name: search
+          type: string
+          required: false
+          in: query
+          description: user id to search by (id contains "search")
+        - name: page
+          in: query
+          type: number
+          format: int32
+          required: false
+          description: one-based page number
+          minimum: 1
+          default: 1
+        - name: pageSize
+          in: query
+          type: number
+          format: int32
+          required: false
+          default: 20
+          description: page size
+        - name: sortBy
+          type: string
+          in: query
+          required: false
+          default: id
+          description: field to sort by
+        - name: sortOrder
+          type: string
+          in: query
+          required: false
+          default: asc
+          enum:
+            - asc
+            - desc
+          description: sort order (ascending or descending)
+      responses:
+        '200':
+          description: page of users
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/PageMeta'
+              - type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/definitions/UserWithMeta'
+        default:
+          description: other error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+    post:
+      summary: Create user
+      operationId: createUser
+      tags:
+        - User
+      produces:
+        - application/json
+      parameters:
+        - name: user
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+      responses:
+        '201':
+          description: object with id of created user
+          schema:
+            $ref: '#/definitions/UserIdentity'
+        '422':
+          description: validation error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        default:
+          description: other error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+  /identity/users/{userId}:
+    get:
+      summary: Get user
+      operationId: getUser
+      tags:
+        - User
+      produces:
+        - application/json
+      parameters:
+        - name: userId
+          in: path
+          type: string
+          required: true
+      responses:
+        '200':
+            description: user object
+            schema:
+              $ref: '#/definitions/UserWithMeta'
+        '404':
+          description: not found error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        default:
+          description: other error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+    put:
+      summary: Update user
+      operationId: updateUser
+      tags:
+        - User
+      produces:
+        - application/json
+      parameters:
+        - name: userId
+          in: path
+          type: string
+          required: true
+        - name: user
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+      responses:
+        '204':
+          description: user was updated successfully
+        '404':
+          description: not found error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        '422':
+          description: validation error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        default:
+          description: other error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+    delete:
+      summary: Delete user
+      operationId: deleteUser
+      tags:
+        - User
+      parameters:
+        - name: userId
+          in: path
+          type: string
+          required: true
+      responses:
+        '204':
+          description: user was deleted successfully
+        '404':
+          description: not found error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        default:
+          description: other error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+  /identity/companies:
+    get:
+      summary: Find companies
+      operationId: getCompanies
+      tags:
+        - Company
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          type: string
+          required: false
+          in: query
+          description: company id to filter by
+        - name: ids
+          required: false
+          in: query
+          description: company ids to filter by
+          type: array
+          items:
+            type: string
+          collectionFormat: csv
+        - name: search
+          type: string
+          required: false
+          in: query
+          description: company id to search by (id contains "search")
+        - name: page
+          in: query
+          type: number
+          format: int32
+          required: false
+          description: one-based page number
+          minimum: 1
+          default: 1
+        - name: pageSize
+          in: query
+          type: number
+          format: int32
+          required: false
+          default: 20
+          description: page size
+        - name: sortBy
+          type: string
+          in: query
+          required: false
+          default: id
+          description: field to sort by
+        - name: sortOrder
+          type: string
+          in: query
+          required: false
+          default: asc
+          enum:
+            - asc
+            - desc
+          description: sort order (ascending or descending)
+      responses:
+        '200':
+          description: page of companies
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/PageMeta'
+              - type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/definitions/CompanyWithMeta'
+        default:
+          description: other error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+    post:
+      summary: Create company
+      operationId: createCompany
+      tags:
+        - Company
+      produces:
+        - application/json
+      parameters:
+        - name: company
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Company'
+      responses:
+        '201':
+          description: user was created
+          schema:
+            $ref: '#/definitions/CompanyIdentity'
+        '422':
+          description: validation error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        default:
+          description: other error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+  /identity/companies/{companyId}:
+    get:
+      summary: Get company
+      operationId: getCompany
+      tags:
+        - Company
+      produces:
+        - application/json
+      parameters:
+        - name: companyId
+          type: string
+          in: path
+          required: true
+      responses:
+        '200':
+          description: company object
+          schema:
+            $ref: '#/definitions/CompanyWithMeta'
+        '404':
+          description: not found error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        default:
+          description: other error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+    put:
+      summary: Update company
+      operationId: updateCompany
+      tags:
+        - Company
+      produces:
+        - application/json
+      parameters:
+        - name: companyId
+          type: string
+          in: path
+          required: true
+        - name: company
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Company'
+      responses:
+        '204':
+          description: company was updated
+        '404':
+          description: not found error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        '422':
+          description: validation error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        default:
+          description: other error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+    delete:
+      summary: Delete company
+      operationId: deleteCompany
+      tags:
+        - Company
+      parameters:
+        - name: companyId
+          type: string
+          in: path
+          required: true
+      responses:
+        '204':
+          description: company was deleted
+        '404':
+          description: not found error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        default:
+          description: other error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+  /identity/companies/logo/{logoId}:
+    get:
+      summary: Get company logo
+      operationId: getCompanyLogo
+      tags:
+        - Company
+      produces:
+        - image/png
+        - image/jpeg
+      parameters:
+        - name: logoId
+          type: string
+          in: path
+          required: true
+      responses:
+        '200':
+            description: logo image
+        '404':
+          description: not found error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        default:
+          description: other error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+  /idenity/companies/{companyId}/logo:
+    post:
+      summary: Upload company logo
+      operationId: uploadCompanyLogo
+      tags:
+        - Company
+      produces:
+        - application/json
+      parameters:
+        - name: companyId
+          type: string
+          in: path
+          required: true
+        - name: logo
+          type: file
+          in: formData
+          required: true
+      responses:
+        '201':
+            description: logo uploaded
+            schema:
+              $ref: '#/definitions/LogoIdentity'
+        '404':
+          description: not found error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        default:
+          description: other error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+    delete:
+      summary: Delete company logo
+      operationId: deleteCompanyLogo
+      tags:
+        - Company
+      parameters:
+        - name: companyId
+          type: string
+          in: path
+          required: true
+      responses:
+        '204':
+          description: logo was deleted
+        '404':
+          description: not found error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        default:
+          description: other error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+  /identity/groups:
+    get:
+      summary: Find groups
+      operationId: getGroups
+      tags:
+        - Group
+      produces:
+        - application/json
+      parameters:
+        - name: service
+          type: string
+          in: query
+          description: service to filter by
+          required: false
+        - name: company
+          type: string
+          in: query
+          description: company to filter by
+          required: false
+        - name: name
+          type: string
+          in: query
+          description: name to search by ("contains" logic)
+          required: false
+      responses:
+        '200':
+          description: page of groups
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/PageMeta'
+              - type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/definitions/GroupWithMeta'
+        default:
+          description: other error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+    post:
+      summary: Create group
+      operationId: createGroup
+      tags:
+        - Group
+      produces:
+        - application/json
+      parameters:
+        - name: group
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Group'
+      responses:
+        '201':
+          description: group was created
+          schema:
+            $ref: '#/definitions/GroupWithMeta'
+        '422':
+          description: validation error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        default:
+          description: other error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+  /identity/groups/{groupId}:
+    get:
+      summary: Get group
+      operationId: getGroup
+      tags:
+        - Group
+      produces:
+        - application/json
+      parameters:
+        - name: groupId
+          type: string
+          in: path
+          required: true
+      responses:
+        '200':
+            description: group object
+            schema:
+              $ref: '#/definitions/GroupWithMeta'
+        '404':
+          description: not found error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        default:
+          description: other error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+    put:
+      summary: Update group
+      operationId: updateGroup
+      tags:
+        - Group
+      produces:
+        - application/json
+      parameters:
+        - name: groupId
+          type: string
+          in: path
+          required: true
+        - name: group
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Group'
+      responses:
+        '200':
+          description: group was updated
+          schema:
+            $ref: '#/definitions/GroupWithMeta'
+        '404':
+          description: not found error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        '422':
+          description: validation error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        default:
+          description: other error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+    delete:
+      summary: Delete group
+      operationId: deleteGroup
+      tags:
+        - Group
+      produces:
+        - application/json
+      parameters:
+        - name: groupId
+          type: string
+          in: path
+          required: true
+      responses:
+        '204':
+          description: group was deleted
+        '404':
+          description: not found error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        default:
+          description: other error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+  /identity/groups/{groupId}?users=true:
+    get:
+      summary: Get group with users
+      operationId: getGroupWithUsers
+      tags:
+        - Group
+      produces:
+        - application/json
+      parameters:
+        - name: groupId
+          type: string
+          in: path
+          required: true
+      responses:
+        '200':
+            description: group object with users expand
+            schema:
+              $ref: '#/definitions/ExpandedGroupWithMeta'
+        '404':
+          description: not found error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        default:
+          description: other error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+  /access/roles:
+    get:
+      summary: Get roles
+      operationId: getRoles
+      tags:
+        - Role
+      produces:
+        - application/json
+      parameters:
+        - name: company
+          type: string
+          in: query
+          required: false
+        - name: service
+          type: string
+          in: query
+          required: false
+      responses:
+        '200':
+            description: list of roles
+            schema:
+              type: array
+              items:
+                $ref: '#/definitions/RoleWithMeta'
+        default:
+          description: other error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+    post:
+      summary: Create role
+      operationId: createRole
+      tags:
+        - Role
+      produces:
+        - application/json
+      parameters:
+        - name: role
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Role'
+      responses:
+        '201':
+          description: role was created
+          schema:
+            $ref: '#/definitions/RoleWithMeta'
+        '422':
+          description: validation error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        default:
+          description: other error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+  /access/roles/{roleId}:
+    get:
+      summary: Get role
+      operationId: getRole
+      tags:
+        - Role
+      produces:
+        - application/json
+      parameters:
+        - name: roleId
+          type: string
+          in: path
+          required: true
+      responses:
+        '200':
+            description: role object
+            schema:
+              $ref: '#/definitions/RoleWithMeta'
+        '404':
+          description: not found error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        default:
+          description: other error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+    put:
+      summary: Update role
+      operationId: updateRole
+      tags:
+        - Role
+      produces:
+        - application/json
+      parameters:
+        - name: roleId
+          type: string
+          in: path
+          required: true
+        - name: role
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Role'
+      responses:
+        '200':
+          description: role was updated
+          schema:
+            $ref: '#/definitions/RoleWithMeta'
+        '404':
+          description: not found error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        '422':
+          description: validation error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        default:
+          description: other error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+    delete:
+      summary: Delete role
+      operationId: deleteRole
+      tags:
+        - Role
+      produces:
+        - application/json
+      parameters:
+        - name: roleId
+          type: string
+          in: path
+          required: true
+      responses:
+        '204':
+          description: role was deleted
+        '404':
+          description: not found error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        default:
+          description: other error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+  /access/users/{userId}/roles:
+    get:
+      summary: Get user roles
+      operationId: getUserRoles
+      tags:
+        - Role
+      produces:
+        - application/json
+      parameters:
+        - name: userId
+          type: string
+          in: path
+          required: true
+        - name: service
+          type: string
+          in: query
+          required: false
+        - name: company
+          type: string
+          in: query
+          required: false
+      responses:
+        '200':
+            description: list of roles
+            schema:
+              type: array
+              items:
+                $ref: '#/definitions/RoleWithMeta'
+        '404':
+          description: not found error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        default:
+          description: other error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+    put:
+      summary: Set user roles
+      operationId: setUserRoles
+      tags:
+        - Role
+      produces:
+        - application/json
+      parameters:
+        - name: userId
+          type: string
+          in: path
+          required: true
+        - name: roles
+          in: body
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/RoleWithMeta'
+      responses:
+        '200':
+            description: list of roles
+            schema:
+              type: array
+              items:
+                $ref: '#/definitions/RoleIdentity'
+        '404':
+          description: not found error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        '422':
+          description: validation error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        default:
+          description: other error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+  /access/users/{userId}/permissions:
+    get:
+      summary: Get user permissions
+      operationId: getUserPermissions
+      tags:
+        - Role
+      produces:
+        - application/json
+      parameters:
+        - name: userId
+          type: string
+          in: path
+          required: true
+      responses:
+        '200':
+          description: permissions map (resource name -> array of actions)
+          schema:
+            type: object
+        '404':
+          description: not found error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        '422':
+          description: validation error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+        default:
+          description: other error
+          schema:
+            $ref: '#/definitions/ErrorWrapper'
+definitions:
+  RoleWithMeta:
+    type: object
+    allOf:
+      - $ref: '#/definitions/Role'
+      - $ref: '#/definitions/RoleIdentity'
+      - $ref: '#/definitions/TimestampMeta'
+  RoleIdentity:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: string
+  Role:
+    type: object
+    required:
+      - name
+      - company
+      - service
+    properties:
+      isRoot:
+        type: boolean
+        description: root role cannot be deleted
+      name:
+        type: string
+        description: role display name
+      company:
+        type: string
+        description: company id
+      service:
+        type: string
+      permissions:
+        type: object
+  ExpandedGroupWithMeta:
+      type: object
+      allOf:
+        - $ref: "#/definitions/Group"
+        - $ref: "#/definitions/GroupIdentity"
+        - $ref: "#/definitions/TimestampMeta"
+        - type: object
+          properties:
+            users:
+              type: array
+              items:
+                $ref: '#/definitions/UserWithMeta'
+  GroupWithMeta:
+    type: object
+    allOf:
+      - $ref: "#/definitions/Group"
+      - $ref: "#/definitions/GroupIdentity"
+      - $ref: "#/definitions/TimestampMeta"
+  GroupIdentity:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: string
+        description: group uuid
+  Group:
+    type: object
+    required:
+      - name
+      - service
+      - company
+    properties:
+      name:
+        type: string
+        example: notification-receivers.user-created
+      service:
+        type: string
+        example: wlp
+      company:
+        type: string
+        description: company id
+      users:
+        type: array
+        description: array of user ids
+        items:
+          type: string
+          example: user@maaii.com
+  LogoIdentity:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: string
+  CompanyWithMeta:
+    type: object
+    allOf:
+      - $ref: '#/definitions/Company'
+      - type: object
+        properties:
+          logo:
+            type: string
+            description: logo url (null when no logo)
+      - $ref: '#/definitions/CompanyIdentity'
+      - $ref: '#/definitions/TimestampMeta'
+      - $ref: '#/definitions/AuditMeta'
+  CompanyIdentity:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: string
+        description: company uuid
+  Company:
+    type: object
+    required:
+      - name
+    properties:
+      parent:
+        type: string
+        description: parent company id
+      reseller:
+        type: boolean
+        default: false
+      name:
+        type: string
+      country:
+        type: string
+      themeType:
+        type: string
+      address:
+        $ref: '#/definitions/Address'
+      timezone:
+        type: string
+      accountManager:
+        type: string
+      businessContact:
+        type: array
+        items:
+          $ref: '#/definitions/Contact'
+      technicalContact:
+        type: array
+        items:
+          $ref: '#/definitions/Contact'
+      supportContact:
+        type: array
+        items:
+          $ref: '#/definitions/Contact'
+  Contact:
+    type: object
+    properties:
+      name:
+        type: string
+      phone:
+        type: string
+      email:
+        type: string
+  UserWithMeta:
+    type: object
+    allOf:
+      - $ref: '#/definitions/UserIdentity'
+      - $ref: '#/definitions/User'
+      - $ref: '#/definitions/AuditMeta'
+      - $ref: '#/definitions/TimestampMeta'
+  UserIdentity:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: string
+        example: user@email.com
+  User:
+    type: object
+    properties:
+      active:
+        type: boolean
+        default: false
+      isRoot:
+        type: boolean
+        description: super admin user flag
+      affiliatedCompany:
+        type: string
+        description: company user belongs to
+      name:
+        $ref: "#/definitions/UserName"
+      nickName:
+        type: string
+      gender:
+        type: string
+      birthdate:
+        type: string
+      website:
+        type: string
+      profileUrl:
+        type: string
+      title:
+        type: string
+        description: employee's title
+      userType:
+        type: string
+        description: relationship between company and user (deprecated, use roles or groups instead)
+      preferredLanguage:
+        type: string
+      locale:
+        type: string
+      timezone:
+        type: string
+      emails:
+        type: array
+        items:
+          $ref: '#/definitions/ComplexValue'
+      phoneNumbers:
+        type: array
+        items:
+          $ref: '#/definitions/ComplexValue'
+      ims:
+        type: array
+        items:
+          $ref: '#/definitions/ComplexValue'
+      photos:
+        type: array
+        items:
+          $ref: '#/definitions/ComplexValue'
+      x509Certificates:
+        type: array
+        items:
+          $ref: '#/definitions/ComplexValue'
+      addresses:
+        type: array
+        items:
+          $ref: '#/definitions/Address'
+  Address:
+    type: object
+    properties:
+      type:
+        type: string
+      formatted:
+        type: string
+      streetAddress:
+        type: string
+      locality:
+        type: string
+      region:
+        type: string
+      postalCode:
+        type: string
+      country:
+        type: string
+  ComplexValue:
+    type: object
+    properties:
+      type:
+        type: string
+      primary:
+        type: boolean
+      display:
+        type: string
+      value:
+        type: string
+      verified:
+        type: boolean
+  UserName:
+     type: object
+     properties:
+       formatted:
+          type: string
+       familyName:
+          type: string
+       givenName:
+          type: string
+       middleName:
+          type: string
+       honorificPrefix:
+          type: string
+       honorifixSuffix:
+          type: string
+  ErrorWrapper:
+    type: object
+    required:
+      - error
+    properties:
+      error:
+        $ref: '#/definitions/Error'
+  Error:
+    type: object
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: number
+        format: int32
+        enum:
+          - 20000
+          - 20001
+          - 20002
+          - 20003
+          - 20004
+          - 20005
+          - 20006
+      message:
+        type: string
+  PageMeta:
+    type: object
+    properties:
+      page:
+        description: one-based page number
+        type: number
+        format: int32
+        minimum: 1
+      pageSize:
+        description: number of items per page
+        type: number
+        format: int32
+        maximum: 500
+      pageTotal:
+        description: total number of pages
+        type: number
+        format: int32
+      total:
+        description: total number of items
+        type: number
+        format: int32
+  TimestampMeta:
+    type: object
+    properties:
+      createdAt:
+        type: string
+        format: 'date-time'
+      updatedAt:
+        type: string
+        format: 'date-time'
+  AuditMeta:
+    type: object
+    properties:
+      createdBy:
+          type: string
+      updatedBy:
+          type: string
