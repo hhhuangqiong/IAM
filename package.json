@@ -1,6 +1,6 @@
 {
   "name": "maaii-identity-access-mgmt",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Identity Access Management",
   "main": "index.js",
   "scripts": {
