@@ -25,14 +25,6 @@
   },
   "MAIL_SERVICE_URL": "http://deploy.dev.maaii.com:4011",
   "email": {
-    "from": "noreply@m800.com",
-    "templates": {
-      "iam-signUp": {
-        "subject": "Plesae confirm your email"
-      },
-      "iam-resetPassword": {
-        "subject": "Reset your password"
-      }
-    }
+    "from": "noreply@m800.com"
   }
 }

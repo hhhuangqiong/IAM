@@ -1,9 +1,8 @@
 import Q from 'q';
 
 export function emailService(emailClient, config) {
-  function getMailHeader(email, templateName) {
+  function getMailHeader(email) {
     return {
-      subject: config.get(`email:templates:${templateName}:subject`),
       from: config.get('email:from'),
       to: email,
     };
@@ -24,14 +23,14 @@ export function emailService(emailClient, config) {
 
   function sendSignUpEmail(email, client = { }) {
     const templateName = 'iam-signUp';
-    const mailHeader = getMailHeader(email, templateName);
+    const mailHeader = getMailHeader(email);
     const mailTemplate = getMailTemplate(email, 'setPassword', templateName, client);
     return Q.ninvoke(emailClient, 'send', mailHeader, mailTemplate, client);
   }
 
   function sendResetPasswordEmail(email, client = { }) {
     const templateName = 'iam-resetPassword';
-    const mailHeader = getMailHeader(email, templateName);
+    const mailHeader = getMailHeader(email);
     const mailTemplate = getMailTemplate(email, 'resetPassword', templateName, client);
     return Q.ninvoke(emailClient, 'send', mailHeader, mailTemplate, client);
   }
