@@ -1,11 +1,3 @@
 {
-  "presets": ["es2015", "stage-2", "react"],
-  "plugins": [
-    "add-module-exports",
-    "transform-runtime",
-    ["react-intl", {
-      "messagesDir": "./build/messages/",
-      "enforceDescriptions": false
-    }]
-  ]
+  "presets": ["es2015", "stage-2"]
 }

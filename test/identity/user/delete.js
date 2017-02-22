@@ -1,21 +1,20 @@
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
 
-import getAgent from '../../getAgent';
-import User from '../../../src/collections/user';
+import getTestContext from '../../testContext';
 
 describe('DELETE /identity/users/:id', () => {
   let agent;
-  before((done) => {
-    getAgent().then(mAgent => {
+  let User;
+  before(() =>
+    getTestContext().then(({ agent: mAgent, models }) => {
       agent = mAgent;
-      done();
-    });
-  });
+      User = models.User;
+    }));
 
   describe('delete the user', () => {
     // insert the data first
-    before((done) => {
+    before(() => {
       const userInfo = {
         id: 'user@test.abc',
         name: {
@@ -26,11 +25,11 @@ describe('DELETE /identity/users/:id', () => {
         },
         nickName: 'Johnny R',
       };
-      User.create(userInfo, done);
+      return User.create(userInfo);
     });
 
     // remove all the data
-    after((done) => User.remove({}, done));
+    after(() => User.remove({}));
 
     it('successfully deletes the user record', (done) => {
       const id = 'user@test.abc';
@@ -54,16 +53,16 @@ describe('DELETE /identity/users/:id', () => {
 
   describe('delete the root user', () => {
     // insert the data first
-    before((done) => {
+    before(() => {
       const userInfo = {
         isRoot: true,
         id: 'root@abc.com',
       };
-      User.create(userInfo, done);
+      return User.create(userInfo);
     });
 
     // remove all the data
-    after((done) => User.remove({}, done));
+    after(() => User.remove({}));
 
     it('fail to delete the root user record', (done) => {
       agent.delete(`/identity/users/${encodeURIComponent('root@abc.com')}`)

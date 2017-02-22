@@ -2,17 +2,16 @@ import { describe, it } from 'mocha';
 import { expect } from 'chai';
 import bcrypt from 'bcrypt';
 
-import getAgent from '../getAgent';
-import User from '../../src/collections/user';
+import getTestContext from '../testContext';
 
 describe('POST /openid/setPassword', () => {
   let agent;
-  before((done) => {
-    getAgent().then(mAgent => {
+  let User;
+  before(() =>
+    getTestContext().then(({ agent: mAgent, models }) => {
       agent = mAgent;
-      done();
-    });
-  });
+      User = models.User;
+    }));
 
   describe('reset the passwords successfully use the correct code', () => {
     const token = '12S@AtestSAs@%#';
@@ -30,10 +29,10 @@ describe('POST /openid/setPassword', () => {
       }],
     };
     // insert the data first
-    beforeEach((done) => User.create(userInfo).done(() => done()));
+    beforeEach(() => User.create(userInfo));
 
     // remove all the data
-    afterEach((done) => User.remove({}, done));
+    afterEach(() => User.remove({}));
 
     it('reset passwords sucessfully', done => {
       const updatePWBody = {
@@ -100,10 +99,10 @@ describe('POST /openid/setPassword', () => {
       }],
     };
     // insert the data first
-    before((done) => User.create(userInfo).done(() => done()));
+    before(() => User.create(userInfo));
 
     // remove all the data
-    after((done) => User.remove({}, done));
+    after(() => User.remove({}));
 
     it('reset passwords unsucessfully with expired token', done => {
       const updatePWBody = {
@@ -147,10 +146,10 @@ describe('POST /openid/setPassword', () => {
       }],
     };
     // insert the data first
-    beforeEach((done) => User.create(userInfo).done(() => done()));
+    beforeEach(() => User.create(userInfo));
 
     // remove all the data
-    afterEach((done) => User.remove({}, done));
+    afterEach(() => User.remove({}));
 
     it('set passwords sucessfully', done => {
       const updatePWBody = {
@@ -195,10 +194,10 @@ describe('POST /openid/setPassword', () => {
       }],
     };
     // insert the data first
-    before((done) => User.create(userInfo).done(() => done()));
+    before(() => User.create(userInfo));
 
     // remove all the data
-    after((done) => User.remove({}, done));
+    after(() => User.remove({}));
 
     it('set passwords sucessfully', done => {
       const updatePWBody = {

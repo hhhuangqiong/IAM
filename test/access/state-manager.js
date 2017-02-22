@@ -1,12 +1,11 @@
 import * as _ from 'lodash';
-import Q from 'q';
 
 export class StateManager {
-  constructor(db) {
-    this.db = db;
-    this.driver = this.db.connection.db;
+  constructor(connection) {
+    this.db = connection;
+    this.driver = this.db;
   }
-  set(state = {}) {
+  async set(state = {}) {
     const keys = _.keys(state);
     const modelKeys = this.db.modelNames();
     const diff = _.difference(keys, modelKeys);
@@ -15,20 +14,16 @@ export class StateManager {
       const undefinedModels = diff.join(', ');
       throw new Error(`Undefined models: ${undefinedModels}`);
     }
-    return Q.all([
-      state,
-      this.clean(),
-    ]).spread(resolvedState => {
-      const inserts = keys.map(key => {
-        const model = this.db.model(key);
-        const data = _.isArray(resolvedState[key]) ? resolvedState[key] : [resolvedState[key]];
-        return model.create(data);
-      });
-      return Q.all(inserts)
-        .then(() => resolvedState);
-    });
+
+    await this.clean();
+    for (const key of keys) {
+      const model = this.db.model(key);
+      const data = _.isArray(state[key]) ? state[key] : [state[key]];
+      await model.create(data);
+    }
+    return state;
   }
-  get(models = this.db.modelNames()) {
+  async get(models = this.db.modelNames()) {
     const existingKeys = this.db.modelNames();
     const requestedKeys = _.isArray(models) ? models : _.clone(existingKeys);
     const diff = _.difference(requestedKeys, existingKeys);
@@ -37,21 +32,19 @@ export class StateManager {
       const undefinedModels = diff.join(', ');
       throw new Error(`Undefined model(s): ${undefinedModels}`);
     }
-    const promises = requestedKeys.map(key => {
+    const pairs = [];
+    for (const key of requestedKeys) {
       const model = this.db.model(key);
-      return model.find().then(docs => ([key, docs]));
-    });
-    return Q.all(promises).then(_.fromPairs);
+      pairs.push(await model.find().then(docs => ([key, docs])));
+    }
+    return _.fromPairs(pairs);
   }
-  clean() {
-    return Q.invoke(this.driver, 'dropDatabase')
-      .then(() => {
-        const modelNames = this.db.modelNames();
-        const indexPromises = modelNames.map(name => {
-          const model = this.db.model(name);
-          return model.ensureIndexes();
-        });
-        return Q.all(indexPromises);
-      });
+  async clean() {
+    await this.driver.dropDatabase();
+    const modelNames = this.db.modelNames();
+    for (const name of modelNames) {
+      const model = this.db.model(name);
+      await model.ensureIndexes();
+    }
   }
 }

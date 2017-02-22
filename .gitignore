@@ -36,7 +36,7 @@ build
 public/assets/app
 
 # Intl messages downloaded from OneSky
-src/shared/intl/messages
+src/client/shared/intl/messages
 
 # Dependency directory
 node_modules

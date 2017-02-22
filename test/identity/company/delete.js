@@ -1,17 +1,16 @@
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
 
-import getAgent from '../../getAgent';
-import Company from '../../../src/collections/company';
+import getTestContext from '../../testContext';
 
-describe('DELETE /identity/companies/:id', () => {
+describe('DELETE /identity/companies', () => {
   let agent;
-  before((done) => {
-    getAgent().then(mAgent => {
+  let Company;
+  before(() =>
+    getTestContext().then(({ agent: mAgent, models }) => {
       agent = mAgent;
-      done();
-    });
-  });
+      Company = models.Company;
+    }));
 
   describe('delete the company', () => {
     let companyId;
@@ -52,7 +51,7 @@ describe('DELETE /identity/companies/:id', () => {
     });
 
     // remove all the data
-    after((done) => Company.remove({}, done));
+    after(() => Company.remove({}));
 
     it('successfully deletes the company record', (done) => {
       agent.delete(`/identity/companies/${companyId}`)

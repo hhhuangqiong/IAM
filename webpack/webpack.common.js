@@ -2,15 +2,16 @@ import path from 'path';
 import webpack from 'webpack';
 import cssnext from 'postcss-cssnext';
 import { getSupportedLangs } from '../src/utils/intl';
+import pkg from '../package.json';
 
 // For remove unused locale data
 const langStrRegex = new RegExp(getSupportedLangs().join('|', 'i'));
 
 export default {
   entry: {
-    login: ['babel-polyfill', path.resolve(__dirname, '../src/clients/login')],
-    resetPassword: ['babel-polyfill', path.resolve(__dirname, '../src/clients/resetPassword')],
-    setPassword: ['babel-polyfill', path.resolve(__dirname, '../src/clients/setPassword')],
+    login: ['babel-polyfill', path.resolve(__dirname, '../src/client/login')],
+    resetPassword: ['babel-polyfill', path.resolve(__dirname, '../src/client/resetPassword')],
+    setPassword: ['babel-polyfill', path.resolve(__dirname, '../src/client/setPassword')],
   },
   output: {
     path: path.resolve(__dirname, '../public/assets/app'),
@@ -49,6 +50,9 @@ export default {
     new webpack.NormalModuleReplacementPlugin(/^joi$/, path.resolve(__dirname, '../node_modules/joi-browser')),
     new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.optimize.CommonsChunkPlugin('common.bundle.js'),
+    new webpack.DefinePlugin({
+      VERSION: JSON.stringify(pkg.version),
+    }),
   ],
   postcss: () => [
     cssnext({ browsers: ['last 2 versions'] }),

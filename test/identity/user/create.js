@@ -1,32 +1,31 @@
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
 import sinon from 'sinon';
-import Q from 'q';
+import Promise from 'bluebird';
 
-import { getContainer } from '../../../src/utils/ioc';
-import getAgent from '../../getAgent';
-import User from '../../../src/collections/user';
+import getTestContext from '../../testContext';
 
 describe('POST /identity/users', () => {
   let agent;
-  before((done) => {
-    getAgent().then(mAgent => {
+  let User;
+  let emailService;
+  before(() =>
+    getTestContext().then(({ agent: mAgent, models, app }) => {
       agent = mAgent;
-      done();
-    });
-  });
+      User = models.User;
+      emailService = app.EmailService;
+    }));
 
   describe('create a user', () => {
     let stubToken;
     before(() => {
-      const { emailService } = getContainer();
-      stubToken = sinon.stub(emailService, 'sendSignUpEmail').returns(Q.resolve('dummyToken'));
+      stubToken = sinon.stub(emailService, 'sendSignUpEmail').returns(Promise.resolve('dummyToken'));
     });
     after(() => {
       stubToken.restore();
     });
     // remove all the data after each test
-    afterEach((done) => User.remove({}, done));
+    afterEach(() => User.remove({}));
 
     it('fails to create company without any content', (done) => {
       agent.post('/identity/users')
@@ -171,16 +170,15 @@ describe('POST /identity/users', () => {
     const dummyToken = 'asd#@#@';
     let emailServiceStub;
     // insert the data first
-    before((done) => {
-      const { emailService } = getContainer();
+    before(() => {
       emailServiceStub = sinon.stub(emailService, 'sendSignUpEmail')
-        .returns(Q.resolve(dummyToken));
-      User.create(userInfo, done);
+        .returns(Promise.resolve(dummyToken));
+      return User.create(userInfo);
     });
     // remove all the data
-    after((done) => {
+    after(() => {
       emailServiceStub.restore();
-      User.remove({}, done);
+      return User.remove({});
     });
 
     it('201 request for signup email and generate token', done => {

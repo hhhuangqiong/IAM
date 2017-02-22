@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import _ from 'lodash';
-import Q from 'q';
+import Promise from 'bluebird';
 import { defineMigration } from 'm800-util';
 
 const env = process.env.DEPLOY_ENV || 'development';
@@ -56,7 +56,7 @@ module.exports = defineMigration(async (db) => {
     updatedAt: new Date(),
   }));
 
-  await Q.all([
+  await Promise.all([
     db.collection('Company').insert(company),
     db.collection('User').insert(users),
     db.collection('Group').insert(groups),

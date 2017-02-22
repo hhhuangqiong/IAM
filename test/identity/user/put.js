@@ -1,20 +1,20 @@
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
 import sinon from 'sinon';
-import Q from 'q';
+import Promise from 'bluebird';
 
-import getAgent from '../../getAgent';
-import User from '../../../src/collections/user';
-import { getContainer } from '../../../src/utils/ioc';
+import getTestContext from '../../testContext';
 
 describe('PUT /identity/users/:id', () => {
   let agent;
-  before((done) => {
-    getAgent().then(mAgent => {
+  let User;
+  let emailService;
+  before(() =>
+    getTestContext().then(({ agent: mAgent, models, app }) => {
       agent = mAgent;
-      done();
-    });
-  });
+      User = models.User;
+      emailService = app.EmailService;
+    }));
 
   describe('replace the data', () => {
     const userInfo = {
@@ -27,16 +27,15 @@ describe('PUT /identity/users/:id', () => {
     };
     let stubToken;
     // insert the data first
-    before((done) => {
-      const { emailService } = getContainer();
-      stubToken = sinon.stub(emailService, 'sendSignUpEmail').returns(Q.resolve('dummyToken'));
-      User.create(userInfo).done(() => done());
+    before(() => {
+      stubToken = sinon.stub(emailService, 'sendSignUpEmail').returns(Promise.resolve('dummyToken'));
+      return User.create(userInfo);
     });
 
     // remove all the data
-    after((done) => {
+    after(() => {
       stubToken.restore();
-      User.remove({}, done);
+      return User.remove({});
     });
 
     it('put successfully and replace the data', (done) => {
@@ -50,7 +49,7 @@ describe('PUT /identity/users/:id', () => {
       agent.put(`/identity/users/${encodeURIComponent(userInfo.id)}`)
         .set('Content-Type', 'application/json')
         .send(newUserInfo)
-        .expect(204)
+        .expect(200)
         .end(() => {
           User.findOne({ _id: userInfo.id }).then((user) => {
             const localUser = user.toJSON();
@@ -73,13 +72,8 @@ describe('PUT /identity/users/:id', () => {
       agent.put(`/identity/users/${encodeURIComponent(id)}`)
         .set('Content-Type', 'application/json')
         .send(newUserInfo)
-        .expect(201, {
-          id,
-        })
-        .end((err, res) => {
-          const expectedHeader = `/identity/users/${encodeURIComponent(id)}`;
-          expect(res.header).to.have.property('location');
-          expect(res.header.location).to.include(expectedHeader);
+        .expect(200)
+        .end(() => {
           User.findOne({ _id: id }).then((user) => {
             const localUser = user.toJSON();
             expect(localUser.title).to.equal(newUserInfo.title);

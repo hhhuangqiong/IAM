@@ -43,8 +43,7 @@ describe('POST /access/roles', () => {
             expect(_.omit(res.body, ['id', 'createdAt', 'updatedAt', 'isRoot'])).to.eql(role);
           })
           .end(done);
-      })
-      .done();
+      });
   });
 
   it('responds with 201 and role resource and automatically added read, update when necessary', (done) => {
@@ -84,8 +83,7 @@ describe('POST /access/roles', () => {
             expect(_.omit(res.body, ['id', 'createdAt', 'updatedAt', 'isRoot'])).to.eql(role);
           })
           .end(done);
-      })
-      .done();
+      });
   });
 
   it('responds with 422 and wrong role resource action', (done) => {
@@ -110,8 +108,7 @@ describe('POST /access/roles', () => {
           .send(role)
           .expect(422)
           .end(done);
-      })
-      .done();
+      });
   });
 
   it('responds with 403 and no permission to manage company resource', (done) => {
@@ -136,8 +133,7 @@ describe('POST /access/roles', () => {
           .send(role)
           .expect(403)
           .end(done);
-      })
-      .done();
+      });
   });
 
   it('responds with 204 and create the root Role with isRoot true', (done) => {
@@ -168,8 +164,7 @@ describe('POST /access/roles', () => {
             expect(data.isRoot).to.eql(true);
           })
           .end(done);
-      })
-      .done();
+      });
   });
 
   it('responds with 204 and create the root Role with isRoot false', (done) => {
@@ -209,8 +204,7 @@ describe('POST /access/roles', () => {
             expect(data.isRoot).to.eql(false);
           })
           .end(done);
-      })
-      .done();
+      });
   });
 
   it('responds with 204 and create the root Role in another sevice with isRoot true', (done) => {
@@ -250,8 +244,7 @@ describe('POST /access/roles', () => {
             expect(data.isRoot).to.eql(true);
           })
           .end(done);
-      })
-      .done();
+      });
   });
 
   it('responds with 404 when non existing company id is passed', (done) => {
@@ -356,8 +349,7 @@ describe('GET /access/roles', () => {
             expect(actual).to.eql(expected);
           })
           .end(done);
-      })
-      .done();
+      });
   });
 });
 
@@ -372,7 +364,7 @@ describe('DELETE /access/roles/:roleId', () => {
 
     context.state.set({ Role: role })
       .then(() => {
-        const Role = context.db.model('Role');
+        const Role = context.models.Role;
         context.server
           .delete(`/access/roles/${role._id}`)
           .expect(204)
@@ -381,11 +373,9 @@ describe('DELETE /access/roles/:roleId', () => {
             return Role.findOne({ _id: role._id })
               .then(result => expect(result).to.equal(null))
               .then(() => done())
-              .catch(done)
-              .done();
+              .catch(done);
           });
-      })
-      .done();
+      });
   });
 
   it('responds with 403 and fail to delete root role from database', (done) => {
@@ -403,8 +393,7 @@ describe('DELETE /access/roles/:roleId', () => {
           .delete(`/access/roles/${role._id}`)
           .expect(403)
           .end(done);
-      })
-      .done();
+      });
   });
 });
 
@@ -448,8 +437,7 @@ describe('PUT /access/roles/:id', () => {
             expect(data.updatedAt).to.be.greaterThan(data.createdAt);
           })
           .end(done);
-      })
-      .done();
+      });
   });
 
   it('responds with 403 and fail to update root role', (done) => {
@@ -485,8 +473,7 @@ describe('PUT /access/roles/:id', () => {
           .send(updatedRole)
           .expect(403)
           .end(done);
-      })
-      .done();
+      });
   });
 
   it('responds with 200 and update the permission with read, update when necessary', (done) => {
@@ -534,8 +521,7 @@ describe('PUT /access/roles/:id', () => {
             expect(data.updatedAt).to.be.greaterThan(data.createdAt);
           })
           .end(done);
-      })
-      .done();
+      });
   });
 
   it('responds with 404 when role does not exist', (done) => {
@@ -586,7 +572,7 @@ describe('PUT /access/roles/:id', () => {
           .send(updatedRole)
           .expect(403)
           .end(done);
-      }).done();
+      });
   });
 
   it('responds with 403 when company resources is not allowed', (done) => {
@@ -626,7 +612,7 @@ describe('PUT /access/roles/:id', () => {
             expect(data.updatedAt).to.be.greaterThan(data.createdAt);
           })
           .end(done);
-      }).done();
+      });
   });
 });
 

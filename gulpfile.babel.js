@@ -1,20 +1,22 @@
 import gulp from 'gulp';
 import path from 'path';
 
-import injectM800LocaleGulpTasks from 'm800-user-locale/gulpTasks';
+import {
+  createOneSkyUploadTask,
+  createOneSkyDownloadTask,
+} from 'm800-user-locale';
+
 import { ONE_SKY as oneSkyConfig } from './src/config/credentials.json';
 import { LOCALES as supportedLangs } from './src/config/app.json';
 
-const INTL_MESSAGES_PATTERN = './build/intl/**/*.json';
-
-const ROOT = __dirname;
-const PATHS = {
-  INTL_DIR: path.join(ROOT, 'src/shared/intl/messages'),
-};
-
-injectM800LocaleGulpTasks(gulp, {
-  messages: [INTL_MESSAGES_PATTERN],
-  source: PATHS.INTL_DIR,
+gulp.task('intl:download', createOneSkyDownloadTask({
+  translationsDirectory: path.join(__dirname, 'src/client/shared/intl/messages'),
   languages: supportedLangs,
   oneSky: oneSkyConfig,
-});
+}));
+
+gulp.task('intl:upload', createOneSkyUploadTask({
+  translationsDirectory: path.join(__dirname, 'src/client/shared/intl/messages'),
+  babelTranslationsDirectory: path.join(__dirname, 'build/messages'),
+  oneSky: oneSkyConfig,
+}));

@@ -1,14 +1,13 @@
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
 import { sortBy, values, omit, pick } from 'lodash';
-import Q from 'q';
+import Promise from 'bluebird';
 
-import getAgent from '../../getAgent';
-import Company from '../../../src/collections/company';
+import getTestContext from '../../testContext';
 import {
   DEFAULT_PAGE_SIZE,
   DEFAULT_PAGE_NO,
-} from '../../../src/constants/param';
+} from '../../../src/services';
 
 function removeDynamicAttribute(company) {
   const myCompany = company;
@@ -18,14 +17,15 @@ function removeDynamicAttribute(company) {
   delete myCompany.updatedBy;
   return myCompany;
 }
+
 describe('GET /identity/companies', () => {
   let agent;
-  before((done) => {
-    getAgent().then(mAgent => {
+  let Company;
+  before(() =>
+    getTestContext().then(({ agent: mAgent, models }) => {
       agent = mAgent;
-      done();
-    });
-  });
+      Company = models.Company;
+    }));
 
   describe('get all the companies', () => {
     let companyArray = [];
@@ -76,7 +76,7 @@ describe('GET /identity/companies', () => {
     });
 
     // remove all the data
-    after((done) => Company.remove({}, done));
+    after(() => Company.remove({}));
 
     it('successfully gets all the companies with first page data', (done) => {
       agent.get('/identity/companies')
@@ -218,12 +218,12 @@ describe('GET /identity/companies', () => {
       }).then(company => {
         companyIdMapping[company.name] = company._id;
         return company;
-      }).then(company => Q.all([addChildCompany(company._id, 1), addChildCompany(company._id, 2)]))
-      .then(result => Q.all([addChildCompany(result[0]._id, 3), addChildCompany(result[0]._id, 4)]))
-      .then(result => Q.all([addChildCompany(result[0]._id, 5), addChildCompany(result[0]._id, 6)]))
+      }).then(company => Promise.all([addChildCompany(company._id, 1), addChildCompany(company._id, 2)]))
+      .then(result => Promise.all([addChildCompany(result[0]._id, 3), addChildCompany(result[0]._id, 4)]))
+      .then(result => Promise.all([addChildCompany(result[0]._id, 5), addChildCompany(result[0]._id, 6)]))
     );
     // remove all the data
-    after((done) => Company.remove({}, done));
+    after(() => Company.remove({}));
 
     it('successfully gets all the descendants from root 0', (done) => {
       agent.get(`/identity/companies/${companyIdMapping.Company0}/descendants`)

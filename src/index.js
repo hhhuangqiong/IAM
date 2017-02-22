@@ -1,23 +1,23 @@
-import http from 'http';
-import logger from 'winston';
-import healthcheck from 'm800-health-check';
-import { createServer } from './server';
-import { getContainer } from './utils/ioc' ;
+import { create } from './app';
+import config from './config';
+import { createLogger } from './infrastructure';
 
-createServer().then(app => {
-  const { config, mongoose } = getContainer();
-  const port = config.get('PORT');
+async function run() {
+  const logger = createLogger(process.env.NODE_ENV || 'development');
+  try {
+    const app = create(config);
+    const { server, openIdProvider } = app;
+    await openIdProvider.registerClient();
+    server.start();
 
-  // set up the health check
-  healthcheck(app, {
-    mongodb: {
-      mongoose,
-    },
-  });
+    process.on('SIGINT', async () => {
+      const { mongooseConnection } = app;
+      await mongooseConnection.close();
+      process.exit(0);
+    });
+  } catch (ex) {
+    logger.error('Fail to start the service %s', ex.message, ex);
+  }
+}
 
-  // start the server
-  http.createServer(app).listen(port, () => {
-    logger.info('Server listening on %d', port);
-  });
-})
-.done();
+run();

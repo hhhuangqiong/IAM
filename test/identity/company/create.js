@@ -1,22 +1,20 @@
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
 
-import getAgent from '../../getAgent';
-import Company from '../../../src/collections/company';
+import getTestContext from '../../testContext';
 
 describe('POST /identity/companies', () => {
   let agent;
-  before((done) => {
-    getAgent().then(mAgent => {
+  let Company;
+  before(() =>
+    getTestContext().then(({ agent: mAgent, models }) => {
       agent = mAgent;
-      done();
-    });
-  });
+      Company = models.Company;
+    }));
 
   describe('create a company', () => {
     // remove all the data after each test
-    afterEach((done) => Company.remove({}, done));
-
+    afterEach(() => Company.remove({}));
     it('fails to create company without any content', (done) => {
       agent.post('/identity/companies')
            .expect(422)
@@ -52,7 +50,6 @@ describe('POST /identity/companies', () => {
              const expectedHeader = `/identity/companies/${res.body.id}`;
              expect(res.header).to.have.property('location');
              expect(res.header.location).to.include(expectedHeader);
-
              // also ensure the model has such record
              Company.findOne({ _id: res.body.id }).then((company) => {
                expect(company.country).to.equal(companyInfo.country);

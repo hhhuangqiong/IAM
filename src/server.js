@@ -1,49 +1,64 @@
 import express from 'express';
-import logger from 'winston';
-import Q from 'q';
 import morgan from 'morgan';
+import path from 'path';
+import { createEngine } from 'express-react-views';
 import metricsMiddleware from 'm800-prometheus-express';
+import { check } from 'm800-util';
+import healthCheck from 'm800-health-check';
+import { createLocaleDetectionMiddleware } from 'm800-user-locale';
 
-import injectExpress from './express';
-import injectKoa from './koa';
-import ioc from './utils/ioc';
-import database from './initializers/database';
-import { errorHandler } from './initializers/errorHandler';
+export function createServer(logger, api, mongooseConnection, serverOptions, LOCALES, ENV) {
+  check.ok('logger', logger);
+  check.ok('api', api);
+  check.ok('mongooseConnection', mongooseConnection);
+  check.members('serverOptions', serverOptions, ['env', 'port']);
+  check.ok('LOCALES', LOCALES);
+  check.ok('ENV', ENV);
 
-const env = process.env.NODE_ENV || 'development';
+  // test is applied when running test cases
+  const isDevelopment = ENV !== 'production' && ENV !== 'test';
 
-let app;
-export function createServer() {
-  if (app) {
-    return Q.resolve(app);
+  const server = express();
+  server.use(metricsMiddleware());
+  server.use(morgan('common'));
+  healthCheck(server, {
+    mongodb: {
+      mongoose: mongooseConnection,
+    },
+  });
+
+  // set the user locale and template engine on server
+  server.use(createLocaleDetectionMiddleware({
+    locales: LOCALES,
+  }));
+  server.set('views', path.resolve(__dirname, './client/views'));
+  server.set('view engine', 'js');
+  server.engine('js', createEngine({ transformViews: false }));
+
+  // set up dev config for webpack
+  if (isDevelopment) {
+    logger.debug('inject webpack hot reload');
+    require('./webpackDev').injectWebpackDev(server); // eslint-disable-line global-require
   }
-  // set up the container
-  const bottle = ioc.initialize();
 
-  // connect to the db when server start
-  const { config } = bottle.container;
-  const connection = database(config.get('mongodb:uri'), config.get('mongodb:options'));
-  logger.info(`Connect to the mongoose ${connection.readyState}`);
+  // set up the static resource
+  // if webpack development is enabled, those resources will be consumed in the webpack middleware
+  server.use(express.static(path.join('public/')));
 
-  app = express();
-  app.use(metricsMiddleware());
-  // apply the development logger middleware
-  app.use(morgan('dev'));
+  server.use(api);
 
-  // wait until both services are ready
-  return Q.all([injectExpress(app), injectKoa(app)])
-    .then(() => {
-      // set up express error handler
-      errorHandler({
-        app,
-        logger,
-      });
-
-      // set up dev config
-      if (env === 'development') {
-        require('./initializers/dev')(app); // eslint-disable-line global-require
-      }
-
-      return app;
-    });
+  return {
+    start: () => {
+      server.listen(serverOptions.port);
+      logger.debug(`Server is listening at port ${serverOptions.port}...`);
+      return server;
+    },
+  };
 }
+
+export function register(container) {
+  container.service('server', createServer, 'logger', 'api', 'mongooseConnection', 'serverOptions', 'LOCALES', 'ENV');
+  return container;
+}
+
+export default register;

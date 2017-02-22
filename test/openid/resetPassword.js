@@ -1,20 +1,20 @@
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
 import sinon from 'sinon';
-import Q from 'q';
+import Promise from 'bluebird';
 
-import getAgent from '../getAgent';
-import User from '../../src/collections/user';
-import { getContainer } from '../../src/utils/ioc';
+import getTestContext from '../testContext';
 
 describe('POST /openid/resetPassword', () => {
   let agent;
-  before((done) => {
-    getAgent().then(mAgent => {
+  let User;
+  let emailService;
+  before(() =>
+    getTestContext().then(({ agent: mAgent, models, app }) => {
       agent = mAgent;
-      done();
-    });
-  });
+      User = models.User;
+      emailService = app.EmailService;
+    }));
 
   describe('request for reset password', () => {
     const userInfo = {
@@ -27,17 +27,16 @@ describe('POST /openid/resetPassword', () => {
     };
     let emailServiceStub;
     // insert the data first
-    before((done) => {
-      const { emailService } = getContainer();
+    before(() => {
       emailServiceStub = sinon.stub(emailService, 'sendResetPasswordEmail')
-        .returns(Q.resolve('dummyToken'));
-      User.create(userInfo).done(() => done());
+        .returns(Promise.resolve('dummyToken'));
+      return User.create(userInfo);
     });
 
     // remove all the data
-    after((done) => {
+    after(() => {
       emailServiceStub.restore();
-      User.remove({}, done);
+      return User.remove({});
     });
 
     it('sends request for generate reset password token', done => {
@@ -84,17 +83,16 @@ describe('POST /openid/resetPassword', () => {
     };
     let emailServiceStub;
     // insert the data first
-    before((done) => {
-      const { emailService } = getContainer();
+    before(() => {
       emailServiceStub = sinon.stub(emailService, 'sendResetPasswordEmail')
-        .returns(Q.resolve('dummyToken'));
-      User.create(userInfo).done(() => done());
+        .returns(Promise.resolve('dummyToken'));
+      return User.create(userInfo);
     });
 
     // remove all the data
-    after((done) => {
+    after(() => {
       emailServiceStub.restore();
-      User.remove({}, done);
+      return User.remove({});
     });
 
     it('sends request for generate reset password token and clear the previous one', done => {

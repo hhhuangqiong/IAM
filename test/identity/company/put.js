@@ -1,17 +1,16 @@
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
 
-import getAgent from '../../getAgent';
-import Company from '../../../src/collections/company';
+import getTestContext from '../../testContext';
 
 describe('PUT /identity/companies/:companyId', () => {
   let agent;
-  before((done) => {
-    getAgent().then(mAgent => {
+  let Company;
+  before(() =>
+    getTestContext().then(({ agent: mAgent, models }) => {
       agent = mAgent;
-      done();
-    });
-  });
+      Company = models.Company;
+    }));
 
   describe('replace the data', () => {
     let companyId;
@@ -25,7 +24,7 @@ describe('PUT /identity/companies/:companyId', () => {
     }));
 
     // remove all the data
-    after((done) => Company.remove({}, done));
+    after(() => Company.remove({}));
 
     it('put successfully and replace the data', (done) => {
       const newCompanyInfo = {
@@ -38,7 +37,7 @@ describe('PUT /identity/companies/:companyId', () => {
       agent.put(`/identity/companies/${companyId}`)
         .set('Content-Type', 'application/json')
         .send(newCompanyInfo)
-        .expect(204)
+        .expect(200)
         .end(() => {
           Company.findOne({ _id: companyId }).then((company) => {
             expect(company.themeType).to.equal(newCompanyInfo.themeType);
@@ -60,15 +59,9 @@ describe('PUT /identity/companies/:companyId', () => {
       agent.put(`/identity/companies/${id}`)
         .set('Content-Type', 'application/json')
         .send(newCompanyInfo)
-        .expect(201, {
-          id,
-        })
-        .end((err, res) => {
-          expect(res.body).to.have.property('id');
-          const expectedHeader = `/identity/companies/${res.body.id}`;
-          expect(res.header).to.have.property('location');
-          expect(res.header.location).to.include(expectedHeader);
-          Company.findOne({ _id: res.body.id }).then((company) => {
+        .expect(200)
+        .end(() => {
+          Company.findOne({ _id: id }).then((company) => {
             expect(company.themeType).to.equal(newCompanyInfo.themeType);
             expect(company.address.formatted).to.equal(newCompanyInfo.address.formatted);
             expect(company.country).to.equal(newCompanyInfo.country);

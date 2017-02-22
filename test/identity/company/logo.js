@@ -3,28 +3,27 @@ import path from 'path';
 import { expect } from 'chai';
 import fs from 'fs';
 
-import getAgent from '../../getAgent';
-import Company from '../../../src/collections/company';
-import { getContainer } from '../../../src/utils/ioc';
-
-function removeGridFs(done) {
-  const { mongoose: { connection } } = getContainer();
-  // fail to use gridfs to remove all files once
-  // directly clean the collection it
-  connection.db.dropCollection('fs.files', () => {
-    connection.db.dropCollection('fs.chunks', () => {
-      done();
-    });
-  });
-}
+import getTestContext from '../../testContext';
 
 describe('perform logo action', () => {
   let agent;
   let gridFs;
-  before(() => getAgent().then(mAgent => {
-    agent = mAgent;
-    gridFs = getContainer().gridFs;
-  }));
+  let Company;
+  let mongooseConnection;
+  before(() =>
+    getTestContext().then((context) => {
+      agent = context.agent;
+      Company = context.models.Company;
+      mongooseConnection = context.mongooseConnection;
+      gridFs = context.gridFs;
+    }));
+
+  function removeGridFs() {
+    // fail to use gridfs to remove all files once
+    // directly clean the collection it
+    return mongooseConnection.db.dropCollection('fs.files')
+      .then(() => mongooseConnection.db.dropCollection('fs.chunks'));
+  }
 
   describe('POST /identity/companies/:companyid/logo', () => {
     const companyInfo = {
@@ -38,10 +37,10 @@ describe('perform logo action', () => {
     }));
 
     // remove all the data
-    after((done) => {
+    after(() =>
       Company.remove({})
-        .then(() => removeGridFs(done));
-    });
+      .then(() => removeGridFs())
+    );
 
     it('uploads successfully the logo to the company', (done) => {
       agent.post(`/identity/companies/${companyId}/logo`)
@@ -84,7 +83,7 @@ describe('perform logo action', () => {
       agent.post(`/identity/companies/${companyId}/logo`)
         .set('Content-Type', 'multipart/form-data')
         .attach('logo1', companyLogo)
-        .expect(422)
+        .expect(400)
         .end(done);
     });
   });
@@ -109,10 +108,10 @@ describe('perform logo action', () => {
     });
 
     // remove all the data
-    after((done) => {
+    after(() =>
       Company.remove({})
-        .then(() => removeGridFs(done));
-    });
+      .then(() => removeGridFs())
+    );
 
     it('get successfully the logo', (done) => {
       agent.get(`/identity/companies/logo/${fileId}`)
@@ -160,10 +159,10 @@ describe('perform logo action', () => {
     });
 
     // remove all the data
-    after((done) => {
+    after(() =>
       Company.remove({})
-        .then(() => removeGridFs(done));
-    });
+      .then(() => removeGridFs())
+    );
 
     it('delete successfully the logo', (done) => {
       agent.delete(`/identity/companies/${companyId}/logo`)
@@ -202,7 +201,7 @@ describe('perform logo action', () => {
     }));
 
     // remove all the data
-    after((done) => Company.remove({}, done));
+    after(() => Company.remove({}));
 
     it('delete successfully the logo', (done) => {
       agent.delete(`/identity/companies/${companyId}/logo`)

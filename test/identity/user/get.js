@@ -2,12 +2,11 @@ import { describe, it } from 'mocha';
 import { expect } from 'chai';
 import sortBy from 'lodash/sortBy';
 
-import getAgent from '../../getAgent';
-import User from '../../../src/collections/user';
+import getTestContext from '../../testContext';
 import {
   DEFAULT_PAGE_SIZE,
   DEFAULT_PAGE_NO,
-} from '../../../src/constants/param';
+} from '../../../src/services';
 
 function removeDynamicAttribute(user) {
   const myUser = user;
@@ -24,17 +23,18 @@ function removeDynamicAttribute(user) {
 
 describe('GET /identity/users', () => {
   let agent;
-  before((done) => {
-    getAgent().then(mAgent => {
+  let User;
+  before(() =>
+    getTestContext().then(({ agent: mAgent, models }) => {
       agent = mAgent;
-      done();
-    });
-  });
+      User = models.User;
+    }));
+
 
   describe('get all the users', () => {
     let userArray = [];
     // insert the data first
-    before((done) => {
+    before(() => {
       let count = 0;
       while (count < 45) {
         userArray.push({
@@ -78,17 +78,16 @@ describe('GET /identity/users', () => {
       }
       // auto sort the data first
       userArray = sortBy(userArray, ['id']);
-      User.create(userArray, () => {
+      return User.create(userArray).then(() => {
         // manually update the displayName, so that it is easier for checking
         userArray.forEach((item, index) => {
           userArray[index].displayName = `${item.name.givenName} ${item.name.familyName}`;
         });
-        done();
       });
     });
 
     // remove all the data
-    after((done) => User.remove({}, done));
+    after(() => User.remove({}));
 
     it('successfully gets all the companies with first page data', (done) => {
       agent.get('/identity/users')
