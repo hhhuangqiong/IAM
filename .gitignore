@@ -42,9 +42,5 @@ src/shared/intl/messages
 node_modules
 jspm_packages
 
-# APIDoc output
-**/doc
-_book/
-
 # User specific configuration files
 *.personal.config.json
