@@ -1,10 +1,8 @@
-import nconf from '../src/initializers/nconf';
-
-const config = nconf();
+import config from '../src/config';
 
 module.exports = {
   changelogCollectionName: 'changelog',
   mongodb: {
-    url: config.get('mongodb:uri'),
+    url: config.mongodb.uri,
   },
 };
